@@ -646,6 +646,34 @@ class spell_rog_tricks_of_the_trade_proc : public SpellScriptLoader
         }
 };
 
+class spell_rog_shadowstep : public SpellScriptLoader
+{
+    public:
+        spell_rog_shadowstep() : SpellScriptLoader("spell_rog_shadowstep") { }
+
+        class spell_rog_shadowstep_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_shadowstep_SpellScript);
+
+            SpellCastResult CheckCast()
+            {
+                if (GetCaster()->HasUnitState(UNIT_STATE_ROOT))
+                    return SPELL_FAILED_ROOTED;
+                return SPELL_CAST_OK;
+            }
+
+            void Register()
+            {
+                OnCheckCast += SpellCheckCastFn(spell_rog_shadowstep_SpellScript::CheckCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_shadowstep_SpellScript();
+        }
+};
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -659,4 +687,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_shiv();
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
+    new spell_rog_shadowstep();
 }

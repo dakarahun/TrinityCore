@@ -66,7 +66,18 @@ enum MageSpells
 
     SPELL_MAGE_IMPROVED_MANA_GEM_TRIGGERED       = 83098,
 
-    SPELL_MAGE_FINGERS_OF_FROST                  = 44544
+    SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
+    SPELL_MAGE_COMBUSTION_PERIODIC_DAMAGE        = 83853,
+ 
+    //Custom Script
+    SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
+    SPELL_MAGE_EARLY_FROST_R2_T                  = 83050,
+    SPELL_MAGE_EARLY_FROST_R1_CD                 = 83162,
+    SPELL_MAGE_EARLY_FROST_R2_CD                 = 83239,
+    SPELL_MAGE_CAUTERIZE_R2                      = 86949,
+    SPELL_MAGE_CAUTERIZE_R1                      = 86948,
+    SPELL_MAGE_CAUTERIZE_DOT                     = 87023,
+
 };
 
 enum MageIcons
@@ -540,10 +551,25 @@ class spell_mage_frostbolt : public SpellScriptLoader
                    }
                }
            }
+	    void HandleEarlyFrostScript(SpellEffIndex /*effIndex*/)
+           {
+
+            Unit* caster = GetCaster();
+ 
+	        if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
+	            if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger 
+		           caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
+
+	        if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T)) // Check Talent
+	           if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger 
+		            caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
+             }
+
 
            void Register()
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+		 OnEffectHit += SpellEffectFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
            }
        };
 
@@ -989,6 +1015,109 @@ class spell_mage_water_elemental_freeze : public SpellScriptLoader
        }
 };
 
+// 11129 Combustion
+/// Updated 4.3.4
+class spell_mage_combustion : public SpellScriptLoader
+{
+    public:
+        spell_mage_combustion() : SpellScriptLoader("spell_mage_combustion") { }
+
+        class spell_mage_combustion_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_combustion_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_COMBUSTION_PERIODIC_DAMAGE))
+                    return false;
+                return true;
+            }
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                if (Unit* target = GetHitUnit())
+                {
+                    int32 basePoints0 = 0;
+                    Unit::AuraEffectList const& targetAuras = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_DAMAGE);
+
+                    for (Unit::AuraEffectList::const_iterator i = targetAuras.begin(); i != targetAuras.end(); ++i)
+                        if ((*i)->GetCaster() == GetCaster() && (*i)->GetSpellInfo()->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
+                            basePoints0 += (*i)->GetAmount();
+
+                    if (basePoints0)
+                        GetCaster()->CastCustomSpell(target, SPELL_MAGE_COMBUSTION_PERIODIC_DAMAGE, &basePoints0, NULL, NULL, true);
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_mage_combustion_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_combustion_SpellScript();
+        }
+};
+
+// Cauterize
+class spell_mag_cauterize : public SpellScriptLoader
+{
+    public:
+        spell_mag_cauterize() : SpellScriptLoader("spell_mag_cauterize") { }
+
+        class spell_mag_cauterize_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mag_cauterize_AuraScript);
+
+            uint32 Cauterize;
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_CAUTERIZE_R1) || !sSpellMgr->GetSpellInfo(SPELL_MAGE_CAUTERIZE_R2))
+                    return false;
+                return true;
+            }
+
+           bool Load()
+            {
+                Cauterize = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+                return GetUnitOwner()->ToPlayer();
+            }
+
+            void CauterizeAmount(AuraEffect const* /*aurEff*/, int32 & amount, bool & /*canBeRecalculated*/)
+            {
+                // Set absorbtion amount to unlimited
+                amount = -1;
+            }
+
+            void Absorb(AuraEffect* /*aurEff*/, DamageInfo & dmgInfo, uint32 & Cauterize)
+            {
+                Player* target = GetTarget()->ToPlayer();
+                if (dmgInfo.GetDamage() < target->GetHealth() || target->HasSpellCooldown(SPELL_MAGE_CAUTERIZE_R1) || target->HasSpellCooldown(SPELL_MAGE_CAUTERIZE_R2))
+                    return;    
+
+                target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
+		      target->SetHealth(target->CountPctFromMaxHealth(40));
+                target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R1, 0, time(NULL) + 60);
+                target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R2, 0, time(NULL) + 60);
+
+            }
+
+            void Register()
+            {
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mag_cauterize_AuraScript::CauterizeAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+                OnEffectAbsorb += AuraEffectAbsorbFn(spell_mag_cauterize_AuraScript::Absorb, EFFECT_0);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mag_cauterize_AuraScript();
+        }
+};
+
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1010,4 +1139,6 @@ void AddSC_mage_spell_scripts()
     new spell_mage_replenish_mana();
     new spell_mage_summon_water_elemental();
     new spell_mage_water_elemental_freeze();
+    new spell_mage_combustion();
+    new spell_mage_cauterize();
 }

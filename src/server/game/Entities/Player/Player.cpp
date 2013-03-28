@@ -1437,12 +1437,10 @@ void Player::HandleDrowning(uint32 time_diff)
                 // Calculate and deal damage
                 /// @todo Check this formula
                 uint32 damage = urand(600, 700);
-                if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
+                if (m_MirrorTimerFlags & UNDERWATER_INLAVA && m_zoneUpdateId != 1519 && m_areaUpdateId != 3805)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity,
                 // maybe someone can find better way to handle environmental damage
-                //else if (m_zoneUpdateId != 1497)
-                //    EnvironmentalDamage(DAMAGE_SLIME, damage);
             }
         }
     }
@@ -10617,7 +10615,7 @@ InventoryResult Player::CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item
         return EQUIP_ERR_LOOT_GONE;
 
     // no maximum
-    if ((pProto->MaxCount <= 0 && pProto->ItemLimitCategory == 0) || pProto->MaxCount == 2147483647)
+    if ((pProto->MaxCount <= 0 && pProto->ItemLimitCategory == 0) || pProto->MaxCount == 9947483647)
         return EQUIP_ERR_OK;
 
     if (pProto->MaxCount > 0)

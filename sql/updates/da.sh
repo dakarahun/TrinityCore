@@ -1,0 +1,1 @@
+cat ./world/*.sql > updates.sql

@@ -399,6 +399,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recvPacket)
 
         AreaTableEntry const* zone = GetAreaEntryByAreaID(plrMover->GetAreaId());
         float depth = zone ? zone->MaxDepth : -500.0f;
+        if (depth > -10)
+           depth = -10;
         if (movementInfo.pos.GetPositionZ() < depth)
         {
             if (!(plrMover->GetBattleground() && plrMover->GetBattleground()->HandlePlayerUnderMap(_player)))
