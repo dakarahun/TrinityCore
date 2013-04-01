@@ -940,9 +940,7 @@ enum SoulWellData
     SPELL_CREATE_MASTER_HEALTH_STONE_R1 = 34149,
     SPELL_CREATE_MASTER_HEALTH_STONE_R2 = 34150,
 
-    SPELL_CREATE_FEL_HEALTH_STONE_R0    = 58890,
-    SPELL_CREATE_FEL_HEALTH_STONE_R1    = 58896,
-    SPELL_CREATE_FEL_HEALTH_STONE_R2    = 58898,
+    SPELL_CREATE_FEL_HEALTH_STONE       = 34130,
 };
 
 class go_soulwell : public GameObjectScript
@@ -954,33 +952,8 @@ class go_soulwell : public GameObjectScript
         {
             go_soulwellAI(GameObject* go) : GameObjectAI(go)
             {
-                _stoneSpell = 0;
                 _stoneId = 0;
-                switch (go->GetEntry())
-                {
-                    case GO_SOUL_WELL_R1:
-                        _stoneSpell = SPELL_CREATE_MASTER_HEALTH_STONE_R0;
-                        if (Unit* owner = go->GetOwner())
-                        {
-                            if (owner->HasAura(SPELL_IMPROVED_HEALTH_STONE_R1))
-                                _stoneSpell = SPELL_CREATE_MASTER_HEALTH_STONE_R1;
-                            else if (owner->HasAura(SPELL_CREATE_MASTER_HEALTH_STONE_R2))
-                                _stoneSpell = SPELL_CREATE_MASTER_HEALTH_STONE_R2;
-                        }
-                        break;
-                    case GO_SOUL_WELL_R2:
-                        _stoneSpell = SPELL_CREATE_FEL_HEALTH_STONE_R0;
-                        if (Unit* owner = go->GetOwner())
-                        {
-                            if (owner->HasAura(SPELL_IMPROVED_HEALTH_STONE_R1))
-                                _stoneSpell = SPELL_CREATE_FEL_HEALTH_STONE_R1;
-                            else if (owner->HasAura(SPELL_CREATE_MASTER_HEALTH_STONE_R2))
-                                _stoneSpell = SPELL_CREATE_FEL_HEALTH_STONE_R2;
-                        }
-                        break;
-                }
-                if (_stoneSpell == 0) // Should never happen
-                    return;
+                _stoneSpell = SPELL_CREATE_FEL_HEALTH_STONE;
 
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(_stoneSpell);
                 if (!spellInfo)
@@ -1014,7 +987,6 @@ class go_soulwell : public GameObjectScript
                 // Item has to actually be created to remove a charge on the well.
                 if (player->HasItemCount(_stoneId))
                     go->AddUse();
-
                 return false;
             }
 

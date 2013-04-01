@@ -375,7 +375,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION todo
     &AuraEffect::HandleNoImmediateEffect,                         //315 SPELL_AURA_UNDERWATER_WALKING todo
     &AuraEffect::HandleNoImmediateEffect,                         //316 unused (4.3.4) old SPELL_AURA_PERIODIC_HASTE
-    &AuraEffect::HandleNULL,                                      //317 SPELL_AURA_MOD_SPELL_POWER_PCT
+    &AuraEffect::HandleAuraModSpellPowerPercent,                  //317 SPELL_AURA_MOD_SPELL_POWER_PCT
     &AuraEffect::HandleNULL,                                      //318 SPELL_AURA_MASTERY
     &AuraEffect::HandleModMeleeSpeedPct,                          //319 SPELL_AURA_MOD_MELEE_HASTE_3
     &AuraEffect::HandleAuraModRangedHaste,                        //320 SPELL_AURA_MOD_RANGED_HASTE_2
@@ -1038,8 +1038,38 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
             break;
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+			{
+			if (!caster)
+			break;
+
+			if (!target->isAlive())
+				return;
+
+			if (target->HasUnitState(UNIT_STATE_ISOLATED)) {
+				SendTickImmune(target, caster);
+			return;
+		       }
+			// Dark Evangelism
+			if (target->HasAura(15407)) // Mind Flay
+			{
+				if (caster->HasAura(81659) && roll_chance_i(25)) // Rank 1
+				{
+ 					caster->CastSpell(caster, 87117, true);
+					caster->RemoveAurasDueToSpell(81660);
+					caster->RemoveAurasDueToSpell(81661);
+				}
+				else if (caster->HasAura(81662) && roll_chance_i(50)) // Rank 2
+				{
+ 					caster->CastSpell(caster, 87118, true);
+					caster->RemoveAurasDueToSpell(81660);
+					caster->RemoveAurasDueToSpell(81661);
+				}
+
+				caster->CastSpell(caster, 87154, true);
+			}
             HandlePeriodicDamageAurasTick(target, caster);
             break;
+			}
         case SPELL_AURA_PERIODIC_LEECH:
             HandlePeriodicHealthLeechAuraTick(target, caster);
             break;
@@ -1124,16 +1154,15 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
     uint32 spellId = 0;
     uint32 spellId2 = 0;
     //uint32 spellId3 = 0;
-    uint32 HotWSpellId = 0;
 
     switch (GetMiscValue())
     {
         case FORM_CAT:
             spellId = 3025;
-            HotWSpellId = 24900;
             break;
         case FORM_TREE:
-            spellId = 34123;
+            spellId = 81097;
+            spellId2 = 81098;
             break;
         case FORM_TRAVEL:
             spellId = 5419;
@@ -1144,7 +1173,6 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         case FORM_BEAR:
             spellId = 1178;
             spellId2 = 21178;
-            HotWSpellId = 24899;
             break;
         case FORM_BATTLESTANCE:
             spellId = 21156;
@@ -1157,7 +1185,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             break;
         case FORM_MOONKIN:
             spellId = 24905;
-            spellId2 = 69366;
+            spellId2 = 24907;
             break;
         case FORM_FLIGHT:
             spellId = 33948;
@@ -1199,7 +1227,19 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
         {
             if (target->GetTypeId() == TYPEID_PLAYER)
                 target->ToPlayer()->RemoveSpellCooldown(spellId);
-            target->CastSpell(target, spellId, true, NULL, this);
+           if (spellId == 1178)
+           {
+               // Heart of the wild - Bear
+               if (AuraEffect * BearHeart = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_GENERIC, 240, 0))
+               {
+                   int32 bp = BearHeart->GetAmount() + 20;
+                   target->CastCustomSpell(target, spellId,NULL,&bp,NULL,true);
+               }
+               else
+                   target->CastSpell(target, spellId, true, NULL, this);
+           }
+           else
+               target->CastSpell(target, spellId, true, NULL, this);
         }
 
         if (spellId2)
@@ -1262,23 +1302,6 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 if (GetMiscValue() == FORM_TRAVEL || GetMiscValue() == FORM_NONE) // "while in Travel Form or while not shapeshifted"
                     target->CastSpell(target, 66530, true);
             }
-
-            // Heart of the Wild
-            if (HotWSpellId)
-            {   // hacky, but the only way as spell family is not SPELLFAMILY_DRUID
-                Unit::AuraEffectList const& mModTotalStatPct = target->GetAuraEffectsByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-                for (Unit::AuraEffectList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
-                {
-                    // Heart of the Wild
-                    if ((*i)->GetSpellInfo()->SpellIconID == 240 && (*i)->GetMiscValue() == 3)
-                    {
-                        int32 HotWMod = (*i)->GetAmount() / 2; // For each 2% Intelligence, you get 1% stamina and 1% attack power.
-
-                        target->CastCustomSpell(target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
-                        break;
-                    }
-                }
-            }
             switch (GetMiscValue())
             {
                 case FORM_CAT:
@@ -1300,41 +1323,13 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                         }
                         target->CastSpell(target, spellId3, true, NULL, this);
                     }
-                    // Master Shapeshifter - Cat
-                    if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
-                    {
-                        int32 bp = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 48420, &bp, NULL, NULL, true);
-                    }
                 break;
                 case FORM_BEAR:
-                    // Master Shapeshifter - Bear
-                    if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
-                    {
-                        int32 bp = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 48418, &bp, NULL, NULL, true);
-                    }
                     // Survival of the Fittest
                     if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_DRUID, 961, 0))
                     {
                         int32 bp = aurEff->GetSpellInfo()->Effects[EFFECT_2].CalcValue(GetCaster());
                         target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true, 0, this);
-                    }
-                break;
-                case FORM_MOONKIN:
-                    // Master Shapeshifter - Moonkin
-                    if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
-                    {
-                        int32 bp = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 48421, &bp, NULL, NULL, true);
-                    }
-                break;
-                    // Master Shapeshifter - Tree of Life
-                case FORM_TREE:
-                    if (AuraEffect const* aurEff = target->GetDummyAuraEffect(SPELLFAMILY_GENERIC, 2851, 0))
-                    {
-                        int32 bp = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 48422, &bp, NULL, NULL, true);
                     }
                 break;
             }
@@ -1381,6 +1376,84 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
                 ++itr;
         }
     }
+   // Disentanglement
+   if (target->HasAura(96429))
+       target->RemoveAurasByType(SPELL_AURA_MOD_ROOT);
+
+    // At Apply & Remove
+    switch (GetMiscValue())
+    {
+       case FORM_MOONKIN:
+       {
+           // Master Shapeshifter - Moonkin
+           if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))
+           {
+               if (apply)
+               {
+                   int32 bp = aurEff->GetAmount();
+                   target->CastCustomSpell(target, 48421, &bp, NULL, NULL, true);
+               }
+               else if (target->HasAura(48421))
+                   target->RemoveAurasDueToSpell(48421);
+           }
+           break;
+       }
+        case FORM_BEAR:
+        {
+           // Master Shapeshifter - Bear
+           if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))
+           {
+               if (apply)
+               {
+                   int32 bp = aurEff->GetAmount();
+                   target->CastCustomSpell(target, 48418, &bp, NULL, NULL, true);
+               }
+               else if (target->HasAura(48418))
+                   target->RemoveAurasDueToSpell(48418);
+           }
+           //Thick Hide
+           if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_GENERIC, 1558, 1))
+           {
+               if (apply)
+               {
+                   int32 bp = aurEff->GetAmount();
+                   target->CastCustomSpell(target, 62069, &bp, NULL, NULL, true);
+               }
+               else if (target->HasAura(62069))
+                   target->RemoveAurasDueToSpell(62069);
+           }
+           break;
+       }
+        case FORM_CAT:
+        {
+           //Heart of the wild - cat
+            if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, SPELLFAMILY_GENERIC, 240, 0))
+           {
+               if (apply)
+               {
+                   int32 bp = 0;
+                   if (target->HasAura(17003)) bp = 3;
+                   else if (target->HasAura(17004)) bp = 7;
+                   else if (target->HasAura(17005)) bp = 10;
+                   target->CastCustomSpell(target,24694, &bp, NULL, NULL, true);
+               }
+               else if (target->HasAura(24694))
+                   target->RemoveAurasDueToSpell(24694);
+           }
+           // Master Shapeshifter - Cat
+           if (AuraEffect const * aurEff = target->GetAuraEffect(SPELL_AURA_MOD_HEALING_DONE_PERCENT, SPELLFAMILY_GENERIC, 2851, 0))
+           {
+               if (apply)
+               {
+                   int32 bp = aurEff->GetAmount();
+                   target->CastCustomSpell(target, 48420, &bp, NULL, NULL, true);
+               }
+               else if (target->HasAura(48420))
+                   target->RemoveAurasDueToSpell(48420);
+           }
+            break;
+       }
+   }
 }
 
 /*********************************************************/
@@ -3737,6 +3810,20 @@ void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurA
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
 
+void AuraEffect::HandleAuraModSpellPowerPercent(AuraApplication const * aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Unit *target = aurApp->GetTarget();
+
+    if (target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Recalculate bonus
+    target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+}
+
 void AuraEffect::HandleModSpellHealingPercentFromStat(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
 {
     if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
@@ -4296,7 +4383,10 @@ void AuraEffect::HandleAuraModAttackPower(AuraApplication const* aurApp, uint8 m
 
     Unit* target = aurApp->GetTarget();
 
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(GetAmount()), apply);
+    if (float(GetAmount()) > 0.f)
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_POS, TOTAL_VALUE, float(GetAmount()), apply);
+    else
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_NEG, TOTAL_VALUE, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4309,7 +4399,10 @@ void AuraEffect::HandleAuraModRangedAttackPower(AuraApplication const* aurApp, u
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
 
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(GetAmount()), apply);
+   if (float(GetAmount()) > 0.f)
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_VALUE, float(GetAmount()), apply);
+    else
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_VALUE, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4319,8 +4412,11 @@ void AuraEffect::HandleAuraModAttackPowerPercent(AuraApplication const* aurApp, 
 
     Unit* target = aurApp->GetTarget();
 
-    //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, float(GetAmount()), apply);
+    // UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
+    if (float(GetAmount()) > 0.f)
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_POS, TOTAL_PCT, float(GetAmount()), apply);
+    else
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_NEG, TOTAL_PCT, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -4333,8 +4429,11 @@ void AuraEffect::HandleAuraModRangedAttackPowerPercent(AuraApplication const* au
     if ((target->getClassMask() & CLASSMASK_WAND_USERS) != 0)
         return;
 
-    //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
-    target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(GetAmount()), apply);
+   // UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
+    if (float(GetAmount()) > 0.f)
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_POS, TOTAL_PCT, float(GetAmount()), apply);
+    else
+        target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED_NEG, TOTAL_PCT, -float(GetAmount()), apply);
 }
 
 void AuraEffect::HandleAuraModAttackPowerOfArmor(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
@@ -4662,6 +4761,18 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     }
                     break;
                 }
+                    // Guardian of Ancient Kings - Retribution
+                case 86698:
+                {
+                    caster->CastSpell(caster,86701,true);
+                    break;
+                }
+                    // Guardian of Ancient Kings - Holy
+                case 86669:
+                {
+                    caster->CastSpell(caster,86674,true);
+                    break;
+                }
                 case 37096:                                     // Blood Elf Illusion
                 {
                     if (caster)
@@ -4808,6 +4919,23 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     if (GetId() == 61777)
                         target->CastSpell(target, GetAmount(), true);
                     break;
+                case SPELLFAMILY_PALADIN:
+                {
+                    switch (GetId())
+                    {
+                        // Guardian of Ancient Kings - Retribution
+                        case 86698:
+                        {
+                            if (aurApp->GetBase()->GetOwner()->ToUnit()->HasAura(86700))
+                            {
+                                caster->CastSpell((Unit*)NULL,86704,true);
+                                caster->RemoveAura(86701);
+                                caster->RemoveAura(86700);
+                            }
+                            break;
+                        }
+                    }
+                }
                 default:
                     break;
             }

@@ -964,7 +964,7 @@ bool Aura::CanBeSaved() const
 
 bool Aura::CanBeSentToClient() const
 {
-    return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE);
+    return !IsPassive() || GetSpellInfo()->HasAreaAuraEffect() || HasEffectType(SPELL_AURA_ABILITY_IGNORE_AURASTATE)  || HasEffectType(SPELL_AURA_CAST_WHILE_WALKING);
 }
 
 void Aura::UnregisterSingleTarget()
@@ -1167,6 +1167,41 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 break;
+		case SPELLFAMILY_WARRIOR:
+			if(GetId() == 1715) // Hamstring
+			{
+				if(caster->HasAura(12668)) // Improved Hamstring rank 2
+				{
+					if(target->HasAura(1715)) // If he already has hamstring
+					{
+						caster->CastSpell(target,23694,false); // Not triggered
+						if(!caster->ToPlayer()->HasSpellCooldown(23694))
+							caster->ToPlayer()->AddSpellCooldown(23694,0,uint32(time(NULL) + 30000)); // Add 30 seconds cooldown
+					}
+				}
+				if(caster->HasAura(12289)) // Improved Hamstring rank 1
+				{
+					if(target->HasAura(1715)) // If he already has hamstring
+					{
+						caster->CastSpell(target,23694,false); // Not triggered
+						if(!caster->ToPlayer()->HasSpellCooldown(23694))
+							caster->ToPlayer()->AddSpellCooldown(23694,0,uint32(time(NULL) + 60000)); // Add 60 seconds cooldown
+					}
+				}
+			}
+			if (!caster)
+				break;
+
+			switch (GetId())
+			{
+				case 50227: // Warrior - Sword and Board
+				{
+					// Reset cooldown on shield slam if needed
+					caster->ToPlayer()->RemoveSpellCooldown(23922, true);
+					break;
+				}
+			}
+			break;
             case SPELLFAMILY_DRUID:
                 if (!caster)
                     break;
@@ -1251,6 +1286,128 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 break;
+            case SPELLFAMILY_WARLOCK:
+             switch (GetId())
+ 		{
+			case 6358: // Seduction
+ 				if (!caster)
+ 					break;
+ 				if (Unit *owner = caster->GetOwner())
+ 					if (owner->HasAura(56250)) // Glyph of Succubus
+ 					{
+ 						target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE, 0, target->GetAura(32409)); // SW:D shall not be removed.
+ 						target->RemoveAurasByType(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+ 						target->RemoveAurasByType(SPELL_AURA_PERIODIC_LEECH);
+ 					}
+ 					break;
+			case 89603: // Cremation - refresh immolate
+				if (target->HasAura(348))
+					target->GetAura(348)->RefreshDuration();
+                    break;
+ 			}
+	   if(GetId() == 1120) // Drain soul
+        {
+            if(caster->HasAura(85099)) // Pandemic rank 1
+            {
+                if(target->HealthBelowPct(25))
+                    if(roll_chance_i(50))
+                        if(Aura* uaff = target->GetAura(30108))
+                            uaff->RefreshDuration();
+            }
+            if(caster->HasAura(85100)) // Pandemic rank 2
+            {
+                if(target->HealthBelowPct(25))
+                    if(Aura* uaff = target->GetAura(30108))
+                        uaff->RefreshDuration();
+            }
+        }
+			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
+			{
+				if(caster->HasAura(91713)) // Nether ward talent
+					GetEffect(2)->SetAmount(91711);
+			}
+			if(GetId() == 17877 || GetId() == 6353 || GetId() == 50796) // Shadowburn, Soul Fire, Chaos Bolt
+			{
+				if(caster->HasAura(30293)) // Soul Leech 1
+				{
+					caster->CastSpell(caster,57669,true);
+				caster->CastSpell(caster,59117,true);
+					caster->CastSpell(caster,59118,true);
+				}
+				if(caster->HasAura(30295)) // Soul Leech 2
+				{
+					int32 bp0 = 4;
+					caster->CastSpell(caster,57669,true);
+					caster->CastCustomSpell(caster, 59117, &bp0, NULL, NULL, true);
+					caster->CastCustomSpell(caster, 59118, &bp0, NULL, NULL, true);
+				}
+			}
+			if(GetId() == 1490) // Curse of elements
+			{
+				if(caster->HasAura(18179)) // Jinx rank 1
+					caster->CastSpell(target,85547,true);
+				if(caster->HasAura(85479)) // Jinxs rank 2
+					caster->CastSpell(target,86105,true);
+			}
+ 			if(GetId() == 702) // Curse of weakness
+ 			{
+ 				if(apply)
+ 				{
+ 					if(caster->HasAura(18179)) // Jinx rank 1
+ 					{
+ 						int32 bp = 5;
+ 						uint32 spellid = 0;
+ 						switch(target->getClass())
+ 						{
+ 						case CLASS_DEATH_KNIGHT:
+ 							spellid = 85541;
+ 							break;
+ 						case CLASS_HUNTER:
+ 							spellid = 85542;
+ 							break;
+ 						case CLASS_ROGUE:
+ 							spellid = 85540;
+ 							break;
+ 						case CLASS_WARRIOR:
+ 							spellid = 85539;
+ 							break;
+ 						}
+ 						if(spellid)
+ 							caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+ 					}
+ 					if(caster->HasAura(85479)) // Jinx rank 2
+ 					{
+ 						int32 bp = 10;
+ 						uint32 spellid = 0;
+ 						switch(target->getClass())
+ 						{
+ 						case CLASS_DEATH_KNIGHT:
+ 							spellid = 85541;
+ 							break;
+ 						case CLASS_HUNTER:
+ 							spellid = 85542;
+ 							break;
+ 						case CLASS_ROGUE:
+ 							spellid = 85540;
+ 							break;
+ 						case CLASS_WARRIOR:
+ 							spellid = 85539;
+ 							break;
+ 						}
+ 						if(spellid)
+ 							caster->CastCustomSpell(target,spellid,&bp,NULL,NULL,true);
+ 					}
+ 					else
+ 					{
+ 						target->RemoveAurasDueToSpell(85541);
+ 						target->RemoveAurasDueToSpell(85542);
+ 						target->RemoveAurasDueToSpell(85540);
+ 						target->RemoveAurasDueToSpell(85539);
+ 					}
+ 				}
+
+                }
+              break;
             case SPELLFAMILY_ROGUE:
                 // Sprint (skip non player casted spells by category)
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x40 && GetSpellInfo()->Category == 44)
@@ -1402,6 +1559,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         target->CastSpell(target, 70725, true);
                 break;
             }
+				// Faerie Fire (Feral)
+				else if (m_spellInfo->Id == 16857)
+				{
+					// Causes damage and threat in bear form or dire bear form only
+					if (caster->GetShapeshiftForm() != FORM_CAT)
+						caster->CastSpell(target, 60089, true);
+				}
             break;
         case SPELLFAMILY_ROGUE:
             // Stealth

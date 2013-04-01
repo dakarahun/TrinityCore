@@ -160,7 +160,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
         }
 };
 
-// 2818 - Deadly Poison
+// 2818 Deadly poison
 class spell_rog_deadly_poison : public SpellScriptLoader
 {
     public:
@@ -168,7 +168,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
 
         class spell_rog_deadly_poison_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_rog_deadly_poison_SpellScript);
+            PrepareSpellScript(spell_rog_deadly_poison_SpellScript)
 
             bool Load()
             {
@@ -179,10 +179,13 @@ class spell_rog_deadly_poison : public SpellScriptLoader
 
             void HandleBeforeHit()
             {
-                if (Unit* target = GetHitUnit())
-                    // Deadly Poison
-                    if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x10000, 0x80000, 0, GetCaster()->GetGUID()))
-                        _stackAmount = aurEff->GetBase()->GetStackAmount();
+                Unit* target = GetHitUnit();
+                if (!target)
+                    return;
+
+                // Deadly Poison
+                if (AuraEffect const* aurEff = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x10000, 0x80000, 0, GetCaster()->GetGUID()))
+                    _stackAmount = aurEff->GetBase()->GetStackAmount();
             }
 
             void HandleAfterHit()
@@ -191,53 +194,49 @@ class spell_rog_deadly_poison : public SpellScriptLoader
                     return;
 
                 Player* player = GetCaster()->ToPlayer();
+                Unit* target = GetHitUnit();
+                if (!target)
+                    return;
 
-                if (Unit* target = GetHitUnit())
+                Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+
+                if (item == GetCastItem())
+                    item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+                if (!item)
+                    return;
+
+                // item combat enchantments
+                for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
                 {
+                    SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(item->GetEnchantmentId(EnchantmentSlot(slot)));
+                    if (!enchant)
+                        continue;
 
-                    Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-
-                    if (item == GetCastItem())
-                        item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-                    if (!item)
-                        return;
-
-                    // item combat enchantments
-                    for (uint8 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+                    for (uint8 s = 0; s < 3; ++s)
                     {
-                        if (slot > PRISMATIC_ENCHANTMENT_SLOT || slot < PROP_ENCHANTMENT_SLOT_0)    // not holding enchantment id
+                        if (enchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                             continue;
 
-                        SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(item->GetEnchantmentId(EnchantmentSlot(slot)));
-                        if (!enchant)
-                            continue;
-
-                        for (uint8 s = 0; s < 3; ++s)
+                        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(enchant->spellid[s]);
+                        if (!spellInfo)
                         {
-                            if (enchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
-                                continue;
-
-                            SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(enchant->spellid[s]);
-                            if (!spellInfo)
-                            {
-                                sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::CastItemCombatSpell Enchant %i, player (Name: %s, GUID: %u) cast unknown spell %i", enchant->ID, player->GetName().c_str(), player->GetGUIDLow(), enchant->spellid[s]);
-                                continue;
-                            }
-
-                            // Proc only rogue poisons
-                            if (spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE || spellInfo->Dispel != DISPEL_POISON)
-                                continue;
-
-                            // Do not reproc deadly
-                            if (spellInfo->SpellFamilyFlags.IsEqual(0x10000, 0x80000, 0))
-                                continue;
-
-                            if (spellInfo->IsPositive())
-                                player->CastSpell(player, enchant->spellid[s], true, item);
-                            else
-                                player->CastSpell(target, enchant->spellid[s], true, item);
+                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::CastItemCombatSpell Enchant %i, player (Name: %s, GUID: %u) cast unknown spell %i", enchant->ID, player->GetName(), player->GetGUIDLow(), enchant->spellid[s]);
+                            continue;
                         }
+
+                        // Proc only rogue poisons
+                        if (spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE || spellInfo->Dispel != DISPEL_POISON)
+                            continue;
+
+                        // Do not reproc deadly
+                        if (spellInfo->SpellFamilyFlags.IsEqual(0x10000, 0x80000, 0))
+                            continue;
+
+                        if (spellInfo->IsPositive())
+                            player->CastSpell(player, enchant->spellid[s], true, item);
+                        else
+                            player->CastSpell(target, enchant->spellid[s], true, item);
                     }
                 }
             }
@@ -256,7 +255,6 @@ class spell_rog_deadly_poison : public SpellScriptLoader
             return new spell_rog_deadly_poison_SpellScript();
         }
 };
-
 // 31130 - Nerves of Steel
 class spell_rog_nerves_of_steel : public SpellScriptLoader
 {
@@ -499,6 +497,11 @@ class spell_rog_rupture : public SpellScriptLoader
                         cp = 5;
 
                     amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * attackpowerPerCombo[cp]);
+
+                    if (caster->HasAura(79007))
+                        amount *= 1.2;
+                    else if (caster->HasAura(79008))
+                        amount *= 1.4;
                 }
             }
 

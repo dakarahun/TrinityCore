@@ -100,6 +100,7 @@ void CombatAI::UpdateAI(uint32 diff)
 
     events.Update(diff);
 
+
     if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
 

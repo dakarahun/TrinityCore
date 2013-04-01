@@ -292,6 +292,40 @@ enum TrainerSpellState
     TRAINER_SPELL_GREEN_DISABLED = 10                       // custom value, not send to client: formally green but learn not allowed
 };
 
+enum TalentBranchSpec
+{
+	BS_WARRIOR_ARMS         = 746,
+	BS_WARRIOR_FURY         = 815,
+	BS_WARRIOR_PROTECTION   = 845,
+	BS_PALADIN_HOLY         = 831,
+	BS_PALADIN_PROTECTION   = 839,
+	BS_PALADIN_RETRIBUTION  = 855,
+	BS_HUNTER_BEAST_MASTERY = 811,
+	BS_HUNTER_MARKMANSHIP   = 807,
+	BS_HUNTER_SURVIVAL      = 809,
+	BG_ROGUE_ASSASINATION   = 182,
+	BS_ROGUE_COMBAT         = 181,
+	BS_ROGUE_SUBTLETY       = 183,
+	BS_PRIEST_DISCIPLINE    = 760,
+	BS_PRIEST_HOLY          = 813,
+	BS_PRIEST_SHADOW        = 759,
+	BS_DEATH_KNIGHT_BLOOD   = 398,
+	BS_DEATH_KNIGHT_FROST   = 399,
+	BS_DEATH_KNIGHT_UNHOLY  = 400,
+	BS_SHAMAN_ELEMENTAL     = 261,
+	BS_SHAMAN_ENCHANCEMENT  = 263,
+	BS_SHAMAN_RESTORATION   = 262,
+	BS_MAGE_ARCANE          = 799,
+	BS_MAGE_FIRE            = 851,
+	BS_MAGE_FROST           = 823,
+	BS_WARLOCK_AFFLICTION   = 871,
+	BS_WARLOCK_DEMONOLOGY   = 867,
+	BS_WARLOCK_DESTRUCTION  = 865,
+	BS_DRUID_BALANCE        = 752,
+	BS_DRUID_FERAL_COMBAT   = 750,
+	BS_DRUID_RESTORATION    = 748
+};
+
 enum ActionButtonUpdateState
 {
     ACTIONBUTTON_UNCHANGED = 0,
@@ -1950,6 +1984,7 @@ class Player : public Unit, public GridObject<Player>
         bool UpdateAllStats();
         void UpdateResistances(uint32 school);
         void UpdateArmor();
+	 void UpdateSpellPower();
         void UpdateMaxHealth();
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
@@ -1971,7 +2006,9 @@ class Player : public Unit, public GridObject<Player>
         float GetRatingBonusValue(CombatRating cr) const;
 
         /// Returns base spellpower bonus from spellpower stat on items, without spellpower from intellect stat
-        uint32 GetBaseSpellPowerBonus() const { return m_baseSpellPower; }
+       uint32 GetBaseSpellPowerBonus() const { return m_baseSpellPower; }
+       // uint32 GetBaseSpellPowerBonus() { return m_spellPowerFromIntellect + m_baseSpellPower; }
+       // uint32 GetBaseSpellPower(){ return m_spellPowerFromIntellect; }
         int32 GetSpellPenetrationItemMod() const { return m_spellPenetrationItemMod; }
 
         float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
@@ -2702,6 +2739,7 @@ class Player : public Unit, public GridObject<Player>
         float m_auraBaseMod[BASEMOD_END][MOD_END];
         int16 m_baseRatingValue[MAX_COMBAT_RATING];
         uint32 m_baseSpellPower;
+        uint32 m_spellPowerFromIntellect;
         uint32 m_baseManaRegen;
         uint32 m_baseHealthRegen;
         int32 m_spellPenetrationItemMod;

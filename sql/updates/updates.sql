@@ -1,3 +1,142 @@
+UPDATE `version` SET `db_version`='TDB 335.51', `cache_id`=51 LIMIT 1;
+SET @NPC_DRAKE  := 29709;
+
+DELETE FROM `waypoint_data` WHERE `id`=@NPC_DRAKE;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@NPC_DRAKE,1,7294.96,-2418.733,823.869,0,0,0,0,100,0),
+(@NPC_DRAKE,2,7315.984,-2331.46,826.3972,0,0,0,0,100,0),
+(@NPC_DRAKE,3,7271.826,-2271.479,833.5917,0,0,0,0,100,0),
+(@NPC_DRAKE,4,7186.253,-2218.475,847.5632,0,0,0,0,100,0),
+(@NPC_DRAKE,5,7113.195,-2164.288,850.2301,0,0,0,0,100,0),
+(@NPC_DRAKE,6,7078.018,-2063.106,854.7581,0,0,0,0,100,0),
+(@NPC_DRAKE,7,7073.221,-1983.382,861.9246,0,0,0,0,100,0),
+(@NPC_DRAKE,8,7061.455,-1885.899,865.119,0,0,0,0,100,0),
+(@NPC_DRAKE,9,7033.32,-1826.775,876.2578,0,0,0,0,100,0),
+(@NPC_DRAKE,10,6999.902,-1784.012,897.4521,0,0,0,0,100,0),
+(@NPC_DRAKE,11,6954.913,-1747.043,897.4521,0,0,0,0,100,0),
+(@NPC_DRAKE,12,6933.856,-1720.698,882.2022,0,0,0,0,100,0),
+(@NPC_DRAKE,13,6932.729,-1687.306,866.1189,0,0,0,0,100,0),
+(@NPC_DRAKE,14,6952.458,-1663.802,849.8133,0,0,0,0,100,0),
+(@NPC_DRAKE,15,7002.819,-1651.681,831.397,0,0,0,0,100,0),
+(@NPC_DRAKE,16,7026.531,-1649.239,828.8406,0,0,0,0,100,0);
+UPDATE `creature_template` SET `Armor_mod`=0 WHERE `entry`=29747;
+DELETE FROM `spell_target_position` WHERE `id` IN (64014,64024,64025,64028,64029,64030,64031,64032,65042);
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(64014, 603, -705.9705, -92.55729, 430.8192, 0),
+(64024, 603, 2086.224, -24.05382, 422.2889, 0),
+(64025, 603, 2518.131, 2569.342, 412.6822, 0),
+(64028, 603, 553.243, -12.30903, 410.5428, 0),
+(64029, 603, 1859.563, -24.83773, 449.1945, 6.230825),
+(64030, 603, 1497.989, -24.16162, 421.6254, 0.03490658),
+(64031, 603, 926.2917, -11.44444, 418.9779, 0.01745329),
+(64032, 603, 131.1389, -35.36806, 410.187, 0),
+(65042, 603, 1855.073, -11.48785, 334.559, 5.532694);
+-- Lurgglbr
+DELETE FROM `creature_text` WHERE `entry`=25208;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES 
+(25208,0,0, 'You can''t hold me against my will! You''ve all been brainwashed!', 12,0,100,0,0,0, 'Lurgglbr'),
+(25208,1,0, 'Together we will fight our way out of here. Are you ready?', 12,0,100,0,0,0, 'Lurgglbr'),
+(25208,2,0, 'This is far enough. I can make it on my own from here.', 12,0,100,0,0,0, 'Lurgglbr'),
+(25208,3,0, 'Thank you for rescuing me, $r. Please tell the king that I am back.', 12,0,100,0,0,0, 'Lurgglbr');
+
+-- quest fix cuergo's gold (q2882)
+SET @ENTRY :=7898;
+UPDATE `creature_template` SET `AIName`= 'SmartAI', `ScriptName`='' WHERE `entry`=@ENTRY;
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `source_type`=0 AND`entryorguid`=@ENTRY;
+DELETE FROM `smart_scripts` WHERE `source_type`=9 AND`entryorguid`=@ENTRY*100;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@ENTRY,0,0,0,63,0,100,0,0,0,0,0,80,@ENTRY*100,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Trigger - on respawn - run script'),
+(@ENTRY*100,9,0,0,0,0,100,0,0,0,300000,300000,11,11463,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - spawn pirate1'),
+(@ENTRY*100,9,1,0,0,0,100,0,0,0,300000,300000,11,11463,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - spawn pirate2'),
+(@ENTRY*100,9,2,0,0,0,100,0,0,0,300000,300000,11,11485,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - spawn buccaneer1'),
+(@ENTRY*100,9,3,0,0,0,100,0,0,0,300000,300000,11,11485,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - spawn buccaneer2'),
+(@ENTRY*100,9,4,0,0,0,100,0,0,0,300000,300000,11,11487,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - spawn swashbuckler'),
+(@ENTRY*100,9,5,0,0,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0,'Timed Actionscript - despawn trigger');
+-- Remove Zulian Mudskunk from Zulian Crocolisk's loot template
+DELETE FROM `creature_loot_template` WHERE `entry`=15043 and `item`=19975;
+-- Add Vicious Oil (Item) into loot template of Vicious Oil (NPC)
+DELETE FROM `creature_loot_template` WHERE `entry`=30325 and `item`=42640;
+INSERT INTO `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `lootmode`, `groupid`, `mincountOrRef`, `maxcount`) values
+(30325,42640,-100,1,0,1,1);
+-- Previous quest should be The Defense of Warsong Hold not To Conquest Hold, But Be Careful!
+UPDATE `quest_template` SET `PrevQuestId`=11596 WHERE  `Id`=12486;
+-- Change grouping so Alliance and Horde quests are no longer in 1 group
+UPDATE `quest_template` SET `ExclusiveGroup`=-12222 WHERE  `Id` IN(12222,12223);
+-- Hellscreams Champion requires some conditions to start the quest
+UPDATE `quest_template` SET `ExclusiveGroup`=0,`NextQuestId`=0 WHERE  `Id` IN(11652,11705,11722);
+UPDATE `quest_template` SET `NextQuestId`=11709 WHERE `Id`=11705;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` IN (19,20) AND `SourceEntry`=11916;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES 
+(20,0,11916,0,0,8,0,11652,0,0,0,0, '', 'Player must have completed The Plains of Nasam before been able to accept Hellscream''s Champion'),
+(19,0,11916,0,0,8,0,11652,0,0,0,0, '', 'Player must have completed The Plains of Nasam before been able to accept Hellscream''s Champion'),
+(20,0,11916,0,0,8,0,11705,0,0,0,0, '', 'Player must have completed The Foolish Endeavors before been able to accept Hellscream''s Champion'),
+(19,0,11916,0,0,8,0,11705,0,0,0,0, '', 'Player must have completed The Foolish Endeavors before been able to accept Hellscream''s Champion'),
+(20,0,11916,0,0,8,0,11722,0,0,0,0, '', 'Player must have completed The Trophies of Gammoth before been able to accept Hellscream''s Champion'),
+(19,0,11916,0,0,8,0,11722,0,0,0,0, '', 'Player must have completed The Trophies of Gammoth before been able to accept Hellscream''s Champion');
+-- Fix SAI issue for Hugh Glass (wrong npcflag was set)
+UPDATE `smart_scripts` SET `action_param1`=643 WHERE  `entryorguid`=2648400 AND `source_type`=9 AND `id`=6;
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_sindragosa_frost_breath';
+DELETE FROM `spell_script_names` WHERE `ScriptName`='spell_item_unsated_craving';
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
+(69649,'spell_sindragosa_frost_breath'),
+(71056,'spell_sindragosa_frost_breath'),
+(71057,'spell_sindragosa_frost_breath'),
+(71058,'spell_sindragosa_frost_breath'),
+(73061,'spell_sindragosa_frost_breath'),
+(73062,'spell_sindragosa_frost_breath'),
+(73063,'spell_sindragosa_frost_breath'),
+(73064,'spell_sindragosa_frost_breath'),
+(71168,'spell_item_unsated_craving');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=71952;
+-- creature_template.equipment_id deleted
+-- creature_equip_template.entry == creature_template.entry
+-- id field added to creature_equip_template -> PK(entry, id)
+-- id field in creature_equip_template starts at 1
+-- creature.equipment_id references id of creature_equip_template
+-- creature.equipment_id = 0 means no equipment at all (default 1)
+-- creature.equipment_id = -1 means pick a random equipment from creature_equip_template
+
+-- Diff_entries should use the same template of the normal entry
+UPDATE `creature_template` SET `equipment_id` = 0 WHERE `name` LIKE '%(1)' OR `name` LIKE '%(2)' OR `name` LIKE '%(3)' OR `name` LIKE '%(4)';
+
+-- Delete unused templates
+DROP TABLE IF EXISTS `temp_c_e`;
+CREATE TABLE IF NOT EXISTS `temp_c_e` (`entry` mediumint(8));
+ALTER TABLE `temp_c_e` ADD INDEX `ind` (`entry`);
+INSERT INTO `temp_c_e` SELECT `equipment_id` FROM `creature_template` WHERE `equipment_id` != 0 UNION
+                       SELECT `equipment_id` FROM `creature` WHERE `equipment_id` != 0 UNION
+                       SELECT `equipment_id` FROM `game_event_model_equip` WHERE `equipment_id` != 0;
+DELETE FROM `creature_equip_template` WHERE `entry` NOT IN (SELECT `entry` FROM `temp_c_e`);
+DROP TABLE `temp_c_e`;
+
+-- Create temporary table to hold the values of creature_equip_template with converted entry
+DROP TABLE IF EXISTS `creature_equip_template2`;
+CREATE TABLE IF NOT EXISTS `creature_equip_template2` (
+  `entry` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `id` tinyint(3) unsigned NOT NULL DEFAULT '1',
+  `itemEntry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `itemEntry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `itemEntry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`, `id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+INSERT INTO `creature_equip_template2` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`)
+    SELECT `creature_template`.`entry`, 1, `itemEntry1`, `itemEntry2`, `itemEntry3`
+    FROM `creature_template`
+    JOIN `creature_equip_template` ON `creature_equip_template`.`entry` = `equipment_id`
+    WHERE `equipment_id` != 0;
+
+INSERT IGNORE INTO `creature_equip_template2` (`entry`, `id`, `itemEntry1`, `itemEntry2`, `itemEntry3`)
+    SELECT `creature`.`id`, 2, `itemEntry1`, `itemEntry2`, `itemEntry3`
+    FROM `creature`
+    JOIN `creature_equip_template` ON `creature_equip_template`.`entry` = `equipment_id`
+    WHERE `equipment_id` != 0;
+
+DROP TABLE `creature_equip_template`;
+RENAME TABLE `creature_equip_template2` TO `creature_equip_template`;
+
 UPDATE `creature` SET `equipment_id` = 2 WHERE `equipment_id` != 0;
 UPDATE `creature` SET `equipment_id` = 1 WHERE `equipment_id` = 0;
 
@@ -9,6 +148,14 @@ INSERT INTO `creature_equip_template` (`entry`, `id`, `itemEntry1`, `itemEntry2`
 (1976, 2, 2715, 143, 0),
 (23585, 2, 2715, 143, 0),
 (424, 2, 2715, 143, 0);
+
+-- ALTER TABLE `creature_equip_template` CHANGE `entry` `entry` mediumint(8) unsigned NOT NULL;
+-- ALTER TABLE `creature_equip_template` ADD `id` tinyint(3) unsigned NOT NULL DEFAULT '1' AFTER `entry`;
+-- ALTER TABLE `creature_equip_template` DROP INDEX `PRIMARY`, ADD PRIMARY KEY (`entry`, `id`);
+ALTER TABLE `creature_template` DROP `equipment_id`;
+ALTER TABLE `creature` CHANGE `equipment_id` `equipment_id` tinyint(3) unsigned NOT NULL DEFAULT '1';
+ALTER TABLE `game_event_model_equip` CHANGE `equipment_id` `equipment_id` tinyint(3) unsigned NOT NULL DEFAULT '1';
+
 -- Conversion from SAI
 UPDATE `smart_scripts` SET `action_param1` = 1 WHERE `entryorguid` = 2523901 AND `source_type` = 9 AND `id` = 3;
 UPDATE `smart_scripts` SET `action_param1` = 0 WHERE `entryorguid` = 2523900 AND `source_type` = 9 AND `id` = 2;
@@ -268,6 +415,7 @@ SET @ArcaneExplosion :=    35426; -- such spells need delay to execute properly,
 -- Update templates
 UPDATE `creature_template` SET `unit_flags`=unit_flags|0x02000000 WHERE `entry`=@LightOrb; -- sniff
 -- Add SAI support for Light Orbs and Totem
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=@LightOrb;
 UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN (@LightOrb,@OrbCollectingTotem);
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@LightOrb,@OrbCollectingTotem) AND `source_type`=0;
 DELETE FROM `smart_scripts` WHERE `entryorguid`=@Script AND `source_type`=9;
@@ -366,6 +514,7 @@ INSERT INTO `smart_scripts`(`entryorguid`,`source_type`,`id`,`event_type`,`event
 (29861,0,0,54,0,0,0,0,80,2986100,2,1,'Stormforged Eradictor - Just summoned - Call timed actionlist 2986100'),
 (29861,0,1,0,3000,7000,14000,18000,11,56352,0,2,'Stormforged Eradictor - Cast Storm Punch'),
 (29861,0,2,0,9000,12000,13000,18000,11,15588,0,0,'Stormforged Eradictor - Cast Thunderclap');
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=29861;
 UPDATE `areatrigger_teleport` SET `target_position_x`=728.055,`target_position_y`= 1329.03,`target_position_z`=275,`target_orientation`=5.51524 WHERE `id`=5290; -- The Eye of Eternity (entrance)
 DELETE FROM `command` WHERE `name` = 'reload rbac';
 INSERT INTO `command` (`name`,`security`,`help`) VALUES
@@ -582,6 +731,15 @@ UPDATE `creature_template` SET `flags_extra`=flags_extra &~ 0x00000080 WHERE `en
 UPDATE `creature` SET `modelid`=11686 WHERE `guid` BETWEEN 132304 AND 132308;
 -- Add missing generic spell for opening chests for most of Blood Elf's classes
 -- (was preventing them to loot Eye of Eternity Alexstrasza's Gift Box, Heart of Magic and maybe more.)
+DELETE FROM `playercreateinfo_spell` WHERE `race`=10 AND `Spell`=61437;
+INSERT INTO `playercreateinfo_spell` (`race`,`class`,`Spell`,`Note`) VALUES
+(10,2,61437, 'Opening'),
+(10,3,61437, 'Opening'),
+(10,4,61437, 'Opening'),
+(10,5,61437, 'Opening'),
+(10,6,61437, 'Opening'),
+(10,8,61437, 'Opening'),
+(10,9,61437, 'Opening');
 SET @ELM_BUNNY        :=23837;
 SET @SHADOW_CULTIST   :=30835;
 SET @VARDMADRA        :=30836;
@@ -1460,6 +1618,7 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,
 (13,1,@Explosion,0,0,31,0,3,@Decoy,0,0,0,0,'', 'Explosion Bunny can hit Armored Decoy'),
 (13,1,@Explosion,0,1,31,0,3,@Skytalon,0,0,0,0,'', 'Explosion Bunny can hit Skytalon'),
 (13,1,@PingBunny,0,0,31,0,3,@Bunny,0,0,0,0,'', 'Ping Bunny can hit only Explosion Bunny');
+DELETE FROM `creature_ai_scripts` WHERE `creature_id` IN (26811,26812);
 DELETE FROM `pool_creature` WHERE `pool_entry`=1077;
 DELETE FROM `pool_template` WHERE `entry`=1077;
 -- Update some gameobject data that is correct in WDB, but parsed wrong for some reason
@@ -1491,6 +1650,7 @@ SET @HARRISON := 26814;
 SET @TECAHUNA := 26865;
 SET @MUMMY_BUNNY := 26867;
 
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=@TECAHUNA;
 DELETE FROM `creature_equip_template` WHERE `entry`=@HARRISON;
 
 UPDATE `gameobject` SET `state`=1 WHERE `id`=188465;
@@ -1773,6 +1933,14 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (13,1,43307,0,0,31,0,3,@BUNNY,0,0,0,'','Spell Scare the Guano Out of Them!: Summon Darkclaw Guano targets Firecracker Bunny');
 -- playercreateinfo_spell
 TRUNCATE TABLE `playercreateinfo_spell`;
+
+ALTER TABLE `playercreateinfo_spell`
+  CHANGE `race` `racemask` INT(10) UNSIGNED DEFAULT 0 NOT NULL,
+  CHANGE `class` `classmask` INT(10) UNSIGNED DEFAULT 0 NOT NULL;
+
+ALTER TABLE `playercreateinfo_spell_custom`
+  CHANGE `race` `racemask` INT(10) UNSIGNED DEFAULT 0 NOT NULL,
+  CHANGE `class` `classmask` INT(10) UNSIGNED DEFAULT 0 NOT NULL;
 
 INSERT INTO `playercreateinfo_spell` (`racemask`, `classmask`, `Spell`, `Note`) VALUES
 -- Races:   Human, Orc, Dwarf, Night elf, Undead, Tauren, Gnome, Troll, Dranei
@@ -4059,7 +4227,29 @@ UPDATE `smart_scripts` SET `event_flags`=1 WHERE  `entryorguid`=3727 AND `source
 UPDATE `smart_scripts` SET `event_flags`=1 WHERE  `entryorguid`=4295 AND `source_type`=0 AND `id`=0 AND `link`=1;
 -- Ymirjar Flesh Hunter
 UPDATE `smart_scripts` SET `event_flags`=7 WHERE  `entryorguid`=26670 AND `source_type`=0 AND `id`=27 AND `link`=28;
-
+-- Startup Errors
+UPDATE `smart_scripts` SET `event_flags`=0 WHERE  `entryorguid`=22895 AND `source_type`=0 AND `id`=0 AND `link`=0;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=1487 AND `source_type`=0 AND `id`=8 AND `link`=9;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=2245 AND `source_type`=0 AND `id`=14 AND `link`=15;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=2375 AND `source_type`=0 AND `id`=8 AND `link`=9;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=16344 AND `source_type`=0 AND `id`=8 AND `link`=9;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=29174 AND `source_type`=0 AND `id`=2 AND `link`=3;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=29174 AND `source_type`=0 AND `id`=3 AND `link`=4;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=29174 AND `source_type`=0 AND `id`=4 AND `link`=5;
+-- Timed action scripts aren't supposed to have links set on them
+UPDATE `smart_scripts` SET `link`=0, `event_type`=0 WHERE  `entryorguid`=83600 AND `source_type`=9 AND `id`=1 AND `link`=2;
+UPDATE `smart_scripts` SET `link`=0, `event_type`=0 WHERE  `entryorguid`=83600 AND `source_type`=9 AND `id`=2 AND `link`=3;
+UPDATE `smart_scripts` SET `event_type`=0 WHERE  `entryorguid`=83600 AND `source_type`=9 AND `id`=3 AND `link`=0;
+-- Aforementioned issue about links on timed scripts
+UPDATE `smart_scripts` SET `event_type`=0 WHERE  `entryorguid`=83600 AND `source_type`=9 AND `id`=3 AND `link`=0;
+UPDATE `smart_scripts` SET `link`=0, `event_type`=0 WHERE  `entryorguid`=305400 AND `source_type`=9 AND `id`=1 AND `link`=2;
+UPDATE `smart_scripts` SET `link`=0 WHERE  `entryorguid`=15938 AND `source_type`=0 AND `id`=7 AND `link`=8;
+-- This one had messed up ID's too
+UPDATE `smart_scripts` SET `id`=5, `link`=6 WHERE  `entryorguid`=19456 AND `source_type`=0 AND `id`=6 AND `link`=7;
+UPDATE `smart_scripts` SET `id`=6 WHERE  `entryorguid`=19456 AND `source_type`=0 AND `id`=7 AND `link`=0;
+UPDATE `smart_scripts` SET `id`=7 WHERE  `entryorguid`=19456 AND `source_type`=0 AND `id`=8 AND `link`=0;
+UPDATE `smart_scripts` SET `id`=8 WHERE  `entryorguid`=19456 AND `source_type`=0 AND `id`=9 AND `link`=0;
+UPDATE `smart_scripts` SET `id`=9 WHERE  `entryorguid`=19456 AND `source_type`=0 AND `id`=10 AND `link`=0;
 UPDATE `playercreateinfo_spell` SET `racemask`=0, `classmask`=0 WHERE `Spell`=56816;
 UPDATE `playercreateinfo_spell` SET `racemask`=0, `classmask`=0 WHERE `Spell`=75461;
 UPDATE `playercreateinfo_spell` SET `racemask`=0, `classmask`=0 WHERE `Spell`=75445;
@@ -4530,11 +4720,19 @@ INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`
 (@GO_GUID+6,@GO_ELUNE_GEM,1,1,1,5514.49,-4917.57,850.538,2.3911,0,0,0.930417,0.366502,-900,100,1);
 
 -- EFFECT1 for 18953
-DELETE FROM `spell_dbc` WHERE `Id`=18954;
-INSERT INTO `spell_dbc` (`Id`, `School`, `Category`, `CastUI`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `Stances`, `StancesNot`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `CasterAuraState`, `TargetAuraState`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `PowerCost`, `PowerCostPerLevel`, `PowerCostPerSecond`, `PowerCostPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModelNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectDicePerLevel1`, `EffectDicePerLevel2`, `EffectDicePerLevel3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectBasePoints1`, `EffectBasePoints2`, `EffectBasePoints3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `SpellVisual`, `SpellVisual2`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `Rank`, `Description`, `ToolTip`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags1`, `SpellFamilyFlags2`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`) VALUES
-(18954, 0, 0, 0, 0, 0, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'Ranshalla Despawn', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
+DELETE FROM `spell_dbc` WHERE `id`=18954;
+INSERT INTO `spell_dbc` (`id`, `Attributes`, `CastingTimeIndex`, `ProcChance`, `RangeIndex`, `EquippedItemClass`, `Effect1`, `EffectImplicitTargetA1`, `DmgMultiplier1`, `Comment`) VALUES
+(18954, 256, 1, 101, 1, -1, 3, 1, 1, 'Ranshalla Despawn');
 TRUNCATE TABLE `playercreateinfo_spell`;
 TRUNCATE TABLE `playercreateinfo_spell_custom`;
+
+ALTER TABLE `playercreateinfo_spell`
+  CHANGE `race` `racemask` INT(10) UNSIGNED DEFAULT 0 NOT NULL,
+  CHANGE `class` `classmask` INT(10) UNSIGNED DEFAULT 0 NOT NULL;
+
+ALTER TABLE `playercreateinfo_spell_custom`
+  CHANGE `race` `racemask` INT(10) UNSIGNED DEFAULT 0 NOT NULL,
+  CHANGE `class` `classmask` INT(10) UNSIGNED DEFAULT 0 NOT NULL;
 
 INSERT INTO `playercreateinfo_spell` (`racemask`, `classmask`, `Spell`, `Note`) VALUES
 -- Races:   All
@@ -5302,3 +5500,846 @@ INSERT INTO `playercreateinfo_spell` (`racemask`, `classmask`, `Spell`, `Note`) 
 -- Races:   Worgen
 -- Classes: Death Knight
 (0x200000, 0x20, 87840, "Running Wild");
+-- Fix quest 14077: The Light's Mercy
+SET @SPELL := 66390; 
+SET @NPC := 34852; 
+SET @NPC_REWARD := 34852; 
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` = @NPC; 
+DELETE FROM `smart_scripts` WHERE `entryorguid` = @NPC AND `source_type`=0; 
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`,`event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`,`action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(@NPC,0,0,1,8,0,100,0x01,@SPELL,0,0,0,33,@NPC_REWARD,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Slain Tualiq Villager - On spell hit - Give kill credit for quest 14077'),
+(@NPC,0,1,0,61,0,100,1,0,0,0,0,41,2000,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Slain Tualiq Villager - Despawn after 2 seconds'); 
+DELETE FROM `smart_scripts` WHERE `entryorguid`=9026 AND `source_type`=0 AND `id`=2;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES 
+(9026,0,2,0,6,0,100,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, "Overmaster Pyron - On Death - Say Line 0");
+
+DELETE FROM `creature_text` WHERE `entry`=9026 AND `groupid`=0;
+INSERT INTO `creature_text` (`entry`, `groupid`, `id`, `text`, `type`, `language`, `probability`, `emote`, `duration`, `sound`, `comment`) VALUES
+(9026,0,0, "I will be reborn, mortals! Incendius shall raise me from these ashes!",12,0,100,0,0,0,"Overmaster Pyron");
+SET @CGUID := 54428; -- set by TDB team (3)
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+2;
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `spawndist`, `MovementType`) VALUES
+(@CGUID+0, 36656, 571, 1, 1, 5647.669, 2106.526, 798.1375, 4.764749, 120, 0, 0), -- Silver Covenant Sentinel (Area: 4862)
+(@CGUID+1, 36656, 571, 1, 1, 5657.819, 2105.712, 798.1375, 4.590216, 120, 0, 0), -- Silver Covenant Sentinel (Area: 4862)
+(@CGUID+2, 36624, 571, 1, 1, 5652.733, 2106.208, 798.1375, 4.572762, 120, 0, 0); -- Caladis Brightspear (Area: 4862)
+DELETE FROM `creature_addon` WHERE `guid` BETWEEN @CGUID+0 AND @CGUID+2;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `auras`) VALUES 
+(@CGUID+0, 0, 0, 0x10000, 0x1, 0, '71311'),
+(@CGUID+1, 0, 0, 0x10000, 0x1, 0, '71311'),
+(@CGUID+2, 0, 0, 0x10000, 0x1, 0, '71311');
+UPDATE `smart_scripts` SET `event_phase_mask`=0 WHERE `entryorguid`=2289 AND `source_type`=1;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry`=1494;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=1494;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES 
+(1494,0,0,0,1,0,100,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 'On Respawn - Say Line - Yell Text on Summon');
+-- Add missing creature_text
+DELETE FROM `creature_text` WHERE `entry`=1494 AND `groupid`=0;
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES 
+(1494,0,0, 'Mmmh...I SMELL FOOD!',14,0,100,0,0,0, 'Negolash Yell on Summon');
+-- missing objects/mobs on Demon Fall Ridge
+SET @OGUID := 6040;
+SET @CGUID := 108860;
+DELETE FROM `gameobject` WHERE `guid` BETWEEN @OGUID AND @OGUID+3;
+INSERT INTO `gameobject` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`) VALUES
+(@OGUID+0,1622 ,1,1,1,1559.646 ,-2812.193,181.5358 ,0 ,0 ,0 ,0 ,1 ,120,255,1), --  Bruiseweed (Area: Demon Fall Ridge),
+(@OGUID+1,1623 ,1,1,1,1599.648 ,-3088.057,89.47401 ,0 ,0 ,0 ,0 ,1 ,120,255,1), --  Wild Steelbloom (Area: Demon Fall Ridge),
+(@OGUID+2,1732 ,1,1,1,1619.236 ,-3106.807,90.91071 ,0 ,0 ,0 ,0 ,1 ,120,255,1), --  Tin Vein (Area: Demon Fall Ridge),
+(@OGUID+3,176784,1,1,1,1550.686 ,-2862.281,181.7537 ,3.141593 ,0 ,0 ,0 ,1 ,120,255,1); -- Bonfire (Area: Demon Fall Ridge);
+DELETE FROM `creature` WHERE `guid` BETWEEN @CGUID AND @CGUID+25;
+INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`MovementType`) VALUES
+(@CGUID+00,11697,1,1,1,1377.036,-2832.29,108.1152,5.778122,120,10,1), --  Mannoroc Lasher (Area: Demon Fall Ridge) (waypoints or random movement)
+(@CGUID+01,11697,1,1,1,1442.845,-2781.555,143.3298,3.407407,120,10,1), --  Mannoroc Lasher (Area: Demon Fall Ridge) (possible waypoints or random movement)
+(@CGUID+02,11697,1,1,1,1520.548,-2910.79,128.7899,0.3708913,120,10,1), --  Mannoroc Lasher (Area: Demon Fall Ridge) (possible waypoints or random movement)
+(@CGUID+03,11697,1,1,1,1522.825,-2851.57,182.1475,5.156503,120,10,1), --  Mannoroc Lasher (Area: Demon Fall Ridge) (waypoints or random movement)
+(@CGUID+04,11697,1,1,1,1538.938,-2878.932,183.4645,1.239184,120,0,0), --  Mannoroc Lasher (Area: Demon Fall Ridge)
+(@CGUID+05,11697,1,1,1,1544.031,-2848.745,182.5147,5.044002,120,0,0), --  Mannoroc Lasher (Area: Demon Fall Ridge)
+(@CGUID+06,11697,1,1,1,1544.416,-2863.002,112.0556,2.701836,120,10,1), --  Mannoroc Lasher (Area: Demon Fall Ridge) (possible waypoints or random movement)
+(@CGUID+07,11697,1,1,1,1563.016,-2859.155,182.2932,4.066617,120,0,0), --  Mannoroc Lasher (Area: Demon Fall Ridge)
+(@CGUID+08,11697,1,1,1,1581.573,-2897.424,182.3294,1.43117,120,0,0), --  Mannoroc Lasher (Area: Demon Fall Ridge)
+(@CGUID+09,16030,1,1,1,1625.747,-3095.011,89.12293,2.2015,120,10,1), --  Maggot (Area: Demon Fall Ridge)
+(@CGUID+10,16030,1,1,1,1636.01,-3052.925,90.07569,4.715363,120,10,1), --  Maggot (Area: Demon Fall Ridge)
+(@CGUID+11,16030,1,1,1,1647.72,-3076.708,88.33277,1.016972,120,10,1), --  Maggot (Area: Demon Fall Ridge)
+(@CGUID+12,6073,1,1,1,1420.36,-2797,153.2968,4.158457,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+13,6073,1,1,1,1451.373,-2815.769,154.2159,4.385233,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+14,6073,1,1,1,1500.756,-2835.735,111.587,5.95405,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+15,6073,1,1,1,1512.830,-2877.935,111.1157,2.860,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+16,6073,1,1,1,1550.406,-2885.673,132.9547,4.354227,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+17,6073,1,1,1,1555.71,-2901.445,182.4397,3.857178,120,10,1), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+18,6073,1,1,1,1566.779,-2894.126,132.5958,0.1956479,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+19,6073,1,1,1,1537.930,-2823.109,181.6067,5.282221,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+20,6073,1,1,1,1583.341,-2959.558,182.2528,5.410459,120,0,0), --  Searing Infernal (Area: Demon Fall Ridge)
+(@CGUID+21,6115,1,1,1,1420.313,-2851.199,133.127,0.9438578,120,10,1), --  Roaming Felguard (Area: Demon Fall Ridge) (waypoints or random movement)
+(@CGUID+22,6115,1,1,1,1461.483,-2783.054,154.6106,4.637331,120,10,1), --  Roaming Felguard (Area: Demon Fall Ridge) (waypoints or random movement)
+(@CGUID+23,6115,1,1,1,1521.961,-2856.834,111.6264,4.90235,120,10,1), --  Roaming Felguard (Area: Demon Fall Ridge) (waypoints or random movement)
+(@CGUID+24,6115,1,1,1,1610.802,-3083.251,89.95774,1.347837,120,10,1), --  Roaming Felguard (Area: Demon Fall Ridge) waypoints or random movement)
+(@CGUID+25,6115,1,1,1,1611.121,-2985.179,182.0912,2.853907,120,10,1); -- Roaming Felguard (Area: Demon Fall Ridge) (waypoints or random movement)
+-- reposition to avoid position clash with other mob
+UPDATE creature SET position_x = 1553.05,position_y = -2844.765,position_z = 129.70,orientation = 0.6726,MovementType = 0,spawndist = 0 WHERE `guid` = 20082;
+-- pathing for Felguard #20872 on 
+SET @WPID := 208720;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1445.667358,`position_y`=-2785.956299,`position_z`=144.079132,`currentwaypoint`=0 WHERE `guid`=20872;
+DELETE FROM `creature_addon` WHERE `guid`=20872;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (20872,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1445.667358,-2785.956299,144.079132,0,0,0,0,100,0),
+(@WPID,1,1450.664429,-2799.601807,144.581528,0,0,0,0,100,0),
+(@WPID,2,1457.757935,-2801.675293,145.510452,0,0,0,0,100,0),
+(@WPID,3,1467.130493,-2804.867188,147.879959,0,0,0,0,100,0),
+(@WPID,4,1476.766113,-2806.016602,149.540283,0,0,0,0,100,0),
+(@WPID,5,1478.050537,-2798.385254,149.963150,0,0,0,0,100,0),
+(@WPID,6,1473.788696,-2787.377197,152.504379,0,0,0,0,100,0),
+(@WPID,7,1468.064453,-2783.520264,154.801208,0,0,0,0,100,0),
+(@WPID,8,1460.110718,-2782.338135,154.570343,0,0,0,0,100,0),
+(@WPID,9,1466.063477,-2783.569580,155.144333,0,0,0,0,100,0),
+(@WPID,10,1473.382202,-2788.681152,152.407547,0,0,0,0,100,0),
+(@WPID,11,1477.975464,-2797.371094,150.017349,0,0,0,0,100,0),
+(@WPID,12,1473.043457,-2804.988770,149.482895,0,0,0,0,100,0),
+(@WPID,13,1465.716309,-2806.197021,147.414398,0,0,0,0,100,0),
+(@WPID,14,1457.339355,-2802.397949,145.514069,0,0,0,0,100,0),
+(@WPID,15,1450.980835,-2794.119385,144.331573,0,0,0,0,100,0);
+-- pathing for Felguard #20874 on 
+SET @WPID := 208740;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1427.127686,`position_y`=-2794.929199,`position_z`=153.367630,`currentwaypoint`=0 WHERE `guid`=20874;
+DELETE FROM `creature_addon` WHERE `guid`=20874;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (20874,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1427.127686,-2794.929199,153.367630,0,0,0,0,100,0),
+(@WPID,1,1434.866943,-2792.607666,153.983551,0,0,0,0,100,0),
+(@WPID,2,1439.881104,-2789.645996,156.961761,0,0,0,0,100,0),
+(@WPID,3,1446.391846,-2787.082031,158.247574,0,0,0,0,100,0),
+(@WPID,4,1452.749390,-2784.158691,156.516998,0,0,0,0,100,0),
+(@WPID,5,1461.059204,-2782.987793,154.608047,0,0,0,0,100,0),
+(@WPID,6,1459.080078,-2790.694580,157.111328,0,0,0,0,100,0),
+(@WPID,7,1457.619629,-2795.229492,158.473236,0,0,0,0,100,0),
+(@WPID,8,1455.797607,-2801.988037,158.055511,0,0,0,0,100,0),
+(@WPID,9,1453.832642,-2808.706543,155.066422,0,0,0,0,100,0),
+(@WPID,10,1451.864258,-2814.851807,153.940338,0,0,0,0,100,0),
+(@WPID,11,1453.883789,-2807.040039,155.886780,0,0,0,0,100,0),
+(@WPID,12,1457.238525,-2798.087891,158.691376,0,0,0,0,100,0),
+(@WPID,13,1459.887451,-2791.610352,157.409363,0,0,0,0,100,0),
+(@WPID,14,1461.216431,-2782.308350,154.564026,0,0,0,0,100,0),
+(@WPID,15,1450.710571,-2784.914063,157.356842,0,0,0,0,100,0),
+(@WPID,16,1444.170044,-2787.408203,158.144180,0,0,0,0,100,0),
+(@WPID,17,1434.528687,-2791.566895,154.061630,0,0,0,0,100,0);
+-- pathing for Felguard #20876 on 
+SET @WPID := 208760;
+UPDATE creature SET `MovementType`=2,`position_x`=1519.061279,`position_y`=-2911.228271,`position_z`=128.724503,`currentwaypoint`=0 WHERE `guid` = 20876;
+DELETE FROM `creature_addon` WHERE `guid` = 20876;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (20876,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1519.061279,-2911.228271,128.724503,0,0,0,0,100,0),
+(@WPID,1,1520.779297,-2904.444336,130.019699,0,0,0,0,100,0),
+(@WPID,2,1523.576782,-2894.323975,129.760376,0,0,0,0,100,0),
+(@WPID,3,1525.399658,-2887.565674,129.650497,0,0,0,0,100,0),
+(@WPID,4,1527.510254,-2880.891602,127.859444,0,0,0,0,100,0),
+(@WPID,5,1530.465454,-2871.784424,124.707077,0,0,0,0,100,0),
+(@WPID,6,1534.396240,-2865.125244,124.945396,0,0,0,0,100,0),
+(@WPID,7,1541.486206,-2857.385254,129.325195,0,0,0,0,100,0),
+(@WPID,8,1546.340820,-2852.342285,129.804764,0,0,0,0,100,0),
+(@WPID,9,1551.960815,-2845.879395,129.609558,0,0,0,0,100,0),
+(@WPID,10,1547.109009,-2851.705322,129.800903,0,0,0,0,100,0),
+(@WPID,11,1542.209229,-2856.704590,129.541779,0,0,0,0,100,0),
+(@WPID,12,1534.886353,-2864.229248,125.346100,0,0,0,0,100,0),
+(@WPID,13,1530.252686,-2871.376953,124.679268,0,0,0,0,100,0),
+(@WPID,14,1528.427368,-2877.171631,126.128044,0,0,0,0,100,0),
+(@WPID,15,1525.856323,-2887.348633,129.625702,0,0,0,0,100,0),
+(@WPID,16,1523.781738,-2894.034180,129.770584,0,0,0,0,100,0),
+(@WPID,17,1521.690063,-2900.714355,129.564087,0,0,0,0,100,0);
+-- pathing for Lasher CGUID+0
+SET @WPID := (@CGUID+0)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1377.440918,`position_y`=-2831.153320,`position_z`=108.026917,`currentwaypoint`=0 WHERE `guid` = @CGUID+0;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+0;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+0,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1377.440918,-2831.153320,108.026917,0,0,0,0,100,0),
+(@WPID,1,1382.229004,-2827.563721,108.826355,0,0,0,0,100,0),
+(@WPID,2,1391.730957,-2823.097656,109.964256,0,0,0,0,100,0),
+(@WPID,3,1403.629517,-2820.422607,113.992607,0,0,0,0,100,0),
+(@WPID,4,1414.020630,-2821.883545,116.552795,0,0,0,0,100,0),
+(@WPID,5,1425.679565,-2823.227295,118.282143,0,0,0,0,100,0),
+(@WPID,6,1437.257935,-2822.140869,120.388496,0,0,0,0,100,0),
+(@WPID,7,1444.380127,-2817.184570,120.541428,0,0,0,0,100,0),
+(@WPID,8,1439.560669,-2812.109863,120.442703,0,0,0,0,100,0),
+(@WPID,9,1429.911133,-2806.321045,121.627449,0,0,0,0,100,0),
+(@WPID,10,1420.165527,-2802.415283,122.528816,0,0,0,0,100,0),
+(@WPID,11,1406.437866,-2799.521240,123.336349,0,0,0,0,100,0),
+(@WPID,12,1408.145020,-2806.980225,124.640030,0,0,0,0,100,0),
+(@WPID,13,1411.558472,-2817.519531,130.557297,0,0,0,0,100,0),
+(@WPID,14,1414.248291,-2826.448975,134.029892,0,0,0,0,100,0),
+(@WPID,15,1416.987061,-2833.898926,134.158966,0,0,0,0,100,0),
+(@WPID,16,1418.680298,-2841.623291,134.089142,0,0,0,0,100,0),
+(@WPID,17,1417.675415,-2851.522949,133.205948,0,0,0,0,100,0),
+(@WPID,18,1419.567261,-2843.880615,134.064331,0,0,0,0,100,0),
+(@WPID,19,1418.282349,-2835.081543,133.903214,0,0,0,0,100,0),
+(@WPID,20,1413.755615,-2826.055420,133.871857,0,0,0,0,100,0),
+(@WPID,21,1410.707886,-2816.007813,129.677521,0,0,0,0,100,0),
+(@WPID,22,1407.735840,-2804.345947,123.423225,0,0,0,0,100,0),
+(@WPID,23,1411.128418,-2800.364258,123.362190,0,0,0,0,100,0),
+(@WPID,24,1423.222046,-2802.809082,122.215492,0,0,0,0,100,0),
+(@WPID,25,1432.720093,-2807.233643,121.249458,0,0,0,0,100,0),
+(@WPID,26,1442.866333,-2811.426514,120.474632,0,0,0,0,100,0),
+(@WPID,27,1442.986938,-2817.752686,120.496185,0,0,0,0,100,0),
+(@WPID,28,1432.807739,-2820.319336,120.214920,0,0,0,0,100,0),
+(@WPID,29,1422.910767,-2822.051270,118.090607,0,0,0,0,100,0),
+(@WPID,30,1411.085083,-2819.568359,115.681824,0,0,0,0,100,0),
+(@WPID,31,1400.672852,-2819.333740,113.069351,0,0,0,0,100,0),
+(@WPID,32,1392.437012,-2822.626953,110.105415,0,0,0,0,100,0),
+(@WPID,33,1381.681763,-2827.953857,108.544312,0,0,0,0,100,0);
+-- pathing for Lasher CGUID+3
+SET @WPID := (@CGUID+3)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1525.115723,`position_y`=-2850.323975,`position_z`=182.264648,`currentwaypoint`=0 WHERE `guid` = @CGUID+3;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+3;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+3,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1525.115723,-2850.323975,182.264648,0,0,0,0,100,0),
+(@WPID,1,1531.196411,-2840.045166,182.315933,0,0,0,0,100,0),
+(@WPID,2,1540.609741,-2830.145752,182.035614,0,0,0,0,100,0),
+(@WPID,3,1550.371094,-2824.623535,181.914169,0,0,0,0,100,0),
+(@WPID,4,1560.609863,-2825.602783,181.713562,0,0,0,0,100,0),
+(@WPID,5,1573.442139,-2834.195557,181.620041,0,0,0,0,100,0),
+(@WPID,6,1573.676636,-2843.122803,182.236511,0,0,0,0,100,0),
+(@WPID,7,1575.495605,-2852.658936,183.287399,0,0,0,0,100,0),
+(@WPID,8,1573.915161,-2863.642578,182.804459,0,0,0,0,100,0),
+(@WPID,9,1568.231201,-2881.090820,183.118271,0,0,0,0,100,0),
+(@WPID,10,1558.646729,-2884.779541,183.471115,0,0,0,0,100,0),
+(@WPID,11,1549.383301,-2877.014160,182.969772,0,0,0,0,100,0),
+(@WPID,12,1541.126465,-2864.694092,182.265366,0,0,0,0,100,0);
+-- pathing for Felguard CGUID+21 on 
+SET @WPID := (@CGUID+21)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1418.673340,`position_y`=-2849.543701,`position_z`=133.128998,`currentwaypoint`=0 WHERE `guid` = @CGUID+21;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+21;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+21,@WPID);
+DELETE FROM `waypoint_data` WHERE id=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1418.673340,-2849.543701,133.128998,0,0,0,0,100,0),
+(@WPID,1,1419.053223,-2840.867188,133.872528,0,0,0,0,100,0),
+(@WPID,2,1416.689941,-2834.154297,134.137970,0,0,0,0,100,0),
+(@WPID,3,1414.608398,-2827.471436,134.225082,0,0,0,0,100,0),
+(@WPID,4,1412.582764,-2820.770996,132.077194,0,0,0,0,100,0),
+(@WPID,5,1409.088867,-2810.655762,126.843498,0,0,0,0,100,0),
+(@WPID,6,1411.302002,-2817.291016,130.399963,0,0,0,0,100,0),
+(@WPID,7,1413.902222,-2826.605957,134.035446,0,0,0,0,100,0),
+(@WPID,8,1416.532471,-2833.090820,134.308105,0,0,0,0,100,0),
+(@WPID,9,1418.736084,-2841.765137,134.127487,0,0,0,0,100,0);
+-- pathing for Felguard CGUID+22 on 
+SET @WPID := (@CGUID+22)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1461.952393,`position_y`=-2777.578613,`position_z`=154.923584,`currentwaypoint`=0 WHERE `guid` = @CGUID+22;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+22;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+22,@WPID);
+DELETE FROM `waypoint_data` WHERE id=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1461.952393,-2777.578613,154.923584,0,0,0,0,100,0),
+(@WPID,1,1465.133545,-2767.573975,154.857132,0,0,0,0,100,0),
+(@WPID,2,1472.367310,-2758.643555,156.072708,0,0,0,0,100,0),
+(@WPID,3,1482.150879,-2754.233887,156.292877,0,0,0,0,100,0),
+(@WPID,4,1493.999512,-2752.110352,158.143372,0,0,0,0,100,0),
+(@WPID,5,1497.644165,-2753.630127,159.105545,0,0,0,0,100,0),
+(@WPID,6,1500.601318,-2760.660889,160.422638,0,0,0,0,100,0),
+(@WPID,7,1501.830933,-2768.006348,160.797318,0,0,0,0,100,0),
+(@WPID,8,1503.898804,-2771.084473,161.295364,0,0,0,0,100,0),
+(@WPID,9,1509.369507,-2777.201904,163.673080,0,0,0,0,100,0),
+(@WPID,10,1512.175049,-2785.971191,165.083893,0,0,0,0,100,0),
+(@WPID,11,1513.801514,-2792.097412,165.634216,0,0,0,0,100,0),
+(@WPID,12,1518.169800,-2796.058838,165.138840,0,0,0,0,100,0),
+(@WPID,13,1524.349854,-2800.773926,167.720108,0,0,0,0,100,0),
+(@WPID,14,1525.073975,-2806.124023,169.219666,0,0,0,0,100,0),
+(@WPID,15,1522.830933,-2812.213623,170.961700,0,0,0,0,100,0),
+(@WPID,16,1511.613159,-2814.369385,174.126556,0,0,0,0,100,0),
+(@WPID,17,1510.135620,-2812.832031,174.583145,0,0,0,0,100,0),
+(@WPID,18,1507.537842,-2804.130127,177.219849,0,0,0,0,100,0),
+(@WPID,19,1510.847778,-2799.395020,178.859070,0,0,0,0,100,0),
+(@WPID,20,1516.893555,-2797.346436,180.676239,0,0,0,0,100,0),
+(@WPID,21,1522.649170,-2800.572021,182.535858,0,0,0,0,100,0),
+(@WPID,22,1524.135986,-2803.739746,183.545761,0,0,0,0,100,0),
+(@WPID,23,1525.988403,-2809.307129,183.373550,0,0,0,0,100,0),
+(@WPID,24,1531.261963,-2816.573486,183.528900,0,0,0,0,100,0),
+(@WPID,25,1525.760620,-2811.326904,183.373657,0,0,0,0,100,0),
+(@WPID,26,1524.779297,-2808.985840,183.373657,0,0,0,0,100,0),
+(@WPID,27,1523.441772,-2802.632324,183.127411,0,0,0,0,100,0),
+(@WPID,28,1517.132202,-2796.257080,180.712280,0,0,0,0,100,0),
+(@WPID,29,1513.053223,-2798.000732,179.479279,0,0,0,0,100,0),
+(@WPID,30,1507.427002,-2804.455811,177.126724,0,0,0,0,100,0),
+(@WPID,31,1508.335205,-2810.697266,175.403000,0,0,0,0,100,0),
+(@WPID,32,1511.198853,-2812.709717,174.371857,0,0,0,0,100,0),
+(@WPID,33,1517.645874,-2814.697510,172.516037,0,0,0,0,100,0),
+(@WPID,34,1522.476196,-2811.204834,170.816132,0,0,0,0,100,0),
+(@WPID,35,1524.924316,-2804.578857,168.840012,0,0,0,0,100,0),
+(@WPID,36,1522.207397,-2800.135010,167.209824,0,0,0,0,100,0),
+(@WPID,37,1515.743164,-2793.846436,165.489563,0,0,0,0,100,0),
+(@WPID,38,1513.621826,-2789.284180,165.761047,0,0,0,0,100,0),
+(@WPID,39,1511.703735,-2782.553467,165.049728,0,0,0,0,100,0),
+(@WPID,40,1509.514526,-2776.442139,163.672668,0,0,0,0,100,0),
+(@WPID,41,1504.341187,-2768.239258,160.875214,0,0,0,0,100,0),
+(@WPID,42,1499.623779,-2758.871826,160.065994,0,0,0,0,100,0),
+(@WPID,43,1492.976929,-2750.636963,158.080460,0,0,0,0,100,0),
+(@WPID,44,1487.860107,-2750.589600,157.576538,0,0,0,0,100,0),
+(@WPID,45,1478.629761,-2755.590332,155.843948,0,0,0,0,100,0),
+(@WPID,46,1469.609863,-2761.452148,155.947708,0,0,0,0,100,0),
+(@WPID,47,1465.007324,-2767.513184,154.872833,0,0,0,0,100,0),
+(@WPID,48,1462.420410,-2775.385254,155.379456,0,0,0,0,100,0);
+-- pathing for Felguard CGUID+23 on 
+SET @WPID := (@CGUID+23)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1529.591064,`position_y`=-2869.343506,`position_z`=124.593094,`currentwaypoint`=0 WHERE `guid` = @CGUID+23;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+23;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+23,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1529.591064,-2869.343506,124.593094,0,0,0,0,100,0),
+(@WPID,1,1521.646606,-2867.309082,125.010071,0,0,0,0,100,0),
+(@WPID,2,1513.953125,-2865.164551,121.647118,0,0,0,0,100,0),
+(@WPID,3,1505.404785,-2862.673584,118.801720,0,0,0,0,100,0),
+(@WPID,4,1503.566650,-2868.243408,116.714241,0,0,0,0,100,0),
+(@WPID,5,1502.711060,-2874.966064,113.316238,0,0,0,0,100,0),
+(@WPID,6,1512.905396,-2877.691650,111.030319,0,0,0,0,100,0),
+(@WPID,7,1521.637085,-2882.186279,111.867195,0,0,0,0,100,0),
+(@WPID,8,1529.314087,-2885.161865,111.463722,0,0,0,0,100,0),
+(@WPID,9,1539.290527,-2881.081299,112.201981,0,0,0,0,100,0),
+(@WPID,10,1543.733276,-2870.510986,112.591675,0,0,0,0,100,0),
+(@WPID,11,1538.328125,-2855.836182,111.515526,0,0,0,0,100,0),
+(@WPID,12,1527.172241,-2852.837158,111.962715,0,0,0,0,100,0),
+(@WPID,13,1519.438599,-2860.600342,111.478615,0,0,0,0,100,0),
+(@WPID,14,1511.972412,-2870.450684,111.600555,0,0,0,0,100,0),
+(@WPID,15,1507.419556,-2876.432617,112.032738,0,0,0,0,100,0),
+(@WPID,16,1504.038330,-2877.903809,112.833618,0,0,0,0,100,0),
+(@WPID,17,1502.584595,-2873.350342,113.795448,0,0,0,0,100,0),
+(@WPID,18,1505.001221,-2866.783203,117.746407,0,0,0,0,100,0),
+(@WPID,19,1506.119873,-2863.151855,118.807045,0,0,0,0,100,0),
+(@WPID,20,1513.878296,-2865.620605,121.673973,0,0,0,0,100,0),
+(@WPID,21,1527.201050,-2868.420166,124.730896,0,0,0,0,100,0);
+-- pathing for Felguard CGUID+24 on 
+SET @WPID := (@CGUID+24)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1682.383301,`position_y`=-3116.470459,`position_z`=89.554993,`currentwaypoint`=0 WHERE `guid` = @CGUID+24;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+24;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+24,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1682.383301,-3116.470459,89.554993,0,0,0,0,100,0),
+(@WPID,1,1674.620605,-3109.400146,88.976250,0,0,0,0,100,0),
+(@WPID,2,1658.956787,-3095.415039,89.265846,0,0,0,0,100,0),
+(@WPID,3,1653.566772,-3084.082275,88.686615,0,0,0,0,100,0),
+(@WPID,4,1646.295532,-3068.169434,88.805115,0,0,0,0,100,0),
+(@WPID,5,1636.780884,-3059.662109,88.973808,0,0,0,0,100,0),
+(@WPID,6,1624.316528,-3060.500488,89.142319,0,0,0,0,100,0),
+(@WPID,7,1617.466064,-3070.297119,89.184601,0,0,0,0,100,0),
+(@WPID,8,1617.102051,-3082.547607,89.317902,0,0,0,0,100,0),
+(@WPID,9,1627.488770,-3091.394531,88.658096,0,0,0,0,100,0),
+(@WPID,10,1637.340332,-3094.989258,88.381920,0,0,0,0,100,0),
+(@WPID,11,1650.978027,-3098.081299,88.389397,0,0,0,0,100,0),
+(@WPID,12,1665.720093,-3104.706787,88.814766,0,0,0,0,100,0);
+-- pathing for Felguard CGUID+25 on 
+SET @WPID := (@CGUID+25)*10;
+UPDATE `creature` SET `MovementType`=2,`position_x`=1606.020386,`position_y`=-2979.190918,`position_z`=182.066589,`currentwaypoint`=0 WHERE `guid` = @CGUID+25;
+DELETE FROM `creature_addon` WHERE `guid` = @CGUID+25;
+INSERT INTO `creature_addon` (`guid`,`path_id`) VALUES (@CGUID+25,@WPID);
+DELETE FROM `waypoint_data` WHERE `id`=@WPID;
+INSERT INTO `waypoint_data` (`id`,`point`,`position_x`,`position_y`,`position_z`,`orientation`,`delay`,`move_flag`,`action`,`action_chance`,`wpguid`) VALUES
+(@WPID,0,1606.020386,-2979.190918,182.066589,0,0,0,0,100,0),
+(@WPID,1,1592.612793,-2967.980469,181.734604,0,0,0,0,100,0),
+(@WPID,2,1584.635986,-2961.699951,182.099609,0,0,0,0,100,0),
+(@WPID,3,1576.772339,-2950.720215,182.331390,0,0,0,0,100,0),
+(@WPID,4,1570.186157,-2937.653564,181.647690,0,0,0,0,100,0),
+(@WPID,5,1569.346313,-2915.366455,181.606720,0,0,0,0,100,0),
+(@WPID,6,1567.291138,-2897.670410,181.974411,0,0,0,0,100,0),
+(@WPID,7,1561.564575,-2883.124512,183.536499,0,0,0,0,100,0),
+(@WPID,8,1554.509888,-2870.604492,182.784332,0,0,0,0,100,0),
+(@WPID,9,1559.559570,-2883.650391,183.535065,0,0,0,0,100,0),
+(@WPID,10,1565.662109,-2900.051514,181.913925,0,0,0,0,100,0),
+(@WPID,11,1570.201538,-2913.283936,181.571747,0,0,0,0,100,0),
+(@WPID,12,1573.806274,-2932.618896,181.725723,0,0,0,0,100,0),
+(@WPID,13,1579.702026,-2949.056885,182.503983,0,0,0,0,100,0),
+(@WPID,14,1586.535400,-2960.601807,182.164642,0,0,0,0,100,0),
+(@WPID,15,1595.999878,-2972.899414,181.872986,0,0,0,0,100,0);
+DELETE FROM `spell_target_position` WHERE `id`=53821;
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(53821, 609, 2359.64, -5662.41, 382.261, 0.596899); -- Teach: Death Gate
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=34852;
+-- The Forging of Quel'Serrar (7509)
+UPDATE `quest_template` SET `RequiredClasses` = 3 WHERE `Id` = 7509; -- Warrior & Paladin
+UPDATE `creature_template` SET `AIName`='SmartAI',`ScriptName`='' WHERE `entry`=28877;
+
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=28877;
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=28877 AND `source_type`=0;
+INSERT INTO `smart_scripts`(`entryorguid`,`id`,`link`,`event_type`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`target_type`,`comment`) VALUES
+(28877,0,0,0,3000,5000,3000,5000,11,32018,2,'Stormwatcher - In combat - Cast Call Lightning'),
+(28877,1,2,8,53145,0,0,0,11,53162,1,'Stormwatcher - On spellhit - Summon Stormwatchers Head'),
+(28877,2,0,61,0,0,0,0,41,0,1,'Stormwatcher - Linked with id 1 - Despawn');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceEntry`=53145;
+INSERT INTO `conditions`(`SourceTypeOrReferenceId`,`SourceEntry`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`NegativeCondition`,`Comment`) VALUES
+(17,53145,31,1,3,28877,0,'Target needs to be Stormwatcher'),
+(17,53145,36,1,0,0,1,'Target needs to be dead');
+DELETE FROM `spell_target_position` WHERE `id`=71436;
+INSERT INTO `spell_target_position`(`id`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation`) VALUE
+(71436,-14459.48,492.46,15.12,3.21);
+SET @GOSSIP := 5750;
+SET @LOTHOS := 14387;
+
+UPDATE `gossip_menu_option` SET `option_id`=1, `npc_option_npcflag`=1 WHERE `menu_id`=@GOSSIP; -- 4.3.4 (they are 0)
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@LOTHOS AND `source_type`=0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(@LOTHOS, 0, 0, 0, 62, 0, 100, 0, @GOSSIP, 0, 0, 0, 11, 25139, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 'Lothos Riftwaker - On Gossip select - Teleport player');
+
+DELETE FROM `spell_target_position` WHERE `id`=25139;
+INSERT INTO `spell_target_position` (`id`, `target_map`, `target_position_x`, `target_position_y`, `target_position_z`, `target_orientation`) VALUES
+(25139, 409, 1080, -483, -108, 1); -- Teleport to Molten Core DND
+SET @GUID := 61994;
+
+SET @NPC_ELM_BUNNY := 23837;
+SET @NPC_ELM_BUNNY_LARGE := 24110;
+SET @NPC_ELM_BUNNY_LARGE_001 := 26298;
+SET @NPC_AKALI := 28952;
+SET @NPC_AKALI_SUBDUER := 28988;
+SET @NPC_AKALI_PROPHET := 28996;
+
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_AKALI,@NPC_AKALI_PROPHET);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(@NPC_AKALI,0,0,'I''M FREE, LITTLE DRAKKARI. TIME TO PAY FOR YOUR MANY TRESSPASSES!',14,0,100,33,0,771,'Akali'),
+(@NPC_AKALI_PROPHET,0,0,'ENOUGH!',14,0,100,15,0,0,'Prophet of Akali'),
+(@NPC_AKALI_PROPHET,1,0,'And now, Akali, my master will have your blood and I will take some of your power as well!',14,0,100,397,0,0,'Prophet of Akali'),
+(@NPC_AKALI_PROPHET,2,0,'It is done. Run back to your masters. Run back to Har''koa. Tell her that I am coming!',14,0,100,14,0,0,'Prophet of Akali');
+
+UPDATE `creature_model_info` SET `bounding_radius`=1.041666, `combat_reach`=4.5 WHERE `modelid`=25839;
+
+UPDATE `creature_template` SET `rank`=1, `unit_flags`=33536, `dmg_multiplier`=10 WHERE `entry`=@NPC_AKALI;
+UPDATE `creature_template` SET `AIName`='SmartAI' WHERE `entry` IN (@NPC_ELM_BUNNY_LARGE,@NPC_AKALI,@NPC_AKALI_SUBDUER);
+UPDATE `creature_template` SET `inhabitType`=4 WHERE `entry` IN (@NPC_ELM_BUNNY_LARGE,@NPC_ELM_BUNNY_LARGE_001);
+UPDATE `creature_template` SET `faction_A`=2069, `faction_H`=2069, `unit_flags`=33536, `AIName`='SmartAI' WHERE `entry`=@NPC_AKALI_PROPHET;
+
+UPDATE `creature` SET `spawndist`=0, `MovementType`=0 WHERE `guid` IN (100333,100334,100335,100336);
+UPDATE `creature` SET `modelid`=21999 WHERE `id`=@NPC_ELM_BUNNY_LARGE_001;
+DELETE FROM `creature` WHERE `guid` IN (@GUID+0,@GUID+1,@GUID+2);
+INSERT INTO `creature` (`guid`,`id`,`map`,`spawnMask`,`phaseMask`,`modelid`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`MovementType`) VALUES
+(@GUID+0,@NPC_ELM_BUNNY_LARGE_001,571,1,1,0,6863.839,-4503.26,443.1838,3.926991,300,0,0),
+(@GUID+1,@NPC_ELM_BUNNY_LARGE_001,571,1,1,0,6862.341,-4549.724,443.0588,2.286381,300,0,0),
+(@GUID+2,@NPC_ELM_BUNNY,571,1,1,11686,6829.338,-4525.157,442.068,3.420845,300,0,0);
+
+DELETE FROM `creature_addon` WHERE `guid` IN (100333,100334,100335,100336);
+INSERT INTO `creature_addon` (`guid`,`path_id`,`mount`,`bytes1`,`bytes2`,`emote`,`auras`) VALUES
+(100333,0,0,0,1,0,'52855'),
+(100334,0,0,0,1,0,'52855'),
+(100335,0,0,0,1,0,'52855'),
+(100336,0,0,0,1,0,'52855');
+
+DELETE FROM `creature_summon_groups` WHERE `summonerId`=@NPC_AKALI;
+INSERT INTO `creature_summon_groups` (`summonerId`,`summonerType`,`groupId`,`entry`,`position_x`,`position_y`,`position_z`,`orientation`,`summonType`,`summonTime`) VALUES
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6810.893,-4592.669,440.6777,1.299272,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6806.189,-4595.943,440.6777,1.250024,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6822.087,-4599.02,440.6777,1.469111,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6797.534,-4594.82,440.685,1.137566,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6827.478,-4601.454,440.6777,1.543024,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6817.193,-4601.688,440.6777,1.409492,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6834.823,-4602.401,440.6777,1.638796,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6805.295,-4601.961,440.6777,1.263096,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6765.525,-4543.851,440.6777,0.2786701,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6764.082,-4549.868,440.6777,0.3558455,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6765.489,-4564.422,440.6777,0.5454721,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6763.994,-4537.706,440.6782,0.1836674,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6826.999,-4607.5,440.6777,1.539239,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6763.607,-4558.375,440.6785,0.4619856,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6796.735,-4602.545,441.0136,1.167641,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6832.644,-4607.751,440.6777,1.607957,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6810.649,-4609.51,440.6977,1.349023,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6821.64,-4610.604,440.6777,1.477666,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6759.292,-4545.87,440.828,0.2817687,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6758.293,-4555.154,440.7154,0.393915,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6758.89,-4536.409,441.8029,0.152804,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6759.161,-4564.057,440.7889,0.5006734,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6800.313,-4611.478,442.0841,1.242545,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6755.442,-4540.723,441.9008,0.2022173,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6756.493,-4531.063,443.5255,0.07566226,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6754.277,-4551.221,440.8657,0.3288565,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6815.617,-4616.651,440.7146,1.418685,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6753.755,-4559.585,441.2291,0.4221908,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6750.038,-4544.226,441.7151,0.2309312,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6748.174,-4550.871,441.9503,0.301857,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6901.166,-4516.716,440.6777,3.263991,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6904.161,-4525.245,440.6777,3.145305,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6843.423,-4464.692,440.6777,4.488739,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6894.436,-4500.116,440.6777,3.514982,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6908.481,-4530.965,440.6777,3.0727,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6851.518,-4464.19,440.6777,4.368972,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6903.379,-4508.444,440.6777,3.369018,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6862.596,-4466.07,440.6777,4.205543,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6907.354,-4513.603,440.6777,3.293668,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6847.208,-4459.859,440.6799,4.450202,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6901.388,-4500.221,440.6777,3.480376,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6910.758,-4518.518,440.6777,3.22766,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6877.528,-4472.05,440.6777,3.981474,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6906.053,-4501.915,440.6777,3.441033,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6855.152,-4457.84,440.2045,4.351227,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6903.093,-4495.178,440.6777,3.533091,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6871.4,-4463.921,440.6777,4.11605,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6911.422,-4507.554,440.6777,3.357718,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6916.012,-4518.927,440.6807,3.217745,3,100000),
+(@NPC_AKALI,0,1,@NPC_AKALI_SUBDUER,6864.756,-4459.202,440.6777,4.224802,3,100000);
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (52816,52833,52834,52837,52838,52844,52867,52884);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(13,1,52816,0,0,31,0,3,@NPC_ELM_BUNNY_LARGE,0,0,0,'','Spell Akali Chain Anchor On Disturb targets ELM General Purpose Bunny Large'),
+(13,1,52816,0,1,31,0,3,@NPC_ELM_BUNNY_LARGE_001,0,0,0,'','Spell Akali Chain Anchor On Disturb targets ELM General Purpose Bunny Large'),
+(13,1,52833,0,0,31,0,3,@NPC_AKALI,0,0,0,'','Spell Akali''s Chains - Left Front Paw targets Akali'),
+(13,1,52834,0,0,31,0,3,@NPC_AKALI,0,0,0,'','Spell Akali''s Chains - Right Front Paw targets Akali'),
+(13,1,52837,0,0,31,0,3,@NPC_ELM_BUNNY_LARGE_001,0,0,0,'','Spell Akali''s Chains - Right Rear Paw targets ELM General Purpose Bunny Large'),
+(13,1,52837,0,0,35,0,1,5,3,0,0,'','Spell Akali''s Chains - Right Rear Paw target distance must be 5y or more'),
+(13,1,52838,0,0,31,0,3,@NPC_ELM_BUNNY_LARGE_001,0,0,0,'','Spell Akali''s Chains - Left Rear Paw targets ELM General Purpose Bunny Large'),
+(13,1,52838,0,0,35,0,1,5,3,0,0,'','Spell Akali''s Chains - Left Rear Paw target distance must be 5y or more'),
+(13,1,52844,0,0,31,0,3,@NPC_AKALI,0,0,0,'','Spell Akali''s Chains - Rear Paw Invisible Stun Channel targets Akali'),
+(13,1,52867,0,0,31,0,3,@NPC_AKALI_SUBDUER,0,0,0,'','Spell Knockback targets Akali Subduer'),
+(13,1,52884,0,0,31,0,3,@NPC_AKALI,0,0,0,'','Spell Drain Power targets Akali');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger`=52860;
+INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment`) VALUES
+(52860,45254,1,'On spellhit Rampage: Drain Power Effect - Spellcast Suicide');
+
+DELETE FROM `spell_dbc` WHERE `Id`=52867;
+INSERT INTO `spell_dbc` (`Id`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`AttributesEx7`,`Stances`,`StancesNot`,`Targets`,`CastingTimeIndex`,`AuraInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`RangeIndex`,`StackAmount`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectBasePoints1`,`EffectBasePoints2`,`EffectBasePoints3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectMiscValueB1`,`EffectMiscValueB2`,`EffectMiscValueB3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectSpellClassMaskA1`,`EffectSpellClassMaskA2`,`EffectSpellClassMaskA3`,`EffectSpellClassMaskB1`,`EffectSpellClassMaskB2`,`EffectSpellClassMaskB3`,`EffectSpellClassMaskC1`,`EffectSpellClassMaskC2`,`EffectSpellClassMaskC3`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags1`,`SpellFamilyFlags2`,`SpellFamilyFlags3`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`AreaGroupId`,`SchoolMask`,`Comment`) VALUES
+(52867,0,0,538968320,525448,67108868,64,2177,0,512,0,0,0,0,1,0,0,101,0,0,0,0,0,1,0,-1,0,0,98,0,0,1,0,0,0,0,0,199,0,0,0,0,0,22,0,0,7,0,0,10,0,0,0,0,0,0,0,0,0,0,0,150,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'Knockback');
+
+DELETE FROM `creature_ai_scripts` WHERE `creature_id`=28575;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (-100333,-100334,-100335,-100336,-113548,-113549,-113550,-113551,-(@GUID+0),-(@GUID+1),-(@GUID+2),@NPC_AKALI,@NPC_AKALI_SUBDUER,@NPC_AKALI_PROPHET) AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_AKALI*100+0,@NPC_AKALI*100+1,@NPC_AKALI_SUBDUER*100,@NPC_AKALI_PROPHET*100+0,@NPC_AKALI_PROPHET*100+1) AND `source_type`=9;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(-100333,0,0,1,8,0,100,0,52816,0,0,0,45,0,1,0,0,0,0,10,@GUID+2,@NPC_ELM_BUNNY,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Set data 0 1 ELM General Purpose Bunny'),
+(-100333,0,1,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-100334,0,0,1,8,0,100,0,52816,0,0,0,45,0,1,0,0,0,0,10,@GUID+2,@NPC_ELM_BUNNY,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Set data 0 1 ELM General Purpose Bunny'),
+(-100334,0,1,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-100335,0,0,1,8,0,100,0,52816,0,0,0,45,0,1,0,0,0,0,10,@GUID+2,@NPC_ELM_BUNNY,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Set data 0 1 ELM General Purpose Bunny'),
+(-100335,0,1,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-100336,0,0,1,8,0,100,0,52816,0,0,0,45,0,1,0,0,0,0,10,@GUID+2,@NPC_ELM_BUNNY,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Set data 0 1 ELM General Purpose Bunny'),
+(-100336,0,1,0,61,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+
+(-113548,0,0,0,38,0,100,0,0,1,0,0,11,52833,0,0,0,0,0,10,98159,@NPC_AKALI,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Akali''s Chains - Left Front Paw'),
+(-113548,0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-113549,0,0,0,38,0,100,0,0,1,0,0,11,52834,0,0,0,0,0,10,98159,@NPC_AKALI,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Akali''s Chains - Right Front Paw'),
+(-113549,0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-113550,0,0,0,38,0,100,0,0,1,0,0,11,52844,0,0,0,0,0,10,98159,@NPC_AKALI,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Rear Paw Invisible Stun Channel'),
+(-113550,0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-113551,0,0,0,38,0,100,0,0,1,0,0,11,52844,0,0,0,0,0,10,98159,@NPC_AKALI,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Rear Paw Invisible Stun Channel'),
+(-113551,0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-(@GUID+0),0,0,0,38,0,100,0,0,1,0,0,11,52837,0,0,0,0,0,10,113478,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Akali''s Chains - Right Rear Paw'),
+(-(@GUID+0),0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+(-(@GUID+1),0,0,0,38,0,100,0,0,1,0,0,11,52838,0,0,0,0,0,10,113479,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Spellcast Akali''s Chains - Left Rear Paw'),
+(-(@GUID+1),0,1,0,8,0,100,0,52816,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On spellhit Chain Anchor On Disturb - Despawn'),
+
+(-(@GUID+2),0,0,1,1,8,100,0,0,0,500,500,22,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On update OOC (phase 4) - Set event phase 0'),
+(-(@GUID+2),0,1,0,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,19,@NPC_AKALI,30,0,0,0,0,0, 'ELM General Purpose Bunny - On update OOC (phase 4) - Set data 0 1 Akali'),
+(-(@GUID+2),0,2,0,38,0,100,0,0,1,0,0,23,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'ELM General Purpose Bunny - On data 0 1 set - Increment event phase'),
+
+(@NPC_AKALI,0,0,0,38,0,100,0,0,1,0,0,80,@NPC_AKALI*100+0,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali - On data 0 1 set - Run script 0'),
+(@NPC_AKALI,0,1,2,8,0,100,0,52859,0,0,0,102,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali - On spellhit Submission - Stop regen health'),
+(@NPC_AKALI,0,2,3,61,0,100,0,0,0,0,0,18,512,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali - On spellhit Submission - Set unit_flags IMMUNE_TO_NPC'),
+(@NPC_AKALI,0,3,0,61,0,100,0,0,0,0,0,69,1,0,0,0,0,0,8,0,0,0,6829.587,-4525.521,442.068,0, 'Akali - On spellhit Submission - Move to position'),
+(@NPC_AKALI,0,4,0,34,0,100,0,0,1,0,0,80,@NPC_AKALI*100+1,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali - On movement inform - Run script 1'),
+(@NPC_AKALI,0,5,0,9,0,100,0,0,80,10000,10000,11,52856,0,0,0,0,0,6,0,0,0,0,0,0,0, 'Akali - On target range 10-80y - Spellcast Charge'),
+(@NPC_AKALI,0,6,7,11,0,100,0,0,0,0,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali - On spawn - Set faction default'),
+(@NPC_AKALI,0,7,8,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,113548,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,8,9,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,113549,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,9,10,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,113550,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,10,11,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,113551,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,11,12,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,@GUID+0,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,12,13,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,@GUID+1,@NPC_ELM_BUNNY_LARGE_001,0,0,0,0,0, 'Akali - On spawn - Set data 0 1 ELM General Purpose Bunny'),
+(@NPC_AKALI,0,13,14,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101661,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,14,15,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101662,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,15,16,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101663,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,16,17,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101665,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,17,18,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101666,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,18,19,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101667,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,19,20,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101668,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,20,21,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,101669,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,21,22,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203572,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,22,23,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203573,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,23,24,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203574,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,24,25,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203575,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,25,26,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203576,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+(@NPC_AKALI,0,26,0,61,0,100,0,0,0,0,0,45,0,1,0,0,0,0,10,203577,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script - On spawn - Set data 0 1 Akali Subduer'),
+
+(@NPC_AKALI_SUBDUER,0,0,0,2,0,100,0,0,50,90000,90000,11,57843,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On health below 50% - Spellcast Mojo Empowered Fire Ward'),
+(@NPC_AKALI_SUBDUER,0,1,0,9,0,100,0,25,35,4000,7000,11,9053,0,0,0,0,0,2,0,0,0,0,0,0,0, 'Akali Subduer - On target range 0-35y - Spellcast Fireball'),
+(@NPC_AKALI_SUBDUER,0,2,0,9,0,100,0,0,25,3000,5000,11,20801,0,0,0,0,0,2,0,0,0,0,0,0,0, 'Akali Subduer - On target range 0-35y - Spellcast Firebolt'),
+(@NPC_AKALI_SUBDUER,0,3,4,54,0,100,0,0,0,0,0,2,2102,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - Just summoned - Set faction'),
+(@NPC_AKALI_SUBDUER,0,4,5,61,0,100,0,0,0,0,0,18,256,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - Just summoned - Set unit_flags IMMUNE_TO_PC'),
+(@NPC_AKALI_SUBDUER,0,5,6,61,0,100,0,0,0,0,0,59,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - Just summoned - Set run'),
+(@NPC_AKALI_SUBDUER,0,6,0,61,0,100,0,0,0,0,0,46,60,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - Just summoned - Move forward'),
+(@NPC_AKALI_SUBDUER,0,7,8,31,0,100,0,52859,0,0,0,101,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On target spellhit Submission - Set homeposition'),
+(@NPC_AKALI_SUBDUER,0,8,0,61,0,100,0,0,0,0,0,24,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On target spellhit Submission - Evade'),
+(@NPC_AKALI_SUBDUER,0,9,10,38,0,100,0,0,3,0,0,92,0,0,1,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 3 set - Interrupt spellcast'),
+(@NPC_AKALI_SUBDUER,0,10,0,61,0,100,0,0,0,0,0,20,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 3 set - Stop combat'),
+(@NPC_AKALI_SUBDUER,0,11,0,38,0,100,0,0,1,0,0,11,45579,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 1 set - Spellcast Fire Channeling'),
+(@NPC_AKALI_SUBDUER,0,12,13,38,0,100,0,0,2,0,0,2,2102,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 2 set - Set faction'),
+(@NPC_AKALI_SUBDUER,0,13,0,61,0,100,0,0,0,0,0,92,0,45579,1,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 2 set - Interrupt spellcast'),
+(@NPC_AKALI_SUBDUER,0,14,0,38,0,100,0,0,4,0,0,80,@NPC_AKALI_SUBDUER*100,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer - On data 0 4 set - Run script'),
+
+(@NPC_AKALI_PROPHET,0,0,1,54,0,100,0,0,0,0,0,11,34427,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali - Just summoned - Spellcast Ethereal Teleport'),
+(@NPC_AKALI_PROPHET,0,1,0,61,0,100,0,0,0,0,0,1,0,2300,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali - Just summoned - Say line'),
+(@NPC_AKALI_PROPHET,0,2,3,52,0,100,0,0,@NPC_AKALI_PROPHET,0,0,59,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali - On text over - Set run'),
+(@NPC_AKALI_PROPHET,0,3,0,61,0,100,0,0,0,0,0,69,1,0,0,0,0,0,8,0,0,0,6869.146,-4558.086,443.3982,0, 'Prophet of Akali - On text over - Move to position'),
+(@NPC_AKALI_PROPHET,0,4,5,34,0,100,0,0,1,0,0,97,30.7787,0,0,0,0,0,1,0,0,0,6856.265,-4543.67,441.9847,0, 'Prophet of Akali - On movement inform - Jump to position'),
+(@NPC_AKALI_PROPHET,0,5,0,61,0,100,0,0,0,0,0,80,@NPC_AKALI_PROPHET*100+0,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali - On WP 1 reached - Run script 0'),
+(@NPC_AKALI_PROPHET,0,6,0,38,0,100,0,0,1,0,0,80,@NPC_AKALI_PROPHET*100+1,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali - On data 0 1 set - Run script 1'),
+
+(@NPC_AKALI*100,9,0,0,0,0,100,0,2000,2000,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali script 0 - Say line'),
+(@NPC_AKALI*100,9,1,0,0,0,100,0,0,0,0,0,15,12721,0,0,0,0,0,18,50,0,0,0,0,0,0, 'Akali script 0 - Quest credit'),
+(@NPC_AKALI*100,9,2,0,0,0,100,0,0,0,0,0,107,1,0,0,0,0,0,0,0,0,0,0,0,0,0, 'Akali script 0 - Summon creature group'),
+(@NPC_AKALI*100,9,3,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101661,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,4,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101662,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,5,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101663,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,6,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101665,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,7,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101666,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,8,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101667,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,9,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101668,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,10,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,101669,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,11,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203572,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,12,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203573,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,13,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203574,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,14,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203575,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,15,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203576,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,16,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,10,203577,@NPC_AKALI_SUBDUER,0,0,0,0,0, 'Akali script 0 - Set data 0 2 Akali Subduer'),
+(@NPC_AKALI*100,9,17,0,0,0,100,0,4600,4600,0,0,19,512,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali script - Remove unit_flags IMMUNE_TO_NPC'),
+(@NPC_AKALI*100,9,18,0,0,0,100,0,55000,55000,0,0,12,@NPC_AKALI_PROPHET,8,0,0,0,0,8,0,0,0,6882.029,-4571.001,442.3118,2.373648, 'Akali script - Summon Akali Prophet'),
+
+(@NPC_AKALI*100+1,9,0,0,0,0,100,0,0,0,0,0,2,35,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali script 1 - Set faction'),
+(@NPC_AKALI*100+1,9,1,0,0,0,100,0,0,0,0,0,24,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali script 1 - Evade'),
+(@NPC_AKALI*100+1,9,2,0,0,0,100,0,200,200,0,0,66,0,0,0,0,0,0,19,@NPC_AKALI_PROPHET,100,0,0,0,0,0, 'Akali script 1 - Turn to'),
+(@NPC_AKALI*100+1,9,3,0,0,0,100,0,0,0,0,0,45,0,1,0,0,0,0,19,@NPC_AKALI_PROPHET,100,0,0,0,0,0, 'Akali script 1 - Set data 0 1 Prophet of Akali'),
+
+(@NPC_AKALI_SUBDUER*100,9,0,0,0,0,100,0,0,0,0,0,66,0,0,0,0,0,0,19,@NPC_AKALI_PROPHET,100,0,0,0,0,0, 'Akali Subduer script - Turn to'),
+(@NPC_AKALI_SUBDUER*100,9,1,0,0,0,100,0,10000,10000,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,2,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,3,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,4,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,5,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,6,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,7,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,8,0,0,0,100,0,1000,1200,0,0,5,71,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Play emote'),
+(@NPC_AKALI_SUBDUER*100,9,9,0,0,0,100,0,1000,1200,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akali Subduer script - Despawn'),
+
+(@NPC_AKALI_PROPHET*100+0,9,0,0,0,0,100,0,0,0,0,0,45,0,3,0,0,0,0,9,@NPC_AKALI_SUBDUER,0,100,0,0,0,0, 'Prophet of Akali script - Set data 0 4 Akali Subduer'), 
+(@NPC_AKALI_PROPHET*100+0,9,1,0,0,0,100,0,1000,1000,0,0,11,52859,0,0,0,0,0,19,@NPC_AKALI,100,0,0,0,0,0, 'Prophet of Akali script - Spellcast Submission'), 
+
+(@NPC_AKALI_PROPHET*100+1,9,0,0,0,0,100,0,2000,2000,0,0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali script - Say line'),
+(@NPC_AKALI_PROPHET*100+1,9,1,0,0,0,100,0,4700,4700,0,0,11,52884,0,0,0,0,0,19,@NPC_AKALI,50,0,0,0,0,0, 'Prophet of Akali script - Spellcast Drain Power'),
+(@NPC_AKALI_PROPHET*100+1,9,2,0,0,0,100,0,0,0,0,0,45,0,4,0,0,0,0,9,@NPC_AKALI_SUBDUER,0,100,0,0,0,0, 'Prophet of Akali script - Set data 0 3 Akali Subduer'),
+(@NPC_AKALI_PROPHET*100+1,9,3,0,0,0,100,0,11600,11600,0,0,1,2,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali script - Say line'),
+(@NPC_AKALI_PROPHET*100+1,9,4,0,0,0,100,0,3500,3500,0,0,11,34427,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali script - Spellcast Ethereal Teleport'),
+(@NPC_AKALI_PROPHET*100+1,9,5,0,0,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Prophet of Akali script - Despawn');
+﻿SET @NPC_ELM_BUNNY := 23837;
+SET @NPC_HARKOA := 28401;
+SET @NPC_KHUFU := 28479;
+SET @NPC_AKILZON := 29021;
+SET @NPC_HALAZZI := 29022;
+SET @NPC_JANALAI := 29023;
+SET @NPC_NALORAKK := 29024;
+
+DELETE FROM `creature_text` WHERE `entry`=@NPC_HARKOA AND `groupid`=1;
+DELETE FROM `creature_text` WHERE `entry` IN (@NPC_AKILZON,@NPC_HALAZZI,@NPC_JANALAI,@NPC_NALORAKK);
+INSERT INTO `creature_text` (`entry`,`groupid`,`id`,`text`,`type`,`language`,`probability`,`emote`,`duration`,`sound`,`comment`) VALUES
+(@NPC_HARKOA,1,0,'No, not Akali too!',15,0,100,0,0,0,'Har''koa'),
+(@NPC_AKILZON,0,0,'And yet we see only doom in your future. It is your destiny that you do this, $N, but we fear that the prophet is too powerful for you and your friends. Still, you must try.',12,0,100,0,0,12196,'Akil''zon'),
+(@NPC_HALAZZI,0,0,'Once more we hear your call, Khufu. We have wisdom for you and $N. You face great peril and must act swiftly or you all and Har''koa will die.',12,0,100,0,0,643,'Halazzi'),
+(@NPC_JANALAI,0,0,'The gusty essence of deceased Quetz''lun''s wardens must be gathered to draw him near. To Har''koa must both of these rarities be delivered.',12,0,100,0,0,9919,'Jana''lai'),
+(@NPC_NALORAKK,0,0,'The unblemished heart of the guardian must be secured to show defiance and strength. Jealous Zim''Rhuk keeps those who harbor it.',12,0,100,0,0,473,'Nalorakk');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=13 AND `SourceEntry` IN (52934,52935,52936,52937);
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceGroup`,`SourceEntry`,`SourceId`,`ElseGroup`,`ConditionTypeOrReference`,`ConditionTarget`,`ConditionValue1`,`ConditionValue2`,`ConditionValue3`,`NegativeCondition`,`ErrorTextId`,`ScriptName`,`Comment`) VALUES
+(13,1,52934,0,0,31,0,3,@NPC_ELM_BUNNY,0,0,0,'','Spell Rampage: Summon Akil''zon targets ELM General Purpose Bunny'),
+(13,1,52934,0,0,29,0,28527,10,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 35y from Chronicler To''kini'),
+(13,1,52934,0,0,29,0,28527,15,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 35y from Chronicler To''kini'),
+(13,1,52934,0,0,29,0,28527,30,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 35y from Chronicler To''kini'),
+(13,1,52934,0,0,29,0,28527,35,0,0,0,'','Spell Rampage: Summon Akil''zon target needs to be 35y from Chronicler To''kini'),
+(13,1,52935,0,0,31,0,3,@NPC_ELM_BUNNY,0,0,0,'','Spell Rampage: Summon Akil''zon targets ELM General Purpose Bunny'),
+(13,1,52935,0,0,29,0,28527,10,0,0,0,'','Spell Rampage: Summon Akil''zon target needs to be 10y from Chronicler To''kini'),
+(13,1,52936,0,0,31,0,3,@NPC_ELM_BUNNY,0,0,0,'','Spell Rampage: Summon Akil''zon targets ELM General Purpose Bunny'),
+(13,1,52936,0,0,29,0,28527,10,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 15y from Chronicler To''kini'),
+(13,1,52936,0,0,29,0,28527,15,0,0,0,'','Spell Rampage: Summon Akil''zon target needs to be 15y from Chronicler To''kini'),
+(13,1,52937,0,0,31,0,3,@NPC_ELM_BUNNY,0,0,0,'','Spell Rampage: Summon Akil''zon targets ELM General Purpose Bunny'),
+(13,1,52937,0,0,29,0,28527,10,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 30y from Chronicler To''kini'),
+(13,1,52937,0,0,29,0,28527,15,0,1,0,'','Spell Rampage: Summon Akil''zon target needs to be 30y from Chronicler To''kini'),
+(13,1,52937,0,0,29,0,28527,30,0,0,0,'','Spell Rampage: Summon Akil''zon target needs to be 30y from Chronicler To''kini');
+
+DELETE FROM `spell_scripts` WHERE `id`=52933;
+INSERT INTO `spell_scripts` (`id`,`effIndex`,`delay`,`command`,`datalong`,`datalong2`,`dataint`,`x`,`y`,`z`,`o`) VALUES
+(52933,0,0,15,52934,0,0,0,0,0,0),
+(52933,0,0,15,52935,0,0,0,0,0,0),
+(52933,0,0,15,52936,0,0,0,0,0,0),
+(52933,0,0,15,52937,0,0,0,0,0,0);
+
+UPDATE `creature_model_info` SET `bounding_radius`=0.93 WHERE `modelid`=21793;
+UPDATE `creature_model_info` SET `bounding_radius`=1.833, `combat_reach`=4.5 WHERE `modelid`=21830;
+UPDATE `creature_model_info` SET `bounding_radius`=0.525, `combat_reach`=2.625 WHERE `modelid`=21831;
+UPDATE `creature_model_info` SET `bounding_radius`=0.775, `combat_reach`=5 WHERE `modelid`=22256;
+
+DELETE FROM `creature_template_addon` WHERE `entry`=29021;
+INSERT INTO `creature_template_addon` (`entry`,`bytes1`) VALUES
+(29021,33554432);
+
+UPDATE `creature_template` SET `minlevel`=83, `maxlevel`=83, `faction_A`=1610, `faction_H`=1610, `unit_flags`=512|256, `AIName`='SmartAI' WHERE `entry` IN (@NPC_AKILZON,@NPC_HALAZZI,@NPC_JANALAI,@NPC_NALORAKK);
+
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_HARKOA AND `source_type`=0 AND `id`=16;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_KHUFU AND `source_type`=0 AND `id` IN (3,4,5);
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (@NPC_AKILZON,@NPC_HALAZZI,@NPC_JANALAI,@NPC_NALORAKK) AND `source_type`=0;
+DELETE FROM `smart_scripts` WHERE `entryorguid`=@NPC_HALAZZI*100 AND `source_type`=9;
+INSERT INTO `smart_scripts` (`entryorguid`,`source_type`,`id`,`link`,`event_type`,`event_phase_mask`,`event_chance`,`event_flags`,`event_param1`,`event_param2`,`event_param3`,`event_param4`,`action_type`,`action_param1`,`action_param2`,`action_param3`,`action_param4`,`action_param5`,`action_param6`,`target_type`,`target_param1`,`target_param2`,`target_param3`,`target_x`,`target_y`,`target_z`,`target_o`,`comment`) VALUES
+(@NPC_HARKOA,0,16,15,38,0,100,0,0,2,0,0,1,1,0,0,0,0,0,12,1,0,0,0,0,0,0, 'Har''koa - On data 0 2 set - Say line'),
+
+(@NPC_KHUFU,0,3,4,20,0,100,0,12721,0,0,0,64,1,0,0,0,0,0,7,0,0,0,0,0,0,0, 'Khufu - On quest rewarded - Store targetlist'),
+(@NPC_KHUFU,0,4,5,61,0,100,0,0,0,0,0,100,1,0,0,0,0,0,19,@NPC_HARKOA,100,0,0,0,0,0, 'Khufu - On quest rewarded - Send targetlist to Har''koa'),
+(@NPC_KHUFU,0,5,0,61,0,100,0,0,0,0,0,45,0,2,0,0,0,0,19,@NPC_HARKOA,100,0,0,0,0,0, 'Khufu - On quest rewarded - Set data 0 2 Har''koa'),
+
+(@NPC_AKILZON,0,0,0,54,0,100,0,0,0,0,0,11,35426,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akil''zon - Just summoned - Spellcast Arcane Explosion Visual'),
+(@NPC_AKILZON,0,1,0,38,0,100,0,0,1,0,0,1,0,0,0,0,0,0,23,0,0,0,0,0,0,0, 'Akil''zon - On data 0 1 set - Say line'),
+(@NPC_AKILZON,0,2,0,38,0,100,0,0,2,0,0,41,800,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Akil''zon - On data 0 2 set - Despawn'),
+
+(@NPC_HALAZZI,0,0,1,54,0,100,0,0,0,0,0,11,35426,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Halazzi - Just summoned - Spellcast Arcane Explosion Visual'),
+(@NPC_HALAZZI,0,1,0,61,0,100,0,0,0,0,0,80,@NPC_HALAZZI*100,2,0,0,0,0,1,0,0,0,0,0,0,0, 'Halazzi - Just summoned - Run script'),
+
+(@NPC_JANALAI,0,0,0,54,0,100,0,0,0,0,0,11,35426,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Jana''lai - Just summoned - Spellcast Arcane Explosion Visual'),
+(@NPC_JANALAI,0,1,0,38,0,100,0,0,1,0,0,1,0,0,0,0,0,0,23,0,0,0,0,0,0,0, 'Jana''lai - On data 0 1 set - Say line'),
+(@NPC_JANALAI,0,2,0,38,0,100,0,0,2,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Jana''lai - On data 0 2 set - Despawn'),
+
+(@NPC_NALORAKK,0,0,0,54,0,100,0,0,0,0,0,11,35426,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Nalorakk - Just summoned - Spellcast Arcane Explosion Visual'),
+(@NPC_NALORAKK,0,1,0,38,0,100,0,0,1,0,0,1,0,0,0,0,0,0,23,0,0,0,0,0,0,0, 'Nalorakk - On data 0 1 set - Say line'),
+(@NPC_NALORAKK,0,2,0,38,0,100,0,0,2,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Nalorakk - On data 0 2 set - Despawn'),
+
+(@NPC_HALAZZI*100,9,0,0,0,0,100,0,3300,3300,0,0,1,0,0,0,0,0,0,23,0,0,0,0,0,0,0, 'Halazzi script - Say line'),
+(@NPC_HALAZZI*100,9,1,0,0,0,100,0,5200,5200,0,0,45,0,1,0,0,0,0,19,@NPC_NALORAKK,20,0,0,0,0,0, 'Halazzi script - Set data 0 1 Nalorakk'),
+(@NPC_HALAZZI*100,9,2,0,0,0,100,0,5600,5600,0,0,45,0,1,0,0,0,0,19,@NPC_JANALAI,20,0,0,0,0,0, 'Halazzi script - Set data 0 1 Jana''lai'),
+(@NPC_HALAZZI*100,9,3,0,0,0,100,0,7700,7700,0,0,45,0,1,0,0,0,0,19,@NPC_AKILZON,20,0,0,0,0,0, 'Halazzi script - Set data 0 1 Akil''zon'),
+(@NPC_HALAZZI*100,9,4,0,0,0,100,0,8300,8300,0,0,45,0,2,0,0,0,0,19,@NPC_JANALAI,20,0,0,0,0,0, 'Halazzi script - Set data 0 2 Jana''lai'),
+(@NPC_HALAZZI*100,9,5,0,0,0,100,0,800,800,0,0,11,42466,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Halazzi script - Spellcast Spirit Visual'),
+(@NPC_HALAZZI*100,9,6,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,19,@NPC_AKILZON,20,0,0,0,0,0, 'Halazzi script - Set data 0 2 Akil''zon'),
+(@NPC_HALAZZI*100,9,7,0,0,0,100,0,0,0,0,0,45,0,2,0,0,0,0,19,@NPC_NALORAKK,20,0,0,0,0,0, 'Halazzi script - Set data 0 2 Nalorakk'),
+(@NPC_HALAZZI*100,9,8,0,0,0,100,0,0,0,0,0,41,0,0,0,0,0,0,1,0,0,0,0,0,0,0, 'Halazzi script - Despawn');
+DELETE FROM `creature_addon` WHERE `guid` BETWEEN 202441 AND 202460;
+INSERT INTO `creature_addon`(`guid`,`path_id`,`bytes1`) VALUES 
+(202441,2024410,50331648),
+(202442,2024410,50331648),
+(202443,2024430,50331648),
+(202444,2024430,50331648),
+(202445,2024450,50331648),
+(202446,2024410,50331648),
+(202447,2024470,50331648),
+(202448,2024450,50331648),
+(202449,2024450,50331648),
+(202450,2024450,50331648),
+(202451,2024510,50331648),
+(202452,2024520,50331648),
+(202453,2024430,50331648),
+(202454,2024430,50331648),
+(202455,2024410,50331648),
+(202456,2024450,50331648),
+(202457,2024510,50331648),
+(202458,2024510,50331648),
+(202459,2024510,50331648),
+(202460,2024430,50331648);
+
+DELETE FROM `waypoint_data` WHERE `id` IN (2024410,2024430,2024450,2024470,2024520,2024510);
+INSERT INTO `waypoint_data`(`id`,`point`,`position_x`,`position_y`,`position_z`) VALUES 
+(2024410,1,7210.96,-1046.89,1006.18),
+(2024410,2,6998.46,-1076.85,1024.82),
+(2024410,3,6874.25,-1097.38,927.736),
+(2024410,4,6614.79,-875.755,812.765),
+(2024410,5,6563.27,-811.767,749.876),
+(2024410,6,6299.5,-797.577,529.126),
+(2024410,7,6194.55,-1013.14,501.542),
+(2024410,8,6319.25,-1251.66,468.626),
+(2024410,9,6309.16,-1537.86,615.042),
+(2024410,10,6748.21,-1664.31,919.312),
+(2024410,11,6913.31,-1725.26,954.792),
+(2024410,12,7167.58,-1501.69,962.569),
+(2024410,13,7440.4,-1295.86,997.291),
+(2024410,14,7024.75,-1625.54,957.369),
+(2024410,15,7025.49,-1624.87,957.369),
+(2024410,16,7167.58,-1501.69,962.569),
+(2024410,17,7440.4,-1295.86,997.291),
+(2024430,1,7440.4,-1295.86,997.291),
+(2024430,2,7210.96,-1046.89,1006.18),
+(2024430,3,6998.46,-1076.85,1024.82),
+(2024430,4,6874.25,-1097.38,927.736),
+(2024430,5,6614.79,-875.755,812.765),
+(2024430,6,6563.27,-811.767,749.876),
+(2024430,7,6299.5,-797.577,529.126),
+(2024430,8,6194.55,-1013.14,501.542),
+(2024430,9,6319.25,-1251.66,468.626),
+(2024430,10,6309.16,-1537.86,615.042),
+(2024430,11,6748.21,-1664.31,919.312),
+(2024430,12,6913.31,-1725.26,954.792),
+(2024430,13,7167.58,-1501.69,962.569),
+(2024430,14,7440.4,-1295.86,997.291),
+(2024430,15,7024.75,-1625.54,957.369),
+(2024430,16,7025.49,-1624.87,957.369),
+(2024430,17,7167.58,-1501.69,962.569),
+(2024450,1,6563.27,-811.767,749.876),
+(2024450,2,6299.5,-797.577,529.126),
+(2024450,3,6194.55,-1013.14,501.542),
+(2024450,4,6319.25,-1251.66,468.626),
+(2024450,5,6309.16,-1537.86,615.042),
+(2024450,6,6748.21,-1664.31,919.312),
+(2024450,7,6913.31,-1725.26,954.792),
+(2024450,8,7167.58,-1501.69,962.569),
+(2024450,9,7440.4,-1295.86,997.291),
+(2024450,10,7024.75,-1625.54,957.369),
+(2024450,11,7025.49,-1624.87,957.369),
+(2024450,12,7167.58,-1501.69,962.569),
+(2024450,13,7440.4,-1295.86,997.291),
+(2024450,14,7210.96,-1046.89,1006.18),
+(2024450,15,6998.46,-1076.85,1024.82),
+(2024450,16,6874.25,-1097.38,927.736),
+(2024450,17,6614.79,-875.755,812.765),
+(2024470,1,6614.79,-875.755,812.765),
+(2024470,2,6563.27,-811.767,749.876),
+(2024470,3,6299.5,-797.577,529.126),
+(2024470,4,6194.55,-1013.14,501.542),
+(2024470,5,6319.25,-1251.66,468.626),
+(2024470,6,6309.16,-1537.86,615.042),
+(2024470,7,6748.21,-1664.31,919.312),
+(2024470,8,6913.31,-1725.26,954.792),
+(2024470,9,7167.58,-1501.69,962.569),
+(2024470,10,7440.4,-1295.86,997.291),
+(2024470,11,7024.75,-1625.54,957.369),
+(2024470,12,7025.49,-1624.87,957.369),
+(2024470,13,7167.58,-1501.69,962.569),
+(2024470,14,7440.4,-1295.86,997.291),
+(2024470,15,7210.96,-1046.89,1006.18),
+(2024470,16,6998.46,-1076.85,1024.82),
+(2024470,17,6874.25,-1097.38,927.736),
+(2024510,1,6913.31,-1725.26,954.792),
+(2024510,2,7167.58,-1501.69,962.569),
+(2024510,3,7440.4,-1295.86,997.291),
+(2024510,4,7024.75,-1625.54,957.369),
+(2024510,5,7025.49,-1624.87,957.369),
+(2024510,6,7167.58,-1501.69,962.569),
+(2024510,7,7440.4,-1295.86,997.291),
+(2024510,8,7210.96,-1046.89,1006.18),
+(2024510,9,6998.46,-1076.85,1024.82),
+(2024510,10,6874.25,-1097.38,927.736),
+(2024510,11,6614.79,-875.755,812.765),
+(2024510,12,6563.27,-811.767,749.876),
+(2024510,13,6299.5,-797.577,529.126),
+(2024510,14,6194.55,-1013.14,501.542),
+(2024510,15,6319.25,-1251.66,468.626),
+(2024510,16,6309.16,-1537.86,615.042),
+(2024510,17,6748.21,-1664.31,919.312),
+(2024520,1,7167.58,-1501.69,962.569),
+(2024520,2,7440.4,-1295.86,997.291),
+(2024520,3,7210.96,-1046.89,1006.18),
+(2024520,4,6998.46,-1076.85,1024.82),
+(2024520,5,6874.25,-1097.38,927.736),
+(2024520,6,6614.79,-875.755,812.765),
+(2024520,7,6563.27,-811.767,749.876),
+(2024520,8,6299.5,-797.577,529.126),
+(2024520,9,6194.55,-1013.14,501.542),
+(2024520,10,6319.25,-1251.66,468.626),
+(2024520,11,6309.16,-1537.86,615.042),
+(2024520,12,6748.21,-1664.31,919.312),
+(2024520,13,6913.31,-1725.26,954.792),
+(2024520,14,7167.58,-1501.69,962.569),
+(2024520,15,7440.4,-1295.86,997.291),
+(2024520,16,7024.75,-1625.54,957.369),
+(2024520,17,7025.49,-1624.87,957.369);

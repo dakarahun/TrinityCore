@@ -68,6 +68,14 @@ enum MageSpells
 
     SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
     SPELL_MAGE_COMBUSTION_PERIODIC_DAMAGE        = 83853,
+
+    SPELL_MAGE_RING_OF_FROST_SUMMON              = 82676,
+    SPELL_MAGE_RING_OF_FROST_FREEZE              = 82691,
+    SPELL_MAGE_RING_OF_FROST_DUMMY               = 91264,
+
+    SPELL_MAGE_SLOW                              = 31589,
+    SPELL_MAGE_NETHER_VORTEX_R1                  = 86181,
+    SPELL_MAGE_NETHER_VORTEX_R2                  = 86209,
  
     //Custom Script
     SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
@@ -551,25 +559,24 @@ class spell_mage_frostbolt : public SpellScriptLoader
                    }
                }
            }
-	    void HandleEarlyFrostScript(SpellEffIndex /*effIndex*/)
+	    void HandleEarlyFrostScript()
            {
 
-            Unit* caster = GetCaster();
- 
-	        if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
-	            if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger 
-		           caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
+          	  if (Unit* caster = GetCaster())
+           	  {
+	       	 if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
+	            		if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger 
+		         	  caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
 
-	        if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T)) // Check Talent
-	           if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger 
-		            caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
-             }
-
-
+	      		  if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T)) // Check Talent
+	        	      if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger 
+		         	   caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
+                }
+	    }
            void Register()
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-		 OnEffectHit += SpellEffectFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+		 AfterCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript);
            }
        };
 
@@ -1062,14 +1069,14 @@ class spell_mage_combustion : public SpellScriptLoader
 };
 
 // Cauterize
-class spell_mag_cauterize : public SpellScriptLoader
+class spell_mage_cauterize : public SpellScriptLoader
 {
     public:
-        spell_mag_cauterize() : SpellScriptLoader("spell_mag_cauterize") { }
+        spell_mage_cauterize() : SpellScriptLoader("spell_mage_cauterize") { }
 
-        class spell_mag_cauterize_AuraScript : public AuraScript
+        class spell_mage_cauterize_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_mag_cauterize_AuraScript);
+            PrepareAuraScript(spell_mage_cauterize_AuraScript);
 
             uint32 Cauterize;
 
@@ -1099,7 +1106,7 @@ class spell_mag_cauterize : public SpellScriptLoader
                     return;    
 
                 target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
-		      target->SetHealth(target->CountPctFromMaxHealth(40));
+		  target->SetHealth(target->CountPctFromMaxHealth(40));
                 target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R1, 0, time(NULL) + 60);
                 target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R2, 0, time(NULL) + 60);
 
@@ -1107,15 +1114,229 @@ class spell_mag_cauterize : public SpellScriptLoader
 
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mag_cauterize_AuraScript::CauterizeAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
-                OnEffectAbsorb += AuraEffectAbsorbFn(spell_mag_cauterize_AuraScript::Absorb, EFFECT_0);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_mage_cauterize_AuraScript::CauterizeAmount, EFFECT_0, SPELL_AURA_SCHOOL_ABSORB);
+                OnEffectAbsorb += AuraEffectAbsorbFn(spell_mage_cauterize_AuraScript::Absorb, EFFECT_0);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_mag_cauterize_AuraScript();
+            return new spell_mage_cauterize_AuraScript();
         }
+};
+
+
+// 82676 - Ring of Frost
+/// Updated 4.3.4
+class spell_mage_ring_of_frost : public SpellScriptLoader
+{
+    public:
+        spell_mage_ring_of_frost() : SpellScriptLoader("spell_mage_ring_of_frost") { }
+
+        class spell_mage_ring_of_frost_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_ring_of_frost_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_FREEZE))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_DUMMY))
+                    return false;
+                return true;
+            }
+
+            bool Load()
+            {
+                ringOfFrost = NULL;
+                return true;
+            }
+
+            void HandleEffectPeriodic(AuraEffect const* aurEff)
+            {
+                if (ringOfFrost)
+                    if (GetMaxDuration() - (int32)ringOfFrost->GetTimer() >= sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_DUMMY)->GetDuration())
+                        GetTarget()->CastSpell(ringOfFrost->GetPositionX(), ringOfFrost->GetPositionY(), ringOfFrost->GetPositionZ(), SPELL_MAGE_RING_OF_FROST_FREEZE, true);
+            }
+
+            void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                std::list<Creature*> MinionList;
+                GetTarget()->GetAllMinionsByEntry(MinionList, GetSpellInfo()->Effects[EFFECT_0].MiscValue);
+
+                // Get the last summoned RoF, save it and despawn older ones
+                for (std::list<Creature*>::iterator itr = MinionList.begin(); itr != MinionList.end(); itr++)
+                {
+                    TempSummon* summon = (*itr)->ToTempSummon();
+
+                    if (ringOfFrost && summon)
+                    {
+                        if (summon->GetTimer() > ringOfFrost->GetTimer())
+                        {
+                            ringOfFrost->DespawnOrUnsummon();
+                            ringOfFrost = summon;
+                        }
+                        else
+                            summon->DespawnOrUnsummon();
+                    }
+                    else if (summon)
+                        ringOfFrost = summon;
+                }
+            }
+
+            TempSummon* ringOfFrost;
+
+            void Register()
+            {
+                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_mage_ring_of_frost_AuraScript::HandleEffectPeriodic, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+                 OnEffectApply += AuraEffectApplyFn(spell_mage_ring_of_frost_AuraScript::Apply, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_ring_of_frost_AuraScript();
+        }
+};
+
+// 82691 - Ring of Frost (freeze efect)
+/// Updated 4.3.4
+class spell_mage_ring_of_frost_freeze : public SpellScriptLoader
+{
+    public:
+        spell_mage_ring_of_frost_freeze() : SpellScriptLoader("spell_mage_ring_of_frost_freeze") { }
+
+        class spell_mage_ring_of_frost_freeze_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_mage_ring_of_frost_freeze_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_FREEZE))
+                    return false;
+                return true;
+            }
+
+            void FilterTargets(std::list<WorldObject*>& targets)
+            {
+                float outRadius = sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_SUMMON)->Effects[EFFECT_0].CalcRadius();
+                float inRadius  = 4.7f;
+
+                for (std::list<WorldObject*>::iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    if (Unit* unit = (*itr)->ToUnit())
+                        if (unit->HasAura(SPELL_MAGE_RING_OF_FROST_DUMMY) || unit->HasAura(SPELL_MAGE_RING_OF_FROST_FREEZE) || unit->GetExactDist(GetExplTargetDest()) > outRadius || unit->GetExactDist(GetExplTargetDest()) < inRadius)
+                            targets.erase(itr--);
+            }
+
+            void Register()
+            {
+                OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_mage_ring_of_frost_freeze_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_mage_ring_of_frost_freeze_SpellScript();
+        }
+
+        class spell_mage_ring_of_frost_freeze_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_mage_ring_of_frost_freeze_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_RING_OF_FROST_DUMMY))
+                    return false;
+                return true;
+            }
+
+            void OnRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
+            {
+                if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                    if (GetCaster())
+                        GetCaster()->CastSpell(GetTarget(), SPELL_MAGE_RING_OF_FROST_DUMMY, true);
+            }
+
+            void Register()
+            {
+                AfterEffectRemove += AuraEffectRemoveFn(spell_mage_ring_of_frost_freeze_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_mage_ring_of_frost_freeze_AuraScript();
+        }
+};
+
+// 30451 - Arcane Blast
+/// Updated 4.3.4
+class spell_mage_arcane_blast : public SpellScriptLoader
+{
+   public:
+       spell_mage_arcane_blast() : SpellScriptLoader("spell_mage_arcane_blast") { }
+
+       class spell_mage_arcane_blast_SpellScript : public SpellScript
+       {
+           PrepareSpellScript(spell_mage_arcane_blast_SpellScript);
+
+           bool Validate(SpellInfo const* /*spellInfo*/)
+           {
+               if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_SLOW))
+                   return false;
+               if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHER_VORTEX_R1))
+                   return false;
+               if (!sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHER_VORTEX_R2))
+                   return false;
+               return true;
+           }
+
+           void CastSlow(SpellEffIndex /*effIndex*/)
+           {
+               Unit* caster = GetCaster();
+               uint32 chance = 0;
+
+               if (caster->HasAura(SPELL_MAGE_NETHER_VORTEX_R1))
+                   chance = sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHER_VORTEX_R1)->ProcChance;
+               else if (caster->HasAura(SPELL_MAGE_NETHER_VORTEX_R2))
+                   chance = sSpellMgr->GetSpellInfo(SPELL_MAGE_NETHER_VORTEX_R2)->ProcChance;
+               else
+                   return;
+
+               if (roll_chance_i(chance))
+               {
+                   Unit::AuraList& auras = caster->GetSingleCastAuras();
+                   bool alreadyApplied = false;
+
+                   for (Unit::AuraList::iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                   {
+                       if ((*itr)->GetId() == SPELL_MAGE_SLOW)
+                       {
+                           alreadyApplied = true;
+                           break;
+                       }
+                   }
+
+                   // Apply if there were no Slow casted on any target or for refreshing the one on the current target
+                   if (GetHitUnit() && (!alreadyApplied || GetHitUnit()->HasAura(SPELL_MAGE_SLOW, caster->GetGUID())))
+                       caster->CastSpell(GetHitUnit(), SPELL_MAGE_SLOW, true);
+               }
+           }
+
+           void Register()
+           {
+               OnEffectHitTarget += SpellEffectFn(spell_mage_arcane_blast_SpellScript::CastSlow, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+           }
+       };
+
+       SpellScript* GetSpellScript() const
+       {
+           return new spell_mage_arcane_blast_SpellScript();
+       }
 };
 
 void AddSC_mage_spell_scripts()
@@ -1141,4 +1362,7 @@ void AddSC_mage_spell_scripts()
     new spell_mage_water_elemental_freeze();
     new spell_mage_combustion();
     new spell_mage_cauterize();
+    new spell_mage_ring_of_frost();
+    new spell_mage_ring_of_frost_freeze();
+    new spell_mage_arcane_blast();
 }

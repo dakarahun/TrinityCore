@@ -2178,7 +2178,11 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
             m_delayMoment = targetInfo.timeDelay;
     }
     else
-        targetInfo.timeDelay = 0LL;
+    {
+        targetInfo.timeDelay = GetCCDelay(m_spellInfo);
+        if (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay)
+            m_delayMoment = targetInfo.timeDelay;
+    }
 
     // If target reflect spell back to caster
     if (targetInfo.missCondition == SPELL_MISS_REFLECT)
@@ -3291,7 +3295,7 @@ void Spell::cast(bool skipCheck)
     SendSpellGo();
 
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
-    if ((m_spellInfo->Speed > 0.0f && !m_spellInfo->IsChanneled()) || m_spellInfo->Id == 14157)
+    if (((m_spellInfo->Speed > 0.0f || GetCCDelay(m_spellInfo) > 0) && !m_spellInfo->IsChanneled()) || m_spellInfo->Id == 14157)
     {
         // Remove used for cast item if need (it can be already NULL after TakeReagents call
         // in case delayed spell remove item at cast delay start
@@ -3564,7 +3568,7 @@ void Spell::update(uint32 difftime)
         !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
     {
         // don't cancel for melee, autorepeat, triggered and instant spells
-        if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered())
+        if (!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !m_caster->HasAuraTypeWithAffectMask(SPELL_AURA_CAST_WHILE_WALKING, m_spellInfo))
             cancel();
     }
 
@@ -5614,16 +5618,13 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
 		SPELL_AURA_MOD_STUN,
 		SPELL_AURA_MOD_CONFUSE,
 		SPELL_AURA_MOD_FEAR,
+		SPELL_AURA_MOD_ROOT,
 		SPELL_AURA_MOD_DISARM,
 		SPELL_AURA_MOD_POSSESS
 	};
 	uint8 CCDArraySize = 6;
 
-    const uint32 delayForInstantSpells = 130;
-    const uint32 delayForInstantSpells2 = 50;
-    const uint32 delayForInstantSpells3 = 160;
-    const uint32 delayForInstantSpells4 = 230;
-    const uint32 NOdelayForInstantSpells = 0;
+    const uint32 delayForInstantSpells = 132;
 
 	    for (uint8 i = 0; i < CCDArraySize; ++i)
         if (_spell->HasAura(auraWithCCD[i]))
@@ -5645,7 +5646,7 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
         case SPELLFAMILY_DEATHKNIGHT:
             // Death Grip
             if (_spell->Id == 49576)
-                return NOdelayForInstantSpells;
+                return 0;
 				break;
         case SPELLFAMILY_PRIEST:
          //Psychic Scream
@@ -5655,26 +5656,26 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
         case SPELLFAMILY_ROGUE:
             // Blind
             if (_spell->Id == 2094)
-                return delayForInstantSpells3;
+                return delayForInstantSpells;
             // CheapShot
             if (_spell->Id == 1833)
-                return NOdelayForInstantSpells;
+                return 0;
             // Kidney Shot
             if (_spell->Id == 408)
-                return delayForInstantSpells2;
+                return delayForInstantSpells;
             break;
         case SPELLFAMILY_SHAMAN:
             // HEX
             if (_spell->Id == 51514)
-                return delayForInstantSpells3;
+                return delayForInstantSpells;
 			break;
         case SPELLFAMILY_MAGE:
             // Polymorph
             if (_spell->Id == 118)
-                return delayForInstantSpells3;
+                return delayForInstantSpells;
             // Deep Freeze
             if (_spell->Id == 44572)
-                return delayForInstantSpells2;
+                return delayForInstantSpells;
             // Dragon Breath
             if (_spell->Id == 31661)
                 return delayForInstantSpells;
@@ -5682,26 +5683,26 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
         case SPELLFAMILY_WARRIOR:
             // Intercept
             if (_spell->Id == 20253)
-                return delayForInstantSpells2;
+                return delayForInstantSpells;
             // Charge trig.
             if (_spell->Id == 65929)
-                return NOdelayForInstantSpells;
+                return 0;
             break;
         case SPELLFAMILY_WARLOCK:
             //DeathCoil
             if (_spell->Id == 6781)
-                return delayForInstantSpells4;
-		    //Spell Lock - Debuff
-			if (_spell->Id == 24259)
-			    return delayForInstantSpells4;
+                return delayForInstantSpells;
+	     //Spell Lock - Debuff
+	     if (_spell->Id == 24259)
+	         return delayForInstantSpells;
            break;
         case SPELLFAMILY_DRUID:
             // Cyclone
             if (_spell->Id == 33786)
-                return delayForInstantSpells3;
+                return delayForInstantSpells;
             // Pounce
             if (_spell->Id == 9005)
-                return NOdelayForInstantSpells;
+                return 0;
             break;
     }
 

@@ -49,6 +49,7 @@ enum ShamanSpells
     SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB      = 64695,
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
+    SPELL_SHAMAN_TOTEM_MANA_TIDE                = 16191,
     SPELL_SHAMAN_TOTEM_HEALING_STREAM_HEAL      = 52042
 };
 
@@ -584,35 +585,40 @@ class spell_sha_lava_lash : public SpellScriptLoader
             return new spell_sha_lava_lash_SpellScript();
         }
 };
-
 // 16191 - Mana Tide
-/// Updated 4.3.4
-class spell_sha_mana_tide_totem : public SpellScriptLoader
+class spell_sha_mana_tide : public SpellScriptLoader
 {
     public:
-        spell_sha_mana_tide_totem() : SpellScriptLoader("spell_sha_mana_tide_totem") { }
+        spell_sha_mana_tide() : SpellScriptLoader("spell_sha_mana_tide") { }
 
-        class spell_sha_mana_tide_totem_AuraScript : public AuraScript
+        class spell_sha_mana_tide_AuraScript : public AuraScript
         {
-            PrepareAuraScript(spell_sha_mana_tide_totem_AuraScript);
+            PrepareAuraScript(spell_sha_mana_tide_AuraScript);
 
-            void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool& /*canBeRecalculated*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                ///@TODO: Exclude the "short term" buffs from the stat value
-                if (Unit* caster = GetCaster())
-                    if (Unit* owner = caster->GetOwner())
-                        amount = CalculatePct(owner->GetStat(STAT_SPIRIT), aurEff->GetAmount());
+                if (!sSpellMgr->GetSpellInfo(SPELL_SHAMAN_TOTEM_MANA_TIDE))
+                    return false;
+                return true;
+            }
+
+            void CalculateAmount(AuraEffect const* /*aurEff*/, int32 &amount, bool & /*canBeRecalculated*/)
+            {
+                // 400% of caster's spirit
+                // Caster is totem, we need owner
+                if (Unit* owner = GetCaster()->GetOwner())
+                    amount = int32(owner->GetStat(STAT_SPIRIT) * 4.0f);
             }
 
             void Register()
             {
-                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_mana_tide_totem_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
+                DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_sha_mana_tide_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_STAT);
             }
         };
 
         AuraScript* GetAuraScript() const
         {
-            return new spell_sha_mana_tide_totem_AuraScript();
+            return new spell_sha_mana_tide_AuraScript();
         }
 };
 
@@ -658,6 +664,6 @@ void AddSC_shaman_spell_scripts()
     new spell_sha_healing_stream_totem();
     new spell_sha_heroism();
     new spell_sha_lava_lash();
-    new spell_sha_mana_tide_totem();
+    new spell_sha_mana_tide();
     new spell_sha_thunderstorm();
 }

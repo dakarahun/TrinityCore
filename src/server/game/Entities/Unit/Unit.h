@@ -447,8 +447,10 @@ enum UnitMods
     UNIT_MOD_RESISTANCE_FROST,
     UNIT_MOD_RESISTANCE_SHADOW,
     UNIT_MOD_RESISTANCE_ARCANE,
-    UNIT_MOD_ATTACK_POWER,
-    UNIT_MOD_ATTACK_POWER_RANGED,
+    UNIT_MOD_ATTACK_POWER_POS,
+    UNIT_MOD_ATTACK_POWER_NEG,
+    UNIT_MOD_ATTACK_POWER_RANGED_POS,
+    UNIT_MOD_ATTACK_POWER_RANGED_NEG,
     UNIT_MOD_DAMAGE_MAINHAND,
     UNIT_MOD_DAMAGE_OFFHAND,
     UNIT_MOD_DAMAGE_RANGED,
@@ -1462,8 +1464,8 @@ class Unit : public WorldObject
         void DealSpellDamage(SpellNonMeleeDamage* damageInfo, bool durabilityLoss);
 
         // player or player's pet resilience (-1%)
-        uint32 GetCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_CRIT_TAKEN, 2.2f, 33.0f, damage); }
-        uint32 GetDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 2.0f, 100.0f, damage); }
+        uint32 GetCritDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_CRIT_TAKEN, 0.00f, 33.0f, damage); }  // On Cataclysm Not Used
+        uint32 GetDamageReduction(uint32 damage) const { return GetCombatRatingDamageReduction(CR_RESILIENCE_PLAYER_DAMAGE_TAKEN, 1.0f, 100.0f, damage); }
 
         void ApplyResilience(const Unit* victim, int32 * damage, bool isCrit) const;
 
@@ -2146,6 +2148,26 @@ class Unit : public WorldObject
         // Part of Evade mechanics
         time_t GetLastDamagedTime() const { return _lastDamagedTime; }
         void SetLastDamagedTime(time_t val) { _lastDamagedTime = val; }
+
+         //Eclipse System
+        int32 eclipse;
+        int32 GetEclipsePower() {return eclipse;};
+        void SetEclipsePower(int32 power);
+
+        uint32 m_heal_done[120];
+        uint32 m_damage_done[120];
+        uint32 m_damage_taken[120];
+        int32 DmgandHealDoneTimer;
+        uint32 GetHealingDoneInPastSecs(uint32 secs);
+        uint32 GetDamageDoneInPastSecs(uint32 secs);
+        uint32 GetDamageTakenInPastSecs(uint32 secs);
+        void ResetDamageDoneInPastSecs(uint32 secs);
+        void ResetHealingDoneInPastSecs(uint32 secs);
+
+        float m_AbsorbHeal;
+        float GetAbsorbHeal() const { return m_AbsorbHeal; };
+        void SetAbsorbHeal(float heal) { m_AbsorbHeal = heal; };
+
 
     protected:
         explicit Unit (bool isWorldObject);
