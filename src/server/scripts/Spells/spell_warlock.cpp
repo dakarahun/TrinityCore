@@ -1037,6 +1037,66 @@ public:
 	  }
 };
 
+// 28176 - Fel Armor
+class spell_warl_fel_armor: public SpellScriptLoader
+{
+   public:
+       spell_warl_fel_armor() : SpellScriptLoader("spell_warl_fel_armor") {}
+
+   class spell_warl_fel_armor_AuraScript: public AuraScript
+   {
+       PrepareAuraScript(spell_warl_fel_armor_AuraScript);
+
+       void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount,  bool & /*canBeRecalculated*/) 
+      {
+           amount = 10;
+       }
+
+       void Register()
+       {
+           DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_fel_armor_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_SPELL_POWER_PCT);
+       }
+   };
+
+   AuraScript *GetAuraScript() const
+   {
+       return new spell_warl_fel_armor_AuraScript();
+   }
+};
+
+// 687,28176 Demon armor and Fel armor swap controller
+class spell_warl_nether_ward_swap_supressor: public SpellScriptLoader
+{
+public:
+    spell_warl_nether_ward_swap_supressor() : SpellScriptLoader("spell_warl_nether_ward_swap_supressor") {}
+
+    class spell_warl_nether_ward_swap_supressor_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warl_nether_ward_swap_supressor_SpellScript);
+
+        void PreventSwapApplicationOnCaster(WorldObject*& target)
+        {
+            // If the warlock doesnt have the Nether Ward talent,
+            // do not allow the swap effect to hit the warlock
+            if (!GetCaster()->HasAura(WARLOCK_NETHER_WARD))
+                target = NULL;
+        }
+
+        void Register()
+        {
+            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_warl_nether_ward_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warl_nether_ward_swap_supressor_SpellScript();
+    }
+};
+
+
+void
+
 void AddSC_warlock_spell_scripts()
 {
     new spell_warl_bane_of_doom();
@@ -1061,4 +1121,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_unstable_affliction();
     new spell_warl_drain_life();
     new spell_warl_dark_intent();
+    new spell_warl_fel_armor();
+    new spell_warl_nether_ward_swap_supressor();
 }

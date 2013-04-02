@@ -384,7 +384,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (!ancientpower)
                             return;
 
-                        damage = (damage * ancientpower->GetStackAmount()) ;
+                       // damage = ((damage * ancientpower->GetStackAmount()) / 3);
                         break;
                     }
                     // arcane charge. must only affect demons (also undead?)
@@ -440,6 +440,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PALADIN:
             {
+		switch (m_spellInfo->Id)
+		{
                     // Ancient Fury
                     case 86704:
                     {
@@ -451,8 +453,30 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = (damage * ancientpower->GetStackAmount()) ;
                         break;
                     }
+		      case 498: // Divine Protection triggering: Speed of Light
+		     {
+			int32 speed;
 
+		  	if (m_caster->HasAura(85495))
+			    speed = 20;
+			if (m_caster->HasAura(85498))
+			    speed = 40;
+			if (m_caster->HasAura(95499))
+			    speed = 60;
 
+			if (speed)
+			     m_caster->CastCustomSpell(m_caster, 85497, &speed, NULL, NULL, true);
+			break;
+		     }
+		      // Hammer of the Rightneouses
+                    case 53595:
+                    {
+                    		damage = uint32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.25);
+				m_caster->CastCustomSpell(unitTarget, 88263, &damage, NULL, NULL, true);
+				break;
+			}
+		   break;
+		}
 
             break;
             }
@@ -479,6 +503,81 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     if(m_caster->HasAura(85114)) // Aftermath Rank 2
                         if (roll_chance_f(100.0f))
                             m_caster->CastSpell(unitTarget, 18118, true);
+                }
+	          switch(m_spellInfo->Id)
+                {
+ 		      case 5676: // Searing Pain
+                    {
+                        if(m_caster->isSoulBurnActive())
+                        {
+                            m_caster->CastSpell(m_caster,79440,true);
+                            m_caster->RemoveAurasDueToSpell(74434);
+                        }
+                        break;
+                    }
+		      case 61189:
+                    case 6353: // Soul Fire
+                    {
+                        int32 bp0 = 0;
+                        if (m_caster->HasAura(91986)) // Burning Embers
+                        {
+                            bp0 = CalculatePct(int32(damage), 15) /7;
+                            m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true);
+                        }
+                        if (m_caster->HasAura(85112))
+                        {
+                            bp0 = CalculatePct(int32(damage), 30) /7;
+                            m_caster->CastCustomSpell(unitTarget, 85421, &bp0, NULL, NULL, true);
+                        }
+                        if(m_caster->HasAura(18120)) // Improved soul fire rank 2
+                        {
+                            bp0 = 8;
+                            m_caster->CastCustomSpell(m_caster,85383,&bp0,NULL,NULL,true);
+                        }
+                        if(m_caster->HasAura(18119)) // Improved soul fire rank 1
+                        {
+                            bp0 = 4;
+                            m_caster->CastCustomSpell(m_caster,85383,&bp0,NULL,NULL,true);
+                        }
+                        break;
+                    }
+   			case 86121: // Soul Swap
+                    {
+                        m_caster->CastSpell(m_caster,86211,true); //This is the buff that overrides Soul Swap with Soul Swap: Exhale
+                        std::list<AuraEffect const*> dotsList = unitTarget->GetAuraDoTsByCaster(m_caster->GetGUID());
+                        std::list<uint32> lst;
+                        if(!dotsList.empty())
+                        {
+                            for(std::list<AuraEffect const*>::iterator itr = dotsList.begin(); itr != dotsList.end(); ++itr)
+                            {
+                                lst.push_back((*itr)->GetId());
+                                if(!m_caster->HasAura(56226)) //Glyph of Soul Swap
+                                    unitTarget->RemoveAurasDueToSpell((*itr)->GetId());
+                            }
+                        }
+                        if(m_caster->HasAura(56226)) //Glyph of Soul Swap
+                            m_caster->CastSpell(m_caster,94229,true); //The cooldown marker
+                        m_caster->StoreSoulSwapDoTs(lst);
+                        break;
+                    }
+                    case 86213: // Soul Swap: Exhale
+                    {
+                        std::list<uint32> dotsList = m_caster->GetSoulSwapDots();
+                        if(!dotsList.empty() && dotsList.size() >= 1)
+                        {
+                            for(std::list<uint32>::iterator itr = dotsList.begin(); itr != dotsList.end(); ++itr)
+                            {
+                                if(!(*itr))
+                                    break;
+                                m_caster->CastSpell(unitTarget,(*itr),true); //
+                            }
+                        }
+                        else
+                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player (GUID %u) tried to release Soul Swap stored dots without having any previously stored dot",m_caster->GetGUIDLow());
+                        m_caster->RemoveAurasDueToSpell(86211);
+                        break;
+                    }
+		   break;
                 }
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
@@ -534,10 +633,28 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 					m_caster->RemoveAurasDueToSpell(87117);
 				 }
                  	}
-                	 if (m_spellInfo->Id == 73325 || m_spellInfo->Id == 17) // Leap of Faith and Power word: Shield
-                    		 if (m_caster->HasAura(64127)) // Body and Soul
-					m_caster->CastSpell(m_caster, 65081, true);
+			if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
+				if (m_caster->HasAura(77487))
+					m_caster->CastSpell(m_caster, 95799, true);		   
 
+
+                	 if (m_spellInfo->Id == 73325 || m_spellInfo->Id == 17) // Leap of Faith and Power word: Shield
+			 {
+				if (unitTarget)
+				{
+                    			 if (m_caster->HasAura(64127)) // Body and Soul Rank 1
+						m_caster->CastSpell(unitTarget, 64128, true);
+
+                           		 if (m_caster->HasAura(64129)) // Body and Soul Rank 2
+						m_caster->CastSpell(unitTarget, 65081, true);
+				}
+
+                    		 if (m_caster->HasAura(64127)) // Body and Soul Rank 1
+				 	m_caster->CastSpell(m_caster, 64128, true);
+
+                             if (m_caster->HasAura(64129)) // Body and Soul Rank 2
+					m_caster->CastSpell(m_caster, 65081, true);
+			   }
    			   // Shadow orbs
                         if (m_caster->HasAura(77487))
                         {
@@ -1402,10 +1519,14 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 82731: // Flame Orb
                     {
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                           if (m_caster->HasAura(84726) || m_caster->HasAura(84727))
-                            m_caster->CastSpell(m_caster, 84714, true); // Frostfire Orb
-                            else                          
-                            m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
+			   {
+                           if (m_caster->HasAura(84726))
+                           		 m_caster->CastSpell(m_caster, 84714, true); // Frostfire Orb
+			      else if (m_caster->HasAura(84727))
+                           		 m_caster->CastSpell(m_caster, 84714, true); // Frostfire Orb
+                           else                          
+                           		 m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
+			  }
                         break;
                     }
                     case 1459: // Arcane Brilliance
@@ -1618,7 +1739,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                         m_caster->CastSpell(m_caster,86659,true);
                     return;
                 }
-              case 19740: // Blessing of Might
+           /*   case 19740: // Blessing of Might
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
@@ -1631,14 +1752,8 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 79101, true); // Blessing of Might (Caster)
                     }
                     break;
-                }
-                case 23590:
-                {
-                     if ((m_caster->HasAura(87168) || m_caster->HasAura(87172)) && m_caster->GetDistance(unitTarget) > 15.0f || !m_caster->IsWithinDistInMap(unitTarget, 15.0f))
-				m_caster->CastSpell(m_caster, 87173, true); // Long Arm 
-                
-                }
-                case 20217: // Blessing of Kings
+                }             
+	         case 20217: // Blessing of Kings
                 {
                     if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     {
@@ -1658,8 +1773,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 79062, true); // Blessing of Kings (Caster)
                     }
                     break;
-                }
-                case 31789:                                 // Righteous Defense (step 1)
+                }*/
+                 case 85285: // Sacred Shield proc
+                 {
+                 		 int32 ap = int32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+	         		 int32 absorb = int32(CalculatePct(ap, 280));
+
+		 		  m_caster->CastCustomSpell(m_caster, 96263, &absorb, NULL, NULL, true);
+			break;
+                 }
+                 case 31789:                                 // Righteous Defense (step 1)
                 {
                     // Clear targets for eff 1
                     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)

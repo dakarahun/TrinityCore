@@ -1434,10 +1434,10 @@ void Player::HandleDrowning(uint32 time_diff)
             m_MirrorTimer[FIRE_TIMER] -= time_diff;
             if (m_MirrorTimer[FIRE_TIMER] < 0)
             {
-                m_MirrorTimer[FIRE_TIMER]+= 1*IN_MILLISECONDS;
+                m_MirrorTimer[FIRE_TIMER]+= 5*IN_MILLISECONDS;
                 // Calculate and deal damage
                 /// @todo Check this formula
-                uint32 damage = urand(600, 700);
+               uint32 damage = urand(1, 2);
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA && m_zoneUpdateId != 1519 && m_areaUpdateId != 3805)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
                 // need to skip Slime damage in Undercity,

@@ -861,6 +861,34 @@ public:
         return new spell_hun_kill_command_SpellScript();
     }
 };
+
+// 13165 - Aspect of the Hawk
+class spell_hun_aspect_of_the_hawk: public SpellScriptLoader
+{
+   public:
+       spell_hun_aspect_of_the_hawk() : SpellScriptLoader("spell_hun_aspect_of_the_hawk") {}
+
+   class spell_hun_aspect_of_the_hawk_AuraScript: public AuraScript
+   {
+       PrepareAuraScript(spell_hun_aspect_of_the_hawk_AuraScript);
+
+       void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount,  bool & /*canBeRecalculated*/) 
+      {
+           amount = 23.52f * GetCaster()->getLevel();
+       }
+
+       void Register()
+       {
+           DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_hun_aspect_of_the_hawk_AuraScript::CalculateAmount, EFFECT_0, UNIT_MOD_ATTACK_POWER_RANGED_POS);
+       }
+   };
+
+   AuraScript *GetAuraScript() const
+   {
+       return new spell_hun_aspect_of_the_hawk_AuraScript();
+   }
+};
+
 void AddSC_hunter_spell_scripts()
 {
     new spell_hun_aspect_of_the_beast();
@@ -880,4 +908,5 @@ void AddSC_hunter_spell_scripts()
     new spell_hun_tame_beast();
     new spell_hun_target_only_pet_and_owner();
     new spell_hun_kill_command();
+    new spell_hun_aspect_of_the_hawk();
 }

@@ -3128,8 +3128,6 @@ public:
     }
 };
 
-
-
 void AddSC_npcs_special()
 {
     new npc_air_force_bots();

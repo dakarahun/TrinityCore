@@ -815,7 +815,44 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
 
+  if(victim && victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
+    {
+        int32 atkpwr = damage * 0.05f;
+        
+        if(AuraEffect* vng = victim->GetAuraEffect(76691,0)) // If already have Vengeance buff
+                atkpwr += vng->GetAmount();
+        if(atkpwr > int32(victim->CountPctFromMaxHealth(10)))
+            atkpwr = int32(victim->CountPctFromMaxHealth(10));
+        victim->RemoveAurasDueToSpell(76691);
+        victim->CastCustomSpell(victim, 76691, &atkpwr, &atkpwr, NULL, true);
+		victim->GetAura(76691)->SetDuration(30000);
+    }
+    if(victim && victim->HasAura(84840) && victim->HasAura(5487)) // Vengeance Feral
+    {
+        if(victim->GetShapeshiftForm() == FORM_BEAR)
+        {
+            int32 atkpwr = damage * 0.05f;
+            if(AuraEffect* vng = victim->GetAuraEffect(76691,0)) // If already have Vengeance buff
+                    atkpwr += vng->GetAmount();
+            if(atkpwr > int32(victim->CountPctFromMaxHealth(10)))
+                atkpwr = int32(victim->CountPctFromMaxHealth(10));
+            victim->RemoveAurasDueToSpell(76691);
+            victim->CastCustomSpell(victim, 76691, &atkpwr, &atkpwr, NULL, true);
+			victim->GetAura(76691)->SetDuration(30000);
+        }
+        else
+            victim->RemoveAurasDueToSpell(76691);
+    }
+    if(spellProto && m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455)
+    {
+        int32 dmg = int32(damage * 0.15f);
+        CastCustomSpell(m_havocTarget,85455,&dmg,NULL,NULL,true); // Bane of Havoc
+    }
+    
+    if(HasAura(84590)) // Deadly Momentum
+        RemoveAurasDueToSpell(84590);
     return damage;
+}
 }
 
 void Unit::CastStop(uint32 except_spellid)
@@ -5291,17 +5328,17 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     return true;
                 }
                 // Divine purpose
-                case 31871:
-                case 31872:
-                {
-                    // Roll chane
-                    if (!victim || !victim->isAlive() || !roll_chance_i(triggerAmount))
-                        return false;
-
-                    // Remove any stun effect on target
-                    victim->RemoveAurasWithMechanic(1<<MECHANIC_STUN, AURA_REMOVE_BY_ENEMY_SPELL);
-                    return true;
-                }
+                 case 85117:
+                 case 86172:
+                 {
+                    if (roll_chance_i(triggerAmount))
+                     {
+                         target = this;
+                         triggered_spell_id = 90174;
+                         break;
+                     }
+                   break;
+                 }
                 // Glyph of Scourge Strike
                 case 58642:
                 {
@@ -5523,11 +5560,11 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 
                 case 79683: // Arcane Missiles!
                 {
-                    // Do not let arcane missiles missile remove the activation aura
-                    if (procSpell->Id == 7268)
+                    if (!roll_chance_i(20.0f))
                         return false;
 
-                    if (!roll_chance_i(25.0f))
+                    // Do not let arcane missiles missile remove the activation aura
+                    if (procSpell->Id == 7268)
                         return false;
 
                     break;
@@ -5851,10 +5888,18 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                // Shadow Orb
                 case 77487:
                 {
-          	 	 if (HasAura(87327))
-                         return true;
-                      else
+          	 	 if (!HasAura(87327))
+			 {
+                         return false;
 			    RemoveAurasDueToSpell(77487);
+                      }
+			
+			 if (roll_chance_i(30.0f))
+			 {
+                         return false;
+			    RemoveAurasDueToSpell(77487);
+                      }
+ 		    break;
       	     	  }
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
                 case 40438:
@@ -6477,29 +6522,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         }
                     }
                 }
- 		// Sacred Shield
-            if (dummySpell->SpellFamilyFlags[1] & 0x80000)
-            {
-                if (procFlag & PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS)
-                {
-                        basepoints0 = damage / 12;
-
-                        if (basepoints0)
-                            CastCustomSpell(this, 66922, &basepoints0, NULL, NULL, true, 0, triggeredByAura, victim->GetGUID());
-
-                        return true;
-                }
-                else if (damage > 0)
-                    triggered_spell_id = 58597;
-
-                // Item - Paladin T8 Holy 4P Bonus
-                if (Unit* caster = triggeredByAura->GetCaster())
-                    if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
-                        cooldown = aurEff->GetAmount();
-
-                target = this;
-                break;
-             }
                 if (triggered_spell_id && beaconTarget)
                 {
                     int32 percent = 0;
@@ -6520,9 +6542,16 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     victim->CastCustomSpell(beaconTarget, triggered_spell_id, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
                     return true;
                 }
-
                 return false;
-            }
+
+                // Item - Paladin T8 Holy 4P Bonus
+                if (Unit* caster = triggeredByAura->GetCaster())
+                    if (AuraEffect const* aurEff = caster->GetAuraEffect(64895, 0))
+                        cooldown = aurEff->GetAmount();
+
+                target = this;
+                break;
+             }
           // Righteous Vengeance
             if (dummySpell->SpellIconID == 3025)
             {
@@ -6578,21 +6607,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     }
                     break;
                 }
-               // Ancient Healer
-                case 86674:
-                {
-                    int32 bp0 = damage;
-                    int32 bp1 = ((bp0 * 10) / 100);
-
-                    if (!bp0 || !bp1)
-                        return false;
-
-                    if (victim && victim->IsFriendlyTo(this))  
-                        CastCustomSpell(victim,86678,&bp0,&bp1,0,true,NULL,triggeredByAura,0);
-                    else
-                        CastCustomSpell(this,86678,&bp0,&bp1,0,true,NULL,triggeredByAura,0);
-                    return true;
-                }
                 // Ancient Crusader - Player
                 case 86701:
                 {
@@ -6607,41 +6621,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     if (victim == this)
                         return false;
 
-                    break;
-                }
- 		 // Ancient Healer
-                case 86674:
-                {
-                    int32 bp0 = damage;
-                    int32 bp1 = ((bp0 * 10) / 100);
-
-                    if (!bp0 || !bp1)
-                        return false;
-
-                    if (victim && victim->IsFriendlyTo(this))
-                        CastCustomSpell(victim, 86678,&bp0,&bp1, 0, true, NULL, triggeredByAura, 0);
-                    else
-                        CastCustomSpell(this, 86678,&bp0,&bp1, 0, true, NULL, triggeredByAura, 0);
-                    return true;
-                }
-
-                // Ancient Crusader - Player
-                case 86701:
-                {
-                    target = this;
-                    triggered_spell_id = 86700;
-                    break;
-                }
-                // Long Arm of The law
-                case 87168:
-                case 87172:
-                {
-                    if (roll_chance_f(triggerAmount) && GetDistance(victim) > 15.0f)
-                    {
-                        target = this;
-                        triggered_spell_id = 87173;
-                        break;
-                    }
                     break;
                 }
                 // Divine purpose
@@ -6665,6 +6644,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     basepoints0 = int32(victim->CountPctFromMaxHealth(2));
                     victim->CastCustomSpell(victim, 20267, &basepoints0, 0, 0, true, 0, triggeredByAura);
                     return true;
+               break;
                 }
                 // Judgement of Wisdom
                 case 20186:
@@ -6676,6 +6656,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                         victim->CastCustomSpell(victim, 20268, &basepoints0, NULL, NULL, true, 0, triggeredByAura);
                     }
                     return true;
+                 break;
                 }
                 case 31801:
                 {
@@ -7187,7 +7168,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 target = this;
                 break;
             }
-            // Fel Armor
             // Flametongue Weapon (Passive)
             if (dummySpell->SpellFamilyFlags[0] & 0x200000)
             {
@@ -7466,6 +7446,23 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
         case SPELLFAMILY_GENERIC:
             switch (dummySpell->Id)
             {
+                // Pursuit of Justice
+                case 26022:
+                case 26023:
+                {
+                    *handled = true;
+
+                   // Need stun, root, or fear mechanic
+                   if (!(procSpell->GetAllEffectsMechanicMask() & ((1<<MECHANIC_ROOT)|(1<<MECHANIC_STUN)|(1<<MECHANIC_FEAR))))
+                        return false;
+
+                    if (!(HasAura(32733))) // Pursuit of Justice and Blessed Life cooldown marker
+                    {
+                        CastSpell(this,89024,true);
+                        CastSpell(this,32733,true);
+                    }
+                    break;
+                }
                 // Nevermelting Ice Crystal
                 case 71564:
                     RemoveAuraFromStack(71564);
@@ -8098,8 +8095,14 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 // Nether Protection
                 if (auraSpellInfo->SpellIconID == 1985)
                 {
-                    if (!procSpell)
-                        return false;
+			int32 rank = 1;
+
+			if (m_caster->HasAura(30301))
+			    rank = 2;
+
+			if (!roll_chance_i(15*rank))
+			 	return false;
+
                     switch (GetFirstSchoolInMask(procSpell->GetSchoolMask()))
                     {
                         case SPELL_SCHOOL_NORMAL:
@@ -8394,6 +8397,17 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     return true;
             }
             return false;
+        }
+        // Sacred Shield
+        case 85285:
+        {
+            if (!HealthBelowPctDamaged(30, damage))
+                return false;
+
+            int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+            basepoints0 = int32(CalculatePct(ap, 280));
+	     CastCustomSpell(this, 96263, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
+            break;
         }
         // Culling the Herd
         case 70893:
@@ -10072,16 +10086,26 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
     AuraEffectList const& mHealingDone = GetAuraEffectsByType(SPELL_AURA_MOD_HEALING_DONE);
     for (AuraEffectList::const_iterator i = mHealingDone.begin(); i != mHealingDone.end(); ++i)
         if (!(*i)->GetMiscValue() || ((*i)->GetMiscValue() & schoolMask) != 0)
-            DoneAdvertisedBenefit+= (*i)->GetAmount();
+            DoneAdvertisedBenefit += (*i)->GetAmount();
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
 
         uint32 spellPower = ToPlayer()->GetBaseSpellPowerBonus();
+
+
+
        // Spell power from SPELL_AURA_MOD_SPELL_POWER_PCT
         AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
         for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
         {
+      	 	 // Fel Armor
+      		  if (ToPlayer()->HasAura(28176))
+		  {
+			int32 add_spellPower += ToPlayer()->getLevel() * 7.55 + 11;
+			AddPct(add_spellPower, (*i)->GetAmount());
+		  }
+
             AddPct(spellPower, (*i)->GetAmount());
         }
         DoneAdvertisedBenefit += spellPower;
@@ -10101,9 +10125,6 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
                 DoneAdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
             }
         }
-
-      if (HasAura(28176))
-           DoneAdvertisedBenefit *= 1.1;
 
         // ... and attack power
         AuraEffectList const& mDamageDonebyAP = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER);
@@ -17221,92 +17242,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
     }
 }
 
-void Unit::BuildMovementPacket(ByteBuffer *data) const
-{
-    *data << uint32(GetUnitMovementFlags());            // movement flags
-    *data << uint16(GetExtraUnitMovementFlags());       // 2.3.0
-    *data << uint32(getMSTime());                       // time / counter
-    *data << GetPositionX();
-    *data << GetPositionY();
-    *data << GetPositionZMinusOffset();
-    *data << GetOrientation();
-
-    bool onTransport = m_movementInfo.t_guid != 0;
-    bool hasInterpolatedMovement = m_movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_MOVEMENT;
-    bool time3 = false;
-    bool swimming = ((GetUnitMovementFlags() & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING))
-        || (m_movementInfo.flags2 & MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING));
-    bool interPolatedTurning = m_movementInfo.flags2 & MOVEMENTFLAG2_INTERPOLATED_TURNING;
-    bool jumping = GetUnitMovementFlags() & MOVEMENTFLAG_FALLING;
-    bool splineElevation = GetUnitMovementFlags() & MOVEMENTFLAG_SPLINE_ELEVATION;
-    bool splineData = false;
-
-    data->WriteBits(GetUnitMovementFlags(), 30);
-    data->WriteBits(m_movementInfo.flags2, 12);
-    data->WriteBit(onTransport);
-    if (onTransport)
-    {
-        data->WriteBit(hasInterpolatedMovement);
-        data->WriteBit(time3);
-    }
-
-    data->WriteBit(swimming);
-    data->WriteBit(interPolatedTurning);
-    if (interPolatedTurning)
-        data->WriteBit(jumping);
-
-    data->WriteBit(splineElevation);
-    data->WriteBit(splineData);
-
-    data->FlushBits(); // reset bit stream
-
-    *data << uint64(GetGUID());
-    *data << uint32(getMSTime());
-    *data << float(GetPositionX());
-    *data << float(GetPositionY());
-    *data << float(GetPositionZ());
-    *data << float(GetOrientation());
-
-    if (onTransport)
-    {
-        if (m_vehicle)
-            *data << uint64(m_vehicle->GetBase()->GetGUID());
-        else if (GetTransport())
-            *data << uint64(GetTransport()->GetGUID());
-        else // probably should never happen
-            *data << (uint64)0;
-
-        *data << float (GetTransOffsetX());
-        *data << float (GetTransOffsetY());
-        *data << float (GetTransOffsetZ());
-        *data << float (GetTransOffsetO());
-        *data << uint8 (GetTransSeat());
-        *data << uint32(GetTransTime());
-        if (hasInterpolatedMovement)
-            *data << int32(0); // Transport Time 2
-        if (time3)
-            *data << int32(0); // Transport Time 3
-    }
-
-    if (swimming)
-        *data << (float)m_movementInfo.pitch;
-
-    if (interPolatedTurning)
-    {
-        *data << (uint32)m_movementInfo.fallTime;
-        *data << (float)m_movementInfo.j_zspeed;
-        if (jumping)
-        {
-            *data << (float)m_movementInfo.j_sinAngle;
-            *data << (float)m_movementInfo.j_cosAngle;
-            *data << (float)m_movementInfo.j_xyspeed;
-        }
-    }
-
-    if (splineElevation)
-        *data << (float)m_movementInfo.splineElevation;
-}
-
 void Unit::SetCanFly(bool apply)
 {
     if (apply)
@@ -17339,13 +17274,6 @@ void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
     bool hasTimestamp = false;
     bool hasOrientation = false;
     bool hasTransportData = false;
-    bool hasTransportTime2 = false;
-    bool hasTransportTime3 = false;
-    bool hasPitch = false;
-    bool hasFallData = false;
-    bool hasFallDirection = false;
-    bool hasSplineElevation = false;
-    bool hasSpline = false;
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (sequence == NULL)
@@ -17410,27 +17338,27 @@ void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
                 break;
             case MSEHasTransportTime2:
                 if (hasTransportData)
-                    hasTransportTime2 = data.ReadBit();
+                    mi->bits.hasTransportTime2 = data.ReadBit();
                 break;
             case MSEHasTransportTime3:
                 if (hasTransportData)
-                    hasTransportTime3 = data.ReadBit();
+                    mi->bits.hasTransportTime3 = data.ReadBit();
                 break;
             case MSEHasPitch:
-                hasPitch = !data.ReadBit();
+                mi->bits.hasPitch = !data.ReadBit();
                 break;
             case MSEHasFallData:
-                hasFallData = data.ReadBit();
+                mi->bits.hasFallData = data.ReadBit();
                 break;
             case MSEHasFallDirection:
-                if (hasFallData)
-                    hasFallDirection = data.ReadBit();
+                if (mi->bits.hasFallData)
+                    mi->bits.hasFallDirection = data.ReadBit();
                 break;
             case MSEHasSplineElevation:
-                hasSplineElevation = !data.ReadBit();
+                mi->bits.hasSplineElevation = !data.ReadBit();
                 break;
             case MSEHasSpline:
-                hasSpline = data.ReadBit();
+                data.ReadBit();
                 break;
             case MSEMovementFlags:
                 if (hasMovementFlags)
@@ -17482,39 +17410,39 @@ void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
                     data >> mi->t_time;
                 break;
             case MSETransportTime2:
-                if (hasTransportData && hasTransportTime2)
+                if (hasTransportData && mi->bits.hasTransportTime2)
                     data >> mi->t_time2;
                 break;
             case MSETransportTime3:
-                if (hasTransportData && hasTransportTime3)
+                if (hasTransportData && mi->bits.hasTransportTime3)
                     data >> mi->t_time3;
                 break;
             case MSEPitch:
-                if (hasPitch)
+                if (mi->bits.hasPitch)
                     data >> mi->pitch;
                 break;
             case MSEFallTime:
-                if (hasFallData)
+                if (mi->bits.hasFallData)
                     data >> mi->fallTime;
                 break;
             case MSEFallVerticalSpeed:
-                if (hasFallData)
+                if (mi->bits.hasFallData)
                     data >> mi->j_zspeed;
                 break;
             case MSEFallCosAngle:
-                if (hasFallData && hasFallDirection)
+                if (mi->bits.hasFallData && mi->bits.hasFallDirection)
                     data >> mi->j_cosAngle;
                 break;
             case MSEFallSinAngle:
-                if (hasFallData && hasFallDirection)
+                if (mi->bits.hasFallData && mi->bits.hasFallDirection)
                     data >> mi->j_sinAngle;
                 break;
             case MSEFallHorizontalSpeed:
-                if (hasFallData && hasFallDirection)
+                if (mi->bits.hasFallData && mi->bits.hasFallDirection)
                     data >> mi->j_xyspeed;
                 break;
             case MSESplineElevation:
-                if (hasSplineElevation)
+                if (mi->bits.hasSplineElevation)
                     data >> mi->splineElevation;
                 break;
             case MSEZeroBit:
@@ -17541,7 +17469,7 @@ void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
     { \
         if (check) \
         { \
-            sLog->outDebug(LOG_FILTER_UNITS, "WorldSession::ReadMovementInfo: Violation of MovementFlags found (%s). " \
+            sLog->outDebug(LOG_FILTER_UNITS, "Unit::ReadMovementInfo: Violation of MovementFlags found (%s). " \
                 "MovementFlags: %u, MovementFlags2: %u for player GUID: %u. Mask %u will be removed.", \
                 STRINGIZE(check), mi->GetMovementFlags(), mi->GetExtraMovementFlags(), GetGUIDLow(), maskToRemove); \
             mi->RemoveMovementFlag((maskToRemove)); \
@@ -17607,22 +17535,46 @@ void Unit::ReadMovementInfo(WorldPacket& data, MovementInfo* mi)
     #undef REMOVE_VIOLATING_FLAGS
 }
 
-void Unit::WriteMovementInfo(WorldPacket& data)
+void Unit::WriteMovementInfo(WorldPacket& data) const
 {
-    Unit* mover = GetCharmerGUID() ? GetCharmer() : this;
+    Unit const* mover = GetCharmerGUID() ? GetCharmer() : this;
+    if (Player const* player = ToPlayer())
+        mover = player->m_mover;
 
     bool hasMovementFlags = mover->GetUnitMovementFlags() != 0;
     bool hasMovementFlags2 = mover->GetExtraUnitMovementFlags() != 0;
     bool hasTimestamp = GetTypeId() == TYPEID_PLAYER ? (mover->m_movementInfo.time != 0) : true;
     bool hasOrientation = !G3D::fuzzyEq(mover->GetOrientation(), 0.0f);
-    bool hasTransportData = mover->GetTransport() != NULL;
-    bool hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
-    bool hasTransportTime3 = false;
-    bool hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
-    bool hasFallData = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_TURNING);
-    bool hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
-    bool hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
-    bool hasSpline = false;
+    bool hasTransportData = GetTransGUID() != 0;
+    bool hasSpline = mover->IsSplineEnabled();
+
+    bool hasTransportTime2;
+    bool hasTransportTime3;
+    bool hasPitch;
+    bool hasFallData;
+    bool hasFallDirection;
+    bool hasSplineElevation;
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        hasTransportTime2 = mover->m_movementInfo.bits.hasTransportTime2;
+        hasTransportTime3 = mover->m_movementInfo.bits.hasTransportTime3;
+        hasPitch = mover->m_movementInfo.bits.hasPitch;
+        hasFallData = mover->m_movementInfo.bits.hasFallData;
+        hasFallDirection = mover->m_movementInfo.bits.hasFallDirection;
+        hasSplineElevation = mover->m_movementInfo.bits.hasSplineElevation;
+    }
+    else
+    {
+        hasTransportTime2 = mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_INTERPOLATED_MOVEMENT);
+        hasTransportTime3 = false;
+        hasPitch = mover->HasUnitMovementFlag(MovementFlags(MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING)) || mover->HasExtraUnitMovementFlag(MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING);
+        hasFallDirection = mover->HasUnitMovementFlag(MOVEMENTFLAG_FALLING);
+        hasFallData = hasFallDirection; // FallDirection implies that FallData is set as well
+                                        // the only case when hasFallData = 1 && hasFallDirection = 0
+                                        // is for MSG_MOVE_LAND, which is handled above, in player case
+        hasSplineElevation = mover->HasUnitMovementFlag(MOVEMENTFLAG_SPLINE_ELEVATION);
+    }
 
     MovementStatusElements* sequence = GetMovementStatusElementsSequence(data.GetOpcode());
     if (!sequence)
@@ -17632,7 +17584,7 @@ void Unit::WriteMovementInfo(WorldPacket& data)
     }
 
     ObjectGuid guid = mover->GetGUID();
-    ObjectGuid tguid = hasTransportData ? GetTransport()->GetGUID() : 0;
+    ObjectGuid tguid = hasTransportData ? GetTransGUID() : 0;
 
     for (uint32 i = 0; i < MSE_COUNT; ++i)
     {
@@ -18319,8 +18271,7 @@ void Unit::SendMovementHover()
         ToPlayer()->SendMovementSetHover(HasUnitMovementFlag(MOVEMENTFLAG_HOVER));
 
     WorldPacket data(MSG_MOVE_HOVER, 64);
-    data.append(GetPackGUID());
-    BuildMovementPacket(&data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
@@ -18330,8 +18281,7 @@ void Unit::SendMovementWaterWalking()
         ToPlayer()->SendMovementSetWaterWalking(HasUnitMovementFlag(MOVEMENTFLAG_WATERWALKING));
 
     WorldPacket data(MSG_MOVE_WATER_WALK, 64);
-    data.append(GetPackGUID());
-    BuildMovementPacket(&data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
@@ -18341,16 +18291,14 @@ void Unit::SendMovementFeatherFall()
         ToPlayer()->SendMovementSetFeatherFall(HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW));
 
     WorldPacket data(MSG_MOVE_FEATHER_FALL, 64);
-    data.append(GetPackGUID());
-    BuildMovementPacket(&data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
 void Unit::SendMovementGravityChange()
 {
     WorldPacket data(MSG_MOVE_GRAVITY_CHNG, 64);
-    data.append(GetPackGUID());
-    BuildMovementPacket(&data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
@@ -18374,8 +18322,7 @@ void Unit::SendMovementCanFlyChange()
         ToPlayer()->SendMovementSetCanFly(CanFly());
 
     WorldPacket data(MSG_MOVE_UPDATE_CAN_FLY, 64);
-    data.append(GetPackGUID());
-    BuildMovementPacket(&data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 

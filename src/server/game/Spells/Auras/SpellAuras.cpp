@@ -1321,11 +1321,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         uaff->RefreshDuration();
             }
         }
-			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
-			{
-				if(caster->HasAura(91713)) // Nether ward talent
-					GetEffect(2)->SetAmount(91711);
-			}
 			if(GetId() == 17877 || GetId() == 6353 || GetId() == 50796) // Shadowburn, Soul Fire, Chaos Bolt
 			{
 				if(caster->HasAura(30293)) // Soul Leech 1
@@ -1348,6 +1343,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					caster->CastSpell(target,85547,true);
 				if(caster->HasAura(85479)) // Jinxs rank 2
 					caster->CastSpell(target,86105,true);
+			}
+			if(GetId() == 80240) // Bane of Havoc
+			{
+				if(apply)
+					caster->SetHavocTarget(target);
+				else
+					caster->SetHavocTarget(NULL);
 			}
  			if(GetId() == 702) // Curse of weakness
  			{
@@ -1551,6 +1553,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
     switch (GetSpellInfo()->SpellFamilyName)
     {
         case SPELLFAMILY_DRUID:
+		// Solar Eclipse Sunfire check
+		if (GetSpellInfo()->Id == 48517)
+		{
+			if (!caster)
+				return;
+			// Sunfire talent
+			if (apply && caster->HasAura(93401))
+				caster->CastSpell(caster,94338,true); // Moonfire swapper
+			else
+				caster->RemoveAurasDueToSpell(94338);
+		}
             // Enrage
             if ((GetSpellInfo()->SpellFamilyFlags[0] & 0x80000) && GetSpellInfo()->SpellIconID == 961)
             {

@@ -760,13 +760,17 @@ enum MovementFlags2
     MOVEMENTFLAG2_FULL_SPEED_TURNING       = 0x00000004,
     MOVEMENTFLAG2_FULL_SPEED_PITCHING      = 0x00000008,
     MOVEMENTFLAG2_ALWAYS_ALLOW_PITCHING    = 0x00000010,
-    MOVEMENTFLAG2_UNK7                     = 0x00000020,
-    MOVEMENTFLAG2_UNK8                     = 0x00000040,
-    MOVEMENTFLAG2_UNK9                     = 0x00000080,
-    MOVEMENTFLAG2_UNK10                    = 0x00000100,
-    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00000200,
-    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00000400,
-    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00000800
+    MOVEMENTFLAG2_UNK5                     = 0x00000020,
+    MOVEMENTFLAG2_UNK6                     = 0x00000040,
+    MOVEMENTFLAG2_UNK7                     = 0x00000080,
+    MOVEMENTFLAG2_UNK8                     = 0x00000100,
+    MOVEMENTFLAG2_UNK9                     = 0x00000200,
+    MOVEMENTFLAG2_UNK10                    = 0x00000400,
+    MOVEMENTFLAG2_UNK11                    = 0x00000800,
+    MOVEMENTFLAG2_UNK12                    = 0x00001000,
+    MOVEMENTFLAG2_INTERPOLATED_MOVEMENT    = 0x00002000,
+    MOVEMENTFLAG2_INTERPOLATED_TURNING     = 0x00004000,
+    MOVEMENTFLAG2_INTERPOLATED_PITCHING    = 0x00008000
 };
 
 enum UnitTypeMask
@@ -1788,6 +1792,17 @@ class Unit : public WorldObject
         uint32 GetDiseasesByCaster(uint64 casterGUID, bool remove = false);
         uint32 GetDoTsByCaster(uint64 casterGUID) const;
 
+	 std::list<uint32> m_soulswapdots; //Used by Soul Swap
+        Unit* m_havocTarget;
+        bool m_sburnMarked;
+        void MarkSoulBurn(bool apply) { m_sburnMarked = apply;}
+        std::list<AuraEffect const*> GetAuraDoTsByCaster(uint64 casterGUID); // Used by Soul Swap
+        inline void StoreSoulSwapDoTs(std::list<uint32> list){ m_soulswapdots = list; }; //Used by Soul Swap
+        inline std::list<uint32> GetSoulSwapDots() { return m_soulswapdots; } // Used by Soul Swap
+        void SetHavocTarget(Unit* target) { m_havocTarget = target; }
+	 bool isSoulBurnActive() { return HasAuraEffect(74434, 1); }
+
+
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype) const;
@@ -2109,9 +2124,8 @@ class Unit : public WorldObject
         void _ExitVehicle(Position const* exitPosition = NULL);
         void _EnterVehicle(Vehicle* vehicle, int8 seatId, AuraApplication const* aurApp = NULL);
 
-        void BuildMovementPacket(ByteBuffer *data) const;
         void ReadMovementInfo(WorldPacket& data, MovementInfo* mi);
-        void WriteMovementInfo(WorldPacket& data);
+        void WriteMovementInfo(WorldPacket& data) const;
 
         bool isMoving() const   { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING); }
         bool isTurning() const  { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_TURNING); }
