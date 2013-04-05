@@ -1351,6 +1351,14 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 				else
 					caster->SetHavocTarget(NULL);
 			}
+			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
+			{
+				if (caster->HasAura(91713)) // Nether ward talent
+					GetEffect(2)->SetAmount(91711);
+				else 
+					GetEffect(1)->SetAmount(6229);
+				
+			}
  			if(GetId() == 702) // Curse of weakness
  			{
  				if(apply)
@@ -1514,10 +1522,46 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 break;
             case SPELLFAMILY_ROGUE:
+               // Blackjack/Groggy on sap removal
+                else if(GetId() == 6770)
+                {
+                    if(caster->HasAura(79125)) // Rank 2
+                        caster->CastSpell(target, 79126, true);
+                    else if(caster->HasAura(79123)) // Rank 1
+                        caster->CastSpell(target, 79124, true);
+                }
                 // Remove Vanish on stealth remove
                 if (GetId() == 1784)
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
-                break;
+
+                        // Rupture & venomeous wounds energy regain at target's death
+                       if(GetId() == 1943 && removeMode == AURA_REMOVE_BY_DEATH &&    // If rupture's target dies
+                         (caster->HasSpell(79133) || caster->HasSpell(79134)))            // Only if has talent
+                        {
+                            float chance;
+                            uint32 energy = 0, talentId = 79134, remainingTicks;
+                            if (AuraEffect* aurEff = GetEffect(0))
+                            {
+                                remainingTicks = aurEff->GetTotalTicks() - aurEff->GetTickNumber();
+
+                                if(caster->HasSpell(79133))
+                                {
+                                    chance = 30.0f;
+                                    talentId = 79133;
+                                }
+                                else
+                                    chance = 60.0f;
+                        
+                                // for each remaining tick, calculate chances
+                                for(remainingTicks; remainingTicks > 0; remainingTicks--)
+                                    if(roll_chance_f(chance))
+                                        energy += 10;
+
+                        // Give energy
+                        caster->EnergizeBySpell(caster, talentId, energy, POWER_ENERGY);        // Hacky too, isn't it ?
+                         }
+                      }
+			break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
                 if (GetId() == 25771 && target->HasAura(61988) && !target->HasAura(61987))

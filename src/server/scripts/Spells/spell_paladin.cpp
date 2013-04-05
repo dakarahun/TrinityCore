@@ -852,10 +852,10 @@ class spell_pal_sacred_shield : public SpellScriptLoader
             {
                 Unit* caster = GetCaster();
                 if (caster->GetTypeId() != TYPEID_PLAYER)
-                    return SPELL_FAILED_DONT_REPORT;
+                    return SPELL_FAILED_BAD_TARGETS;
 
                 if (!caster->HealthBelowPct(30))
-                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                    return SPELL_FAILED_BAD_TARGETS;
 
                 return SPELL_CAST_OK;
             }
@@ -1228,13 +1228,6 @@ class spell_pal_selfless_healer : public SpellScriptLoader
                             break;
                         }
                     }
-			if (caster->HasAura(90811))
-                     {
-			    caster->RemoveAurasDueToSpell(90811);
-			    caster->CastCustomSpell(caster, 90811, &amount, NULL, NULL, true);
-                     }
-			else
-			    caster->CastCustomSpell(caster, 90811, &amount, NULL, NULL, true);
                 }
             }
 
@@ -1541,7 +1534,8 @@ class spell_pal_judgements : public SpellScriptLoader
             void HandleDummy(SpellEffIndex /*effIndex*/)
             {
                 Unit* caster = GetCaster();
-                Unit* target = GetHitUnit();
+                if (Unit* target = GetHitUnit())
+		  {
                 int32 regen = 0;
 
          	   if (caster->HasAura(89901)) // Jugements of the bold
@@ -1574,8 +1568,7 @@ class spell_pal_judgements : public SpellScriptLoader
                     		caster->CastSpell(caster, 87188 , true);
 		   if (caster->HasAura(53557)) 
                     		caster->CastSpell(caster, 87189, true);
-
-
+		 }
             } 
 
 
@@ -1590,6 +1583,7 @@ class spell_pal_judgements : public SpellScriptLoader
             return new spell_pal_judgements_SpellScript();
         }
 };
+
 
 // Spell Id: 31884
 class spell_pal_avenging_shield: public SpellScriptLoader
@@ -1608,7 +1602,7 @@ public:
             {
                 int32 damage = GetHitDamage();
                 if (!damage)
-                    damage = 14 * caster->getLevel() + 14;
+                    damage = 29 * caster->getLevel() + 14;
                   
                 damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.15);
 
@@ -1645,9 +1639,9 @@ public:
             {
                 int32 damage = GetHitDamage();
                 if (!damage)
-                    damage = 19 * caster->getLevel() + 15;
+                    damage = 36 * caster->getLevel() + 17;
                   
-                damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.14) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.19);
+                damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.2);
 
                 SetHitDamage(damage);
             }
@@ -1680,18 +1674,16 @@ public:
        {
             if (Unit* caster = GetCaster())
             {
-                damage = (15 * caster->getLevel()) + 17;
+              int32 damage = (27 * caster->getLevel()) + 21;
 
-                damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.06) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.23);
+                damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.08) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.23);
 		  
 		     if (caster->HasAura(86700))
 		     {
-                     	Aura* ancientpower = caster->GetAura(86700);
-		       	damage += damage * ancientpower->GetStackAmount();
-				damage /= 3;
+                           if (Aura* ancientpower = caster->GetAura(86700))
+		       		damage += damage * ancientpower->GetStackAmount();
+			damage /= 2;
 		     }
-		    
-		
 
                 SetHitDamage(damage);
             }
@@ -1708,7 +1700,6 @@ public:
         return new spell_pal_exorcism_SpellScript();
     }
 };
-
 
 
 
@@ -1741,5 +1732,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_judgements();
     new spell_pal_avenging_shield();
     new spell_pal_hammer_of_wrath();
-    new spell_pal_exorcism();
+    new spell_pal_exorcism(); 
 }

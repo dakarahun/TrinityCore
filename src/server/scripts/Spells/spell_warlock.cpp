@@ -64,7 +64,9 @@ enum WarlockSpells
     SPELL_WARLOCK_DRAIN_LIFE                        = 89653,
     SPELL_WARLOCK_SOUL_SHARD                        = 95810,
     SPELL_WARLOCK_DARK_INTENT_EFFECT                = 85767,
-    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117
+    SPELL_WARLOCK_UNSTABLE_AFFLICTION_DISPEL        = 31117,
+    SPELL_WARLOCK_NETHER_WARD                       = 91713,
+    SPELL_WARLOCK_DEMONIC_PACT_SPELL                = 53646
 };
 
 enum WarlockSpellIcons
@@ -1049,7 +1051,7 @@ class spell_warl_fel_armor: public SpellScriptLoader
 
        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount,  bool & /*canBeRecalculated*/) 
       {
-           amount = 10;
+           amount = 8; // 8%
        }
 
        void Register()
@@ -1074,11 +1076,18 @@ public:
     {
         PrepareSpellScript(spell_warl_nether_ward_swap_supressor_SpellScript);
 
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(91713))
+                    return false;
+                return true;
+            }
+
         void PreventSwapApplicationOnCaster(WorldObject*& target)
         {
             // If the warlock doesnt have the Nether Ward talent,
             // do not allow the swap effect to hit the warlock
-            if (!GetCaster()->HasAura(WARLOCK_NETHER_WARD))
+            if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
                 target = NULL;
         }
 
@@ -1094,8 +1103,77 @@ public:
     }
 };
 
+// 47236 - Demonic Pact
+class spell_warl_demonic_pact: public SpellScriptLoader {
+public:
+    spell_warl_demonic_pact() : SpellScriptLoader("spell_warl_demonic_pact") {}
 
-void
+    class spell_warl_demonic_pact_AuraScript: public AuraScript
+    {
+        PrepareAuraScript(spell_warl_demonic_pact_AuraScript);
+
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(SPELL_WARLOCK_DEMONIC_PACT_SPELL))
+                return false;
+
+            return true;
+        }
+
+        void HandleEffectApply(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            Unit* target = GetTarget();
+           
+            if (Unit *caster = aurEff->GetBase()->GetCaster())
+                if (caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARLOCK, 3220, 0))
+                    if (target->isPet())
+                        target->CastSpell(target, SPELL_WARLOCK_DEMONIC_PACT_SPELL, true, NULL, aurEff);
+        }
+
+        void Register()
+        {
+            OnEffectApply += AuraEffectApplyFn(spell_warl_demonic_pact_AuraScript::HandleEffectApply, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript *GetAuraScript() const {
+        return new spell_warl_demonic_pact_AuraScript();
+    }
+};
+
+/// 71521 hand of Gul dan
+class spell_warl_hand_of_guldan : public SpellScriptLoader
+{
+    public:
+        spell_warl_hand_of_guldan() : SpellScriptLoader("spell_warl_hand_of_guldan") { }
+
+        class spell_warl_hand_of_guldan_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warl_hand_of_guldan_SpellScript);
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+
+		   if (caster->HasAura(89604)) // Aura of Fooreboding
+                    		caster->CastSpell(target, 93975, true);
+		   if (caster->HasAura(89605)) 
+                    		caster->CastSpell(target, 93986, true);
+            } 
+
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warl_hand_of_guldan_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warl_hand_of_guldan_SpellScript();
+        }
+};
 
 void AddSC_warlock_spell_scripts()
 {
@@ -1123,4 +1201,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_dark_intent();
     new spell_warl_fel_armor();
     new spell_warl_nether_ward_swap_supressor();
+    new spell_warl_demonic_pact();
+    new spell_warl_hand_of_guldan();
 }

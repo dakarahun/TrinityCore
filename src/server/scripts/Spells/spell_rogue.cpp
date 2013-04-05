@@ -35,6 +35,7 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
+    SPELL_ROGUE_RAPTURE                          = 1943
 };
 
 enum RogueSpellIcons
@@ -221,7 +222,7 @@ class spell_rog_deadly_poison : public SpellScriptLoader
                         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(enchant->spellid[s]);
                         if (!spellInfo)
                         {
-                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::CastItemCombatSpell Enchant %i, player (Name: %s, GUID: %u) cast unknown spell %i", enchant->ID, player->GetName(), player->GetGUIDLow(), enchant->spellid[s]);
+                            //sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player::CastItemCombatSpell Enchant %i, player (Name: %s, GUID: %u) cast unknown spell %i", enchant->ID, player->GetName(), player->GetGUIDLow(), enchant->spellid[s]);
                             continue;
                         }
 
@@ -677,6 +678,60 @@ class spell_rog_shadowstep : public SpellScriptLoader
         }
 };
 
+
+// 2098  - Eviscerate - Updated to 4.3.4
+class spell_rog_eviscerate : public SpellScriptLoader
+{
+    public:
+        spell_rog_eviscerate() : SpellScriptLoader("spell_rog_eviscerate") { }
+
+        class spell_rog_eviscerate_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_rog_eviscerate_SpellScript);
+
+            void OnHitTarget(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+                uint8 cp = caster->ToPlayer()->GetComboPoints();
+		  int32 chance;
+
+		  if (caster->HasAura(14171))
+			chance = 10;
+                elseif (caster->HasAura(14172))
+			chance = 20;
+		 if (cp > 5)
+		    cp = 5;
+
+		  chance = chance * cp; // Chance * CP (20 * 5) = 100
+
+		  if (!roll_chance_i(chance))
+			return;
+ 
+                Aura* aura = target->GetAura(SPELL_ROGUE_RAPTURE, caster->GetGUID());
+
+                if (!aura)
+                    return;
+
+                int32 newDuration = aura->GetDuration() + GetSpellInfo()->Effects[EFFECT_1].CalcValue() * 9000;
+                aura->SetDuration(std::min(newDuration, aura->GetMaxDuration()));
+
+                aura->RefreshDuration();
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_rog_eviscerate_SpellScript::OnHitTarget, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_rog_eviscerate_SpellScript;
+        }
+};
+
+
 void AddSC_rogue_spell_scripts()
 {
     new spell_rog_blade_flurry();
@@ -691,4 +746,5 @@ void AddSC_rogue_spell_scripts()
     new spell_rog_tricks_of_the_trade();
     new spell_rog_tricks_of_the_trade_proc();
     new spell_rog_shadowstep();
+    new spell_rog_eviscerate();
 }

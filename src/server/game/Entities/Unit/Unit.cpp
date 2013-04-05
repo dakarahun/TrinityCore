@@ -813,46 +813,22 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
-
-  if(victim && victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
-    {
-        int32 atkpwr = damage * 0.05f;
-        
-        if(AuraEffect* vng = victim->GetAuraEffect(76691,0)) // If already have Vengeance buff
-                atkpwr += vng->GetAmount();
-        if(atkpwr > int32(victim->CountPctFromMaxHealth(10)))
-            atkpwr = int32(victim->CountPctFromMaxHealth(10));
-        victim->RemoveAurasDueToSpell(76691);
-        victim->CastCustomSpell(victim, 76691, &atkpwr, &atkpwr, NULL, true);
-		victim->GetAura(76691)->SetDuration(30000);
-    }
-    if(victim && victim->HasAura(84840) && victim->HasAura(5487)) // Vengeance Feral
-    {
-        if(victim->GetShapeshiftForm() == FORM_BEAR)
-        {
-            int32 atkpwr = damage * 0.05f;
-            if(AuraEffect* vng = victim->GetAuraEffect(76691,0)) // If already have Vengeance buff
-                    atkpwr += vng->GetAmount();
-            if(atkpwr > int32(victim->CountPctFromMaxHealth(10)))
-                atkpwr = int32(victim->CountPctFromMaxHealth(10));
-            victim->RemoveAurasDueToSpell(76691);
-            victim->CastCustomSpell(victim, 76691, &atkpwr, &atkpwr, NULL, true);
-			victim->GetAura(76691)->SetDuration(30000);
-        }
-        else
-            victim->RemoveAurasDueToSpell(76691);
-    }
-    if(spellProto && m_havocTarget != NULL && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455)
+    /*
+   if(spellProto && m_havocTarget && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455 && m_havocTarget != NULL)
     {
         int32 dmg = int32(damage * 0.15f);
-        CastCustomSpell(m_havocTarget,85455,&dmg,NULL,NULL,true); // Bane of Havoc
+	 dmg /= 1.85f;
+        CastCustomSpell(m_havocTarget, 10444, &dmg, NULL, NULL, true); // Bane of Havoc 
+    }*/
+
+    if(spellProto && Unit* target = SelectNearbyTarget() && HasAura(13877)) 
+    {
+        CastCustomSpell(target, 22482, &damage, NULL, NULL, true); // Blade flurry
     }
-    
-    if(HasAura(84590)) // Deadly Momentum
-        RemoveAurasDueToSpell(84590);
+   
+    sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
+
     return damage;
-}
 }
 
 void Unit::CastStop(uint32 except_spellid)
@@ -4226,6 +4202,53 @@ uint32 Unit::GetDiseasesByCaster(uint64 casterGUID, bool remove)
     }
     return diseases;
 }
+/*
+std::list<AuraEffect const*> Unit::GetAuraDoTsByCaster(uint64 casterGUID)
+{
+    static const AuraType diseaseAuraTypes[] =
+    {
+        SPELL_AURA_PERIODIC_DAMAGE,
+        SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
+        SPELL_AURA_NONE
+    };
+
+    std::list<AuraEffect const*> dotList;
+    for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
+    {
+        Unit::AuraEffectList const& auras = GetAuraEffectsByType(*itr);
+        for (AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+        {
+            // Get auras by caster
+            if ((*i)->GetCasterGUID() == casterGUID)
+                dotList.push_back((*i));
+        }
+    }
+    return dotList;
+}*/
+
+std::list<AuraEffect const*> Unit::GetAuraDoTsByCaster(uint64 casterGUID)
+{
+    static const AuraType diseaseAuraTypes[] =
+    {
+        SPELL_AURA_PERIODIC_DAMAGE,
+        SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
+        SPELL_AURA_NONE
+    };
+
+    std::list<AuraEffect const*> dotList;
+    for (AuraType const* itr = &diseaseAuraTypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
+    {
+        Unit::AuraEffectList const& auras = GetAuraEffectsByType(*itr);
+        for (AuraEffectList::const_iterator i = auras.begin(); i != auras.end(); ++i)
+        {
+            // Get auras by caster
+            if ((*i)->GetCasterGUID() == casterGUID)
+                dotList.push_back((*i));
+        }
+    }
+    return dotList;
+}
+
 
 uint32 Unit::GetDoTsByCaster(uint64 casterGUID) const
 {
@@ -5844,6 +5867,25 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         }
         case SPELLFAMILY_PRIEST:
         {
+            // Shadowy Apparition
+            if (dummySpell->SpellIconID == 4879)
+            {
+                if (!victim || !victim->isAlive())
+                    return false;
+
+                int32 roll_chance = dummySpell->Effects[EFFECT_0].CalcValue();
+
+                if(ToPlayer()->isMoving())
+                        roll_chance *= int32(dummySpell->Effects[EFFECT_1].CalcValue() / 3);
+
+                // Summon Shadowy Apparition
+                if (roll_chance_i(roll_chance))
+                {
+                    ToPlayer()->CastSpell(ToPlayer(), 87212, true, castItem, triggeredByAura);
+                    return true;
+                }
+                return false;
+            }   
             // Vampiric Touch
             if (dummySpell->SpellFamilyFlags[1] & 0x00000400)
             {
@@ -6143,6 +6185,19 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 32747;
                     break;
                 }
+                case 79134: // Venomous wounds
+                {
+                    triggered_spell_id = 79136;
+                        CastCustomSpell(51637, SPELLVALUE_BASE_POINT0, 10, this, true);
+                    break;
+                }
+                case 79133: // Venomous wounds
+                {
+                    triggered_spell_id = 79136;
+                     CastCustomSpell(51637, SPELLVALUE_BASE_POINT0, 10, this, true);
+                    break;
+                }
+                break;
                 // Item - Druid T10 Balance 4P Bonus
                 case 70723:
                 {
@@ -7655,18 +7710,21 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
             break;
         }
         case SPELLFAMILY_ROGUE:
-            switch(dummySpell->Id)
+        {
+            // Gouge
+            if (dummySpell->Id == 1776)
             {
-                // Gouge
-                case 1776:
+                // Prevent drop aura from itself 
+                if (procSpell && procSpell->Id == 1776)
+                {
                     *handled = true;
-                    // Check so gouge spell effect [1] (SPELL_EFFECT_SCHOOL_DAMAGE) cannot cancel stun effect
-                    if(procSpell && procSpell->Id == 1776)
-                        return false;
-                    return true;
-                break;
+                    return false;
+                    break;
+                }
+
             }
-            break;
+	    break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             switch (dummySpell->Id)
@@ -7770,17 +7828,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 					// Reactive Barrier
 					case 86303: // Rank 1
 						trigger_spell_id = 11426;
-						if (!HealthBelowPctDamaged(50, damage) && ToPlayer()->GetSpellCooldownDelay(11426) > 20)
+						if (!HealthBelowPctDamaged(50, damage))
 							return false;
                    				if (roll_chance_i(50.0f))
 							CastSpell(this, trigger_spell_id, true);
 						break;
 					case 86304: // Rank 2
 						trigger_spell_id = 11426;
-						if (!HealthBelowPctDamaged(50, damage) && ToPlayer()->GetSpellCooldownDelay(11426) > 20)
+						if (!HealthBelowPctDamaged(50, damage))
 							return false;
-						CastSpell(this, trigger_spell_id, true);
-						break;
+				       CastSpell(this, trigger_spell_id, true);
+					break;
+
                     case 64568:             // Blood Reserve
                     {
                         if (HealthBelowPctDamaged(35, damage))
@@ -7945,6 +8004,20 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = this;
                         break;
                     }
+       		 // Sacred Shield
+       		 case 85285:
+       		 {
+			 	if (HealthBelowPctDamaged(30, damage))
+			 	{
+           				 int32 ap = int32(ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+           				 basepoints0 = int32(CalculatePct(ap, 280));
+
+	    		 		CastCustomSpell(this, 96263, &basepoints0, NULL, NULL, true);
+           				 break;
+       	      		 }
+				 return false;
+			    break;
+			}
                     // Soul Preserver
                     case 60510:
                     {
@@ -8095,14 +8168,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 // Nether Protection
                 if (auraSpellInfo->SpellIconID == 1985)
                 {
-			int32 rank = 1;
-
-			if (m_caster->HasAura(30301))
-			    rank = 2;
-
-			if (!roll_chance_i(15*rank))
-			 	return false;
-
+                    if (!procSpell)
+                        return false;
                     switch (GetFirstSchoolInMask(procSpell->GetSchoolMask()))
                     {
                         case SPELL_SCHOOL_NORMAL:
@@ -8397,17 +8464,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                     return true;
             }
             return false;
-        }
-        // Sacred Shield
-        case 85285:
-        {
-            if (!HealthBelowPctDamaged(30, damage))
-                return false;
-
-            int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
-            basepoints0 = int32(CalculatePct(ap, 280));
-	     CastCustomSpell(this, 96263, &basepoints0, NULL, NULL, true, NULL, triggeredByAura);
-            break;
         }
         // Culling the Herd
         case 70893:
@@ -10093,19 +10149,10 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask) const
 
         uint32 spellPower = ToPlayer()->GetBaseSpellPowerBonus();
 
-
-
        // Spell power from SPELL_AURA_MOD_SPELL_POWER_PCT
         AuraEffectList const& mSpellPowerPct = GetAuraEffectsByType(SPELL_AURA_MOD_SPELL_POWER_PCT);
         for (AuraEffectList::const_iterator i = mSpellPowerPct.begin(); i != mSpellPowerPct.end(); ++i)
         {
-      	 	 // Fel Armor
-      		  if (ToPlayer()->HasAura(28176))
-		  {
-			int32 add_spellPower += ToPlayer()->getLevel() * 7.55 + 11;
-			AddPct(add_spellPower, (*i)->GetAmount());
-		  }
-
             AddPct(spellPower, (*i)->GetAmount());
         }
         DoneAdvertisedBenefit += spellPower;
@@ -18076,6 +18123,53 @@ void Unit::SendClearTarget()
     data.append(GetPackGUID());
     SendMessageToSet(&data, false);
 }
+
+bool Unit::IsVisionObscured(Unit* victim)
+{
+    Aura* victimAura = NULL;
+    Aura* myAura = NULL;
+    Unit* victimCaster = NULL;
+    Unit* myCaster = NULL;
+
+    AuraEffectList const& vAuras = victim->GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
+    for (AuraEffectList::const_iterator i = vAuras.begin(); i != vAuras.end(); ++i)
+    {
+        victimAura = (*i)->GetBase();
+        victimCaster = victimAura->GetCaster();
+        break;
+    }
+    AuraEffectList const& myAuras = GetAuraEffectsByType(SPELL_AURA_INTERFERE_TARGETTING);
+    for (AuraEffectList::const_iterator i = myAuras.begin(); i != myAuras.end(); ++i)
+    {
+        myAura = (*i)->GetBase();
+        myCaster = myAura->GetCaster();
+        break;
+    }
+
+    if ((myAura != NULL && myCaster == NULL) || (victimAura != NULL && victimCaster == NULL))
+        return false; // Failed auras, will result in crash
+
+    // E.G. Victim is in smoke bomb, and I'm not
+    // Spells fail unless I'm friendly to the caster of victim's smoke bomb
+    if (victimAura != NULL && myAura == NULL)
+    {
+        if (IsFriendlyTo(victimCaster))
+            return false;
+        else
+            return true;
+    }
+    // Victim is not in smoke bomb, while I am
+    // Spells fail if my smoke bomb aura's caster is my enemy
+    else if (myAura != NULL && victimAura == NULL)
+    {
+        if (IsFriendlyTo(myCaster))
+            return false;
+        else
+            return true;
+    }
+    return false;
+}
+
 
 uint32 Unit::GetResistance(SpellSchoolMask mask) const
 {

@@ -371,6 +371,19 @@ class spell_pri_mind_sear : public SpellScriptLoader
         {
             PrepareSpellScript(spell_pri_mind_sear_SpellScript);
 
+            SpellCastResult CheckCast()
+            {
+                Unit* caster = GetCaster();
+                if (Unit* target = GetExplTargetUnit())
+                {
+                    if (caster == target)
+                         return SPELL_FAILED_BAD_TARGETS;
+                }
+                else
+                    return SPELL_FAILED_BAD_TARGETS;
+                return SPELL_CAST_OK;
+            }
+
             void FilterTargets(std::list<WorldObject*>& unitList)
             {
                 unitList.remove_if(Trinity::ObjectGUIDCheck(GetCaster()->GetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT)));

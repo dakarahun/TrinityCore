@@ -3008,6 +3008,27 @@ void SpellMgr::LoadSpellInfoCorrections()
                 spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
                 spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
                 break;
+            case 2825:  // Bloodlust
+                spellInfo->Effects[0].TriggerSpell = 57724; // Sated
+                break;
+            case 22482: // Blade Flurry
+            spellInfo->AttributesEx4 |= 0x00000100;
+            break;
+            case 80353:  // Time Warp
+                spellInfo->Effects[0].TriggerSpell = 80354; // Temporal Displacement
+                break;
+            case 90355:  // Ancient Hysteria
+                spellInfo->Effects[0].TriggerSpell = 95809; // Insanity
+                break;
+             // Purification, hotfix 4.0.6
+            case 16213:
+                spellInfo->Effects[0].BasePoints = 25;
+                spellInfo->Effects[1].BasePoints = 25;
+                break;
+            case 26573: // Consecration
+                spellInfo->Effects[1].TriggerSpell = 82366;
+                spellInfo->Effects[2].TriggerSpell = 36946;
+                break;
             case 31344: // Howl of Azgalor
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_100_YARDS); // 100yards instead of 50000?!
                 break;

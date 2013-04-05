@@ -525,8 +525,8 @@ public:
                             if (Creature* creature = me->SummonCreature(Boss[uiBossRandom].uiBoss, SpawnPosition[2], TEMPSUMMON_CORPSE_DESPAWN, 1000))
                                 creature->AI()->SetData(1, uiBossRandom);
                             uiPhase = 0;
-                            break;
-                    }
+                            break; 
+                    } 
                 }else uiTimer -= uiDiff;
             }
         }

@@ -1047,6 +1047,7 @@ struct GlobalCooldown
 };
 
 typedef UNORDERED_MAP<uint32 /*category*/, GlobalCooldown> GlobalCooldownList;
+typedef UNORDERED_MAP<uint32, uint32> SpellsCastedInRow;
 
 class GlobalCooldownMgr                                     // Shared by Player and CharmInfo
 {
@@ -1315,6 +1316,18 @@ class Unit : public WorldObject
         uint32 m_extraAttacks;
         bool m_canDualWield;
 
+        int32 m_lastSpellCasted;
+        SpellsCastedInRow m_spellsinrow;
+
+        uint32 GetTimesCastedInRow(uint32 spellid)
+        {
+            SpellsCastedInRow::iterator itr = m_spellsinrow.find(spellid);
+            if(itr != m_spellsinrow.end())
+                return itr->second;
+           return NULL;
+       }
+        inline int32 getLastSpellCasted() const { return m_lastSpellCasted ? m_lastSpellCasted : 0; }
+
         void _addAttacker(Unit* pAttacker);                  // must be called only from Unit::Attack(Unit*)
         void _removeAttacker(Unit* pAttacker);               // must be called only from Unit::AttackStop()
         Unit* getAttackerForHelper() const;                 // If someone wants to help, who to give them
@@ -1332,6 +1345,8 @@ class Unit : public WorldObject
         Unit* SelectNearbyTarget(Unit* exclude = NULL, float dist = NOMINAL_MELEE_RANGE) const;
         void SendMeleeAttackStop(Unit* victim = NULL);
         void SendMeleeAttackStart(Unit* victim);
+
+        bool IsVisionObscured(Unit* victim);
 
         void AddUnitState(uint32 f) { m_state |= f; }
         bool HasUnitState(const uint32 f) const { return (m_state & f); }
@@ -1800,8 +1815,7 @@ class Unit : public WorldObject
         inline void StoreSoulSwapDoTs(std::list<uint32> list){ m_soulswapdots = list; }; //Used by Soul Swap
         inline std::list<uint32> GetSoulSwapDots() { return m_soulswapdots; } // Used by Soul Swap
         void SetHavocTarget(Unit* target) { m_havocTarget = target; }
-	 bool isSoulBurnActive() { return HasAuraEffect(74434, 1); }
-
+	 //bool isSoulBurnActive() { return HasAuraEffect(74434, 1); }
 
         int32 GetTotalAuraModifier(AuraType auratype) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;

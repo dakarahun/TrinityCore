@@ -504,11 +504,12 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         if (roll_chance_f(100.0f))
                             m_caster->CastSpell(unitTarget, 18118, true);
                 }
+
 	          switch(m_spellInfo->Id)
                 {
  		      case 5676: // Searing Pain
                     {
-                        if(m_caster->isSoulBurnActive())
+                        if(m_caster->HasAura(74434))
                         {
                             m_caster->CastSpell(m_caster,79440,true);
                             m_caster->RemoveAurasDueToSpell(74434);
@@ -541,7 +542,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                         break;
                     }
-   			case 86121: // Soul Swap
+   		      case 86121: // Soul Swap
                     {
                         m_caster->CastSpell(m_caster,86211,true); //This is the buff that overrides Soul Swap with Soul Swap: Exhale
                         std::list<AuraEffect const*> dotsList = unitTarget->GetAuraDoTsByCaster(m_caster->GetGUID());
@@ -556,7 +557,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                         }
                         if(m_caster->HasAura(56226)) //Glyph of Soul Swap
-                            m_caster->CastSpell(m_caster,94229,true); //The cooldown marker
+                            m_caster->CastSpell(m_caster, 94229, true); //The cooldown marker
                         m_caster->StoreSoulSwapDoTs(lst);
                         break;
                     }
@@ -573,8 +574,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                         }
                         else
-                            sLog->outError(LOG_FILTER_SPELLS_AURAS, "Player (GUID %u) tried to release Soul Swap stored dots without having any previously stored dot",m_caster->GetGUIDLow());
                         m_caster->RemoveAurasDueToSpell(86211);
+
+                        if(m_caster->HasAura(56226)) //Glyph of Soul Swap
+                            m_caster->CastSpell(m_caster, 94229, true); //The cooldown marker
                         break;
                     }
 		   break;
@@ -1516,17 +1519,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                             AddPct(damage, 25*fof->GetCharges()); 
 				  m_caster->RemoveAurasDueToSpell(44544); 
                         break;
-                case 82731: // Flame Orb
+                    case 82731: // Flame Orb
                     {
-                        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-			   {
-                           if (m_caster->HasAura(84726))
-                           		 m_caster->CastSpell(m_caster, 84714, true); // Frostfire Orb
-			      else if (m_caster->HasAura(84727))
-                           		 m_caster->CastSpell(m_caster, 84714, true); // Frostfire Orb
-                           else                          
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)                         
                            		 m_caster->CastSpell(m_caster, 84765, true); // Summon Flame Orb
-			  }
+                        break;
+                    }
+                    case 92283: // Frostfire Orb
+                    {
+                        if (m_caster->GetTypeId() == TYPEID_PLAYER)                         
+                           		 m_caster->CastSpell(m_caster, 84714, true); // Summon Frostfire Orb
                         break;
                     }
                     case 1459: // Arcane Brilliance
@@ -1738,51 +1740,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     if (m_caster->ToPlayer()->HasSpell(31935)) // Avenger's shield
                         m_caster->CastSpell(m_caster,86659,true);
                     return;
+		    break;
                 }
-           /*   case 19740: // Blessing of Might
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        std::list<Unit*> PartyMembers;
-                        m_caster->GetPartyMembers(PartyMembers);
-
-                        if (PartyMembers.size() > 1)
-                            m_caster->CastSpell(unitTarget, 79102, true); // Blessing of Might (Raid)
-                        else
-                            m_caster->CastSpell(unitTarget, 79101, true); // Blessing of Might (Caster)
-                    }
-                    break;
-                }             
-	         case 20217: // Blessing of Kings
-                {
-                    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        std::list<Unit*> PartyMembers;
-                        m_caster->GetPartyMembers(PartyMembers);
-                        bool Continue = false;
-                        uint32 player = 0;
-                        for (std::list<Unit*>::iterator itr = PartyMembers.begin(); itr != PartyMembers.end(); ++itr) // If caster is in party with a player
-                        {
-                            ++player;
-                            if (Continue == false && player > 1)
-                                Continue = true;
-                        }
-                        if (Continue == true)
-                            m_caster->CastSpell(unitTarget, 79063, true); // Blessing of Kings (Raid)
-                        else
-                            m_caster->CastSpell(unitTarget, 79062, true); // Blessing of Kings (Caster)
-                    }
-                    break;
-                }*/
-                 case 85285: // Sacred Shield proc
-                 {
-                 		 int32 ap = int32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
-	         		 int32 absorb = int32(CalculatePct(ap, 280));
-
-		 		  m_caster->CastCustomSpell(m_caster, 96263, &absorb, NULL, NULL, true);
-			break;
-                 }
-                 case 31789:                                 // Righteous Defense (step 1)
+                 case 31789:  // Righteous Defense (step 1)
                 {
                     // Clear targets for eff 1
                     for (std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
@@ -1809,7 +1769,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 
                     // now let next effect cast spell at each target.
                     return;
+		   break;
                 }
+		break;
             }
             break;
         case SPELLFAMILY_SHAMAN:
@@ -5413,7 +5375,48 @@ void Spell::EffectAddComboPoints(SpellEffIndex /*effIndex*/)
     if (damage <= 0)
         return;
 
-    m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);
+   Player* player = m_caster->m_movedPlayer;
+
+    if (damage > 0)
+        player->AddComboPoints(unitTarget, damage, this);
+    else
+    {
+        // Rogue: Redirect
+        if (GetSpellInfo()->Id == 73981 && player->GetComboPoints() > 0 && player->GetComboTarget())
+            player->AddComboPoints(unitTarget, player->GetComboPoints(), this);
+    }
+
+    if (m_spellInfo->Id == 1752 || m_spellInfo->Id == 84617) // Sinister Strike and Revealing Strike
+    {
+        uint32 times = m_caster->GetTimesCastedInRow(1752);
+        times += m_caster->GetTimesCastedInRow(84617);
+
+        if (m_caster->HasAura(84654)) // It shouldn't count while under effect of last aura.
+            return;
+
+        if (m_caster->HasAura(84652) && !m_caster->HasAura(84654)) // Bandit's Guile Rank 1
+            if (roll_chance_i(33))
+                times += 1;
+            else if (m_caster->HasAura(84653) && !m_caster->HasAura(84654)) // Bandit's Guile Rank 2
+                if (roll_chance_i(66))
+                    times += 1;
+                else if (m_caster->HasAura(84654) && !m_caster->HasAura(84654)) // Bandit's Guile Rank 3
+                    times += 1;
+
+        if (times == 4)
+            m_caster->CastSpell(m_caster, 84745, true);
+
+        else if (times == 8)
+            m_caster->CastSpell(m_caster, 84746, true);
+
+        else if (times == 12)
+        {
+            times = 0;
+            m_caster->CastSpell(m_caster, 84747, true);
+        }
+    }
+
+   // m_caster->m_movedPlayer->AddComboPoints(unitTarget, damage, this);
 }
 
 void Spell::EffectDuel(SpellEffIndex effIndex)
