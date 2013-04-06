@@ -813,21 +813,25 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
     }
 
-    /*
-   if(spellProto && m_havocTarget && GetTypeId() == TYPEID_PLAYER && spellProto->Id != 85455 && m_havocTarget != NULL)
+    sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
+
+   if (spellProto && m_havocTarget && GetTypeId() == TYPEID_PLAYER && m_havocTarget != NULL)
     {
         int32 dmg = int32(damage * 0.15f);
 	 dmg /= 1.85f;
         CastCustomSpell(m_havocTarget, 10444, &dmg, NULL, NULL, true); // Bane of Havoc 
-    }*/
+    }
 
-    if(spellProto && Unit* target = SelectNearbyTarget() && HasAura(13877)) 
+    if (spellProto && HasAura(13877)) 
     {
-        CastCustomSpell(target, 22482, &damage, NULL, NULL, true); // Blade flurry
+	Unit* target = SelectNearbyTarget();
+	if (target && !target->IsFriendlyTo(this))
+	{
+        int32 dmg = int32(damage);
+        CastCustomSpell(target, 22482, &dmg, NULL, NULL, true); // Blade flurry
+	}
     }
    
-    sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
-
     return damage;
 }
 
@@ -5968,6 +5972,13 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     RemoveMovementImpairingAuras();
                     break;
                 }
+		  case 81781: // Power word: Barrier Buff Check Target
+		  {
+		   if (!target->IsFriendlyTo(this))
+			return false;
+
+		   break;
+		  }
                 // Glyph of Dispel Magic
                 case 55677:
                 {
@@ -7825,21 +7836,27 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         if (GetStat(STAT_SPIRIT)   > stat) { trigger_spell_id = 60235;                               }
                         break;
                     }
-					// Reactive Barrier
-					case 86303: // Rank 1
-						trigger_spell_id = 11426;
-						if (!HealthBelowPctDamaged(50, damage))
-							return false;
-                   				if (roll_chance_i(50.0f))
-							CastSpell(this, trigger_spell_id, true);
-						break;
-					case 86304: // Rank 2
-						trigger_spell_id = 11426;
-						if (!HealthBelowPctDamaged(50, damage))
-							return false;
-				       CastSpell(this, trigger_spell_id, true);
-					break;
+			// Reactive Barrier
+			case 86303: // Rank 1
+				trigger_spell_id = 11426;
+				if (!HealthBelowPctDamaged(50, damage))
+					return false;
+                   		if (roll_chance_i(50.0f))
+					CastSpell(this, trigger_spell_id, true);
+			break;
+			case 86304: // Rank 2
+				trigger_spell_id = 11426;
+				if (!HealthBelowPctDamaged(50, damage))
+					return false;
+				CastSpell(this, trigger_spell_id, true);
+		        break;
+       		 case 85285: // Sacred Shield
+			 	if (!HealthBelowPctDamaged(30, damage))
+			          	return false;	
 
+	    		       CastCustomSpell(this, 96263, &triggerAmount, NULL, NULL, true);
+				CastSpell(this, 11426, true);
+			  break;
                     case 64568:             // Blood Reserve
                     {
                         if (HealthBelowPctDamaged(35, damage))
@@ -8004,20 +8021,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         target = this;
                         break;
                     }
-       		 // Sacred Shield
-       		 case 85285:
-       		 {
-			 	if (HealthBelowPctDamaged(30, damage))
-			 	{
-           				 int32 ap = int32(ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
-           				 basepoints0 = int32(CalculatePct(ap, 280));
-
-	    		 		CastCustomSpell(this, 96263, &basepoints0, NULL, NULL, true);
-           				 break;
-       	      		 }
-				 return false;
-			    break;
-			}
                     // Soul Preserver
                     case 60510:
                     {
@@ -8165,6 +8168,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 			 target = this;
 			 basepoints0 = int32(damage * triggerAmount / 100);
 		 }
+	       
                 // Nether Protection
                 if (auraSpellInfo->SpellIconID == 1985)
                 {
@@ -10468,9 +10472,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellInfo const* spellProto, ui
     if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags[0] & 0x10000))
     {
     healamount = 0.45 * (GetCreateHealth());
-    if (HasAura(74434))
-          healamount += 0.2 * GetMaxHealth();
-
     return healamount;
     }
 
@@ -14641,6 +14642,7 @@ void Unit::ClearComboPointHolders()
             player->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
         else
             m_ComboPointHolders.erase(lowguid);             // or remove manually
+
     }
 }
 

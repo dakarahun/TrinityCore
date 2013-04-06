@@ -35,7 +35,8 @@ enum RogueSpells
     SPELL_ROGUE_SHIV_TRIGGERED                   = 5940,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_DMG_BOOST    = 57933,
     SPELL_ROGUE_TRICKS_OF_THE_TRADE_PROC         = 59628,
-    SPELL_ROGUE_RAPTURE                          = 1943
+    SPELL_ROGUE_RUPTURE                          = 1943,
+
 };
 
 enum RogueSpellIcons
@@ -698,9 +699,12 @@ class spell_rog_eviscerate : public SpellScriptLoader
 
 		  if (caster->HasAura(14171))
 			chance = 10;
-                elseif (caster->HasAura(14172))
+                if (caster->HasAura(14172))
 			chance = 20;
+
 		 if (cp > 5)
+		    cp = 5;
+		 if (!cp)
 		    cp = 5;
 
 		  chance = chance * cp; // Chance * CP (20 * 5) = 100
@@ -708,8 +712,7 @@ class spell_rog_eviscerate : public SpellScriptLoader
 		  if (!roll_chance_i(chance))
 			return;
  
-                Aura* aura = target->GetAura(SPELL_ROGUE_RAPTURE, caster->GetGUID());
-
+                Aura* aura = target->GetAura(SPELL_ROGUE_RUPTURE, caster->GetGUID());
                 if (!aura)
                     return;
 

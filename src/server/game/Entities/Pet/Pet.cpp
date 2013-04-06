@@ -992,24 +992,32 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 27829: // Ebon Gargoyle
-                {
-                    if (!pInfo)
                     {
-                        SetCreateMana(28 + 10*petlevel);
-                        SetCreateHealth(28 + 30*petlevel);
+                        if (!pInfo)
+                        {
+                            SetCreateMana(28 + 10*petlevel);
+                            SetCreateHealth(28 + 30*petlevel);
+                        }
+                        if(Player *owner = m_owner->ToPlayer()) // get 100% of owning player's haste
+                        {
+                            float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
+                            bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) +
+                                owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                            ApplyCastTimePercentMod(bonus, true);
+                            SetCreateHealth(uint32(owner->GetMaxHealth()*0.8)); // hp must be 0.8x of DK hp
+                        }
+                        SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
+                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
+                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
+                        break;
                     }
-                    SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
-                    break;
-                }
                 case 28017: // Bloodworms
-                {
-                    SetCreateHealth(4 * petlevel);
-                    SetBonusDamage(int32(GetOwner()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
-                    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
-                    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
-                }
+                    {
+                        SetCreateHealth(4 * petlevel);
+                        SetBonusDamage(int32(m_owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.006f));
+                        SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - 30 - (petlevel / 4)));
+                        SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - 30 + (petlevel / 4)));
+                    }
             }
             break;
         }

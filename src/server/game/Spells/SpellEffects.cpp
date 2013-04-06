@@ -482,6 +482,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_WARLOCK:
             {
+		  // Soulburn Healthstone
+		  if (m_spellInfo->Id == 6262)
+		         if (m_caster->HasAura(74434))
+                         m_caster->CastSpell(m_caster, 79437, true); // Soulburn: Healthstone
                 // Rain of Fire
                 if (m_spellInfo->Id == 42223)
                 {
@@ -1730,6 +1734,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
         case SPELLFAMILY_PALADIN:
             switch (m_spellInfo->Id)
             {
+             if (m_spellInfo->Id == 31884) // Avenging Wrath
+		  if (m_caster->HasAura(53375) || m_caster->HasAura(53376) || m_caster->HasAura(90286)) // Sanctified Wrath
+		     m_caster->CastSpell(m_caster, 57318, true); // Trigger for Hammer of Wrath
                // Guardian of Ancient Kings
                 case 86150:
                 {
@@ -5260,6 +5267,7 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, spellId2, true);
                 return;
             }
+	  break;
         }
    	 case SPELLFAMILY_PRIEST:
         {			

@@ -1523,7 +1523,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 break;
             case SPELLFAMILY_ROGUE:
                // Blackjack/Groggy on sap removal
-                else if(GetId() == 6770)
+                if(GetId() == 6770)
                 {
                     if(caster->HasAura(79125)) // Rank 2
                         caster->CastSpell(target, 79126, true);

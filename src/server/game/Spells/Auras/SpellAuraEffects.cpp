@@ -3173,10 +3173,6 @@ void AuraEffect::HandleAuraModDecreaseSpeed(AuraApplication const* aurApp, uint8
 
     Unit* target = aurApp->GetTarget();
 
-    //Spirit walk removes imparing effects
-    if (apply && GetSpellInfo()->Id == 58875) // Spirit Walk
-        target->CastSpell(target, 58876, true);
-
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT, true);
@@ -3414,7 +3410,7 @@ void AuraEffect::HandleModStateImmunityMask(AuraApplication const* aurApp, uint8
     {
             if (miscVal & (1<<10))
                 aura_immunity_list.push_back(SPELL_AURA_MOD_STUN);
-            if (miscVal & (1<<7)) && !(apply && GetId() == 46924))// Bladestorm  
+            if (miscVal & (1<<7) && (!apply && GetId() != 46924)) // Bladestorm  
                 aura_immunity_list.push_back(SPELL_AURA_TRANSFORM);
             // These flag can be recognized wrong:
             if (miscVal & (1<<6))
