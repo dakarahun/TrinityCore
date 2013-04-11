@@ -2462,16 +2462,25 @@ MovementStatusElements MovementUpdateRunSpeed[] =
     MSEPositionY,
     MSEExtraElement,
     MSEHasGuidByte6,
+    MSEHasMovementFlags2,
+    MSEHasPitch,
     MSEHasGuidByte2,
     MSEHasGuidByte5,
+    MSEHasSplineElevation,
+    MSEHasSpline,
     MSEHasMovementFlags,
+    MSEHasTimestamp,
     MSEHasGuidByte1,
+    MSEMovementFlags2,
     MSEHasGuidByte3,
     MSEMovementFlags,
     MSEHasGuidByte7,
     MSEHasGuidByte0,
     MSEHasOrientation,
+    MSEHasTransportData,
     MSEHasTransportGuidByte5,
+    MSEHasTransportTime2,
+    MSEHasTransportTime3,
     MSEHasTransportGuidByte7,
     MSEHasTransportGuidByte4,
     MSEHasTransportGuidByte2,
@@ -2479,6 +2488,7 @@ MovementStatusElements MovementUpdateRunSpeed[] =
     MSEHasTransportGuidByte6,
     MSEHasTransportGuidByte1,
     MSEHasTransportGuidByte0,
+    MSEHasFallData,
     MSEHasFallDirection,
     MSEHasGuidByte4,
     MSEZeroBit,
@@ -2492,9 +2502,11 @@ MovementStatusElements MovementUpdateRunSpeed[] =
     MSETransportTime,
     MSETransportGuidByte7,
     MSETransportSeat,
+    MSETransportTime2,
     MSETransportPositionY,
     MSETransportGuidByte3,
     MSETransportGuidByte2,
+    MSETransportTime3,
     MSETransportPositionZ,
     MSETimestamp,
     MSEFallSinAngle,
@@ -2504,6 +2516,7 @@ MovementStatusElements MovementUpdateRunSpeed[] =
     MSEFallTime,
     MSEPitch,
     MSEGuidByte6,
+    MSESplineElevation,
     MSEGuidByte5,
     MSEGuidByte7,
     MSEGuidByte4,
@@ -4742,6 +4755,167 @@ MovementStatusElements MoveNormalFall[] =
     MSEEnd,
 };
 
+MovementStatusElements ChangeSeatsOnControlledVehicle[] =
+{
+    MSEPositionY,
+    MSEPositionX,
+    MSEPositionZ,
+    MSEExtraElement,
+    MSEHasMovementFlags,
+    MSEHasTransportData,
+    MSEHasGuidByte2,
+    MSEHasGuidByte6,
+    MSEHasGuidByte4,
+    MSEExtraElement,
+    MSEExtraElement,
+    MSEHasOrientation,
+    MSEZeroBit,
+    MSEExtraElement,
+    MSEHasGuidByte7,
+    MSEExtraElement,
+    MSEHasTimestamp,
+    MSEHasSplineElevation,
+    MSEHasGuidByte5,
+    MSEExtraElement,
+    MSEHasMovementFlags2,
+    MSEHasPitch,
+    MSEExtraElement,
+    MSEHasGuidByte0,
+    MSEExtraElement,
+    MSEHasFallData,
+    MSEHasGuidByte1,
+    MSEHasSpline,
+    MSEMovementFlags,
+    MSEExtraElement,
+    MSEHasGuidByte3,
+    MSEHasTransportGuidByte3,
+    MSEHasTransportGuidByte0,
+    MSEHasTransportGuidByte7,
+    MSEHasTransportGuidByte5,
+    MSEHasTransportTime3,
+    MSEHasTransportGuidByte1,
+    MSEHasTransportGuidByte2,
+    MSEHasTransportTime2,
+    MSEHasTransportGuidByte4,
+    MSEHasTransportGuidByte6,
+    MSEMovementFlags2,
+    MSEHasFallDirection,
+    MSEExtraElement,
+    MSEGuidByte7,
+    MSEGuidByte5,
+    MSEExtraElement,
+    MSEExtraElement,
+    MSEGuidByte6,
+    MSEExtraElement,
+    MSEExtraElement,
+    MSEGuidByte3,
+    MSEExtraElement,
+    MSEGuidByte0,
+    MSEExtraElement,
+    MSEGuidByte4,
+    MSEGuidByte1,
+    MSEExtraElement,
+    MSEGuidByte2,
+    MSEPitch,
+    MSEFallSinAngle,
+    MSEFallCosAngle,
+    MSEFallHorizontalSpeed,
+    MSEFallTime,
+    MSEFallVerticalSpeed,
+    MSETransportGuidByte2,
+    MSETransportTime2,
+    MSETransportTime3,
+    MSETransportGuidByte0,
+    MSETransportTime,
+    MSETransportSeat,
+    MSETransportPositionX,
+    MSETransportOrientation,
+    MSETransportGuidByte7,
+    MSETransportGuidByte4,
+    MSETransportGuidByte3,
+    MSETransportGuidByte5,
+    MSETransportPositionZ,
+    MSETransportGuidByte1,
+    MSETransportGuidByte6,
+    MSETransportPositionY,
+    MSESplineElevation,
+    MSEOrientation,
+    MSETimestamp,
+    MSEEnd,
+};
+
+MovementStatusElements CastSpellEmbeddedMovement[] =
+{
+    MSEPositionZ,
+    MSEPositionY,
+    MSEPositionX,
+    MSEHasFallData,
+    MSEHasTimestamp,
+    MSEHasOrientation,
+    MSEZeroBit,
+    MSEHasSpline,
+    MSEHasGuidByte6,
+    MSEHasGuidByte4,
+    MSEHasMovementFlags2,
+    MSEHasGuidByte3,
+    MSEHasGuidByte5,
+    MSEHasSplineElevation,
+    MSEHasPitch,
+    MSEHasGuidByte7,
+    MSEHasTransportData,
+    MSEHasGuidByte2,
+    MSEHasMovementFlags,
+    MSEHasGuidByte1,
+    MSEHasGuidByte0,
+    MSEHasTransportGuidByte6,
+    MSEHasTransportGuidByte2,
+    MSEHasTransportGuidByte5,
+    MSEHasTransportTime2,
+    MSEHasTransportGuidByte7,
+    MSEHasTransportGuidByte4,
+    MSEHasTransportTime3,
+    MSEHasTransportGuidByte0,
+    MSEHasTransportGuidByte1,
+    MSEHasTransportGuidByte3,
+    MSEMovementFlags2,
+    MSEMovementFlags,
+    MSEHasFallDirection,
+    MSEGuidByte1,
+    MSEGuidByte4,
+    MSEGuidByte7,
+    MSEGuidByte3,
+    MSEGuidByte0,
+    MSEGuidByte2,
+    MSEGuidByte5,
+    MSEGuidByte6,
+    MSETransportSeat,
+    MSETransportOrientation,
+    MSETransportTime,
+    MSETransportGuidByte6,
+    MSETransportGuidByte5,
+    MSETransportTime3,
+    MSETransportPositionX,
+    MSETransportGuidByte4,
+    MSETransportPositionZ,
+    MSETransportGuidByte2,
+    MSETransportGuidByte0,
+    MSETransportTime2,
+    MSETransportGuidByte1,
+    MSETransportGuidByte3,
+    MSETransportPositionY,
+    MSETransportGuidByte7,
+    MSEOrientation,
+    MSESplineElevation,
+    MSEFallTime,
+    MSEFallHorizontalSpeed,
+    MSEFallCosAngle,
+    MSEFallSinAngle,
+    MSEFallVerticalSpeed,
+    MSETimestamp,
+    MSEPitch,
+    MSEEnd,
+};
+
 void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
 {
     MovementStatusElements element = _elements[_index++];
@@ -4758,13 +4932,19 @@ void Movement::ExtraMovementStatusElement::ReadNextElement(ByteBuffer& packet)
         return;
     }
 
-    if (element == MSEExtraFloat)
+    switch (element)
     {
-        packet >> Data.floatData;
-        return;
+        case MSEExtraFloat:
+            packet >> Data.floatData;
+            break;
+        case MSEExtraInt8:
+            packet >> Data.byteData;
+            break;
+        default:
+            ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
+            break;
     }
 }
-
 
 void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
 {
@@ -4782,11 +4962,24 @@ void Movement::ExtraMovementStatusElement::WriteNextElement(ByteBuffer& packet)
         return;
     }
 
-    if (element == MSEExtraFloat)
+    switch (element)
     {
-        packet << Data.floatData;
-        return;
+        case MSEExtraFloat:
+            packet << Data.floatData;
+            break;
+        case MSEExtraInt8:
+            packet << Data.byteData;
+            break;
+        default:
+            ASSERT(PrintInvalidSequenceElement(element, __FUNCTION__));
+            break;
     }
+}
+
+bool Movement::PrintInvalidSequenceElement(MovementStatusElements element, char const* function)
+{
+    sLog->outError(LOG_FILTER_UNITS, "Incorrect sequence element %d detected at %s", element, function);
+    return false;
 }
 
 Movement::PacketSender::PacketSender(Unit* unit, Opcodes serverControl, Opcodes playerControl, Opcodes broadcast /*= SMSG_PLAYER_MOVE*/, ExtraMovementStatusElement* extras /*= NULL*/)
@@ -4816,6 +5009,10 @@ void Movement::PacketSender::Send() const
 
     if (_broadcast != NULL_OPCODE)
     {
+        ///! Need to reset current extra element index before writing another packet
+        if (_extraElements)
+            _extraElements->ResetIndex();
+
         WorldPacket data(_broadcast);
         _unit->WriteMovementInfo(data, _extraElements);
         _unit->SendMessageToSet(&data, !isPlayerMovement);
@@ -5002,6 +5199,12 @@ MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode)
             return MoveFeatherFall;
         case SMSG_MOVE_NORMAL_FALL:
             return MoveNormalFall;
+        case CMSG_CHANGE_SEATS_ON_CONTROLLED_VEHICLE:
+            return ChangeSeatsOnControlledVehicle;
+        case CMSG_CAST_SPELL:
+        case CMSG_PET_CAST_SPELL:
+        case CMSG_USE_ITEM:
+            return CastSpellEmbeddedMovement;
         default:
             break;
     }

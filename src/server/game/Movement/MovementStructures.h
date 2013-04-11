@@ -95,16 +95,21 @@ enum MovementStatusElements
     MSEZeroBit,         // writes bit value 1 or skips read bit
     MSEOneBit,          // writes bit value 0 or skips read bit
     MSEEnd,             // marks end of parsing
-    MSEExtraElement,    // Used to sinalize reading into ExtraMovementStatusElement, element sequence inside it is declared as separate array
-                        // Allowed internal elements are: GUID markers (not transport) and MSEExtraFloat
+    MSEExtraElement,    // Used to signalize reading into ExtraMovementStatusElement, element sequence inside it is declared as separate array
+                        // Allowed internal elements are: GUID markers (not transport), MSEExtraFloat, MSEExtraInt8
     MSEExtraFloat,
+    MSEExtraInt8,
     MSE_COUNT
 };
 
 namespace Movement
 {
+    class PacketSender;
+
     class ExtraMovementStatusElement
     {
+        friend class PacketSender;
+
     public:
         ExtraMovementStatusElement(MovementStatusElements const* elements) : _elements(elements), _index(0) { }
 
@@ -115,7 +120,11 @@ namespace Movement
         {
             ObjectGuid guid;
             float floatData;
+            int8  byteData;
         } Data;
+
+    protected:
+        void ResetIndex() { _index = 0; }
 
     private:
         MovementStatusElements const* _elements;
@@ -135,6 +144,8 @@ namespace Movement
         Opcodes _selfOpcode;
         Opcodes _broadcast;
     };
+
+    bool PrintInvalidSequenceElement(MovementStatusElements element, char const* function);
 }
 
 MovementStatusElements* GetMovementStatusElementsSequence(Opcodes opcode);
