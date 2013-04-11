@@ -981,8 +981,12 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                     break;
                 }
                 case 31216: // Mirror Image
+                case 47243: // Mirror Image
+                case 47244: // Mirror Image
                 {
                     SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST) * 0.33f));
+                    SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE) * 0.33f));
+                    SetBonusDamage(int32(GetOwner()->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_ARCANE) * 0.33f));
                     SetDisplayId(GetOwner()->GetDisplayId());
                     if (!pInfo)
                     {
@@ -1002,7 +1006,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
                         {
                             float bonus = owner->GetRatingBonusValue(CR_HASTE_MELEE);
                             bonus += owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_HASTE) +
-                                owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
+                            owner->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_RANGED_HASTE);
                             ApplyCastTimePercentMod(bonus, true);
                             SetCreateHealth(uint32(owner->GetMaxHealth()*0.8)); // hp must be 0.8x of DK hp
                         }

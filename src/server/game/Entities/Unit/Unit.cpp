@@ -5650,26 +5650,6 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     RemoveAura(dummySpell->Id);
                     return false;
                 }
-                case 81913: // Die by the Sword Rank 1
-                {
-                  triggered_spell_id = 85386;
-
-                  if (!HealthBelowPct(20))
-                     return false;
-                  else
-                     CastSpell(this, triggered_spell_id, true);
-		    break;
-		  }
-                case 81914: // Die by the Sword Rank 2
-                {
-                  triggered_spell_id = 86624;
-
-                  if (!HealthBelowPct(20))
-                     return false;
-                  else
-                     CastSpell(this, triggered_spell_id, true);
-		    break;
-		  }
             }
 
             // Retaliation
@@ -8289,6 +8269,30 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             // When your health drops below 20%
             if (HealthBelowPctDamaged(20, damage) || HealthBelowPct(20))
                 return false;
+            break;
+        }
+	 case 81913:  // Die by the Sword
+	 case 81914:  // Die by the Sword Rank 2
+	 {
+	       if (!HealthBelowPct(20))
+	            return false;	
+	       break;
+	 }
+	 case 80128: //Impeding Victory Rush
+	 case 80129: 
+	 {
+	       if (!HealthBelowPctDamaged(20, damage))
+	            return false;	
+	   break;
+	 }
+        // Sacred Shield
+        case 85285:
+        {
+            if (!HealthBelowPctDamaged(30, damage))
+                return false;
+
+            int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
+            basepoints0 = int32(CalculatePct(ap, 280));
             break;
         }
         // Greater Heal Refund (Avatar Raiment set)

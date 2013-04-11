@@ -419,8 +419,18 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
                     if (pct > 0)
                         damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
+				
                     break;
                 }
+		  // Gag Order
+		  if (m_spellInfo->Id == 6552)
+		  {
+		      if (m_caster->HasAura(12311))
+			  if (roll_chance_i(50.0f))
+			     m_caster->CastSpell(unitTarget, 18498, true);
+		      if (m_caster->HasAura(12958))
+			     m_caster->CastSpell(unitTarget, 18498, true);
+	         }
                 // Bloodthirst
           	  if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
                     damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
@@ -1014,6 +1024,13 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 				}
 			return;
                 }
+		  case 52437: // Sudden Death Trigger
+		  case 29723: // Sudden Death
+		  case 29725: // Sudden Death rank 2
+	 	  {
+      			    m_caster->ToPlayer()->RemoveSpellCooldown(86346, true); // Colossus Smash
+	  		    break;
+		  }
                 case 23448:       // Transporter Arrival - Ultrasafe Transporter: Gadgetzan - backfires
                 {
                     int32 r = irand(0, 119);
@@ -1394,7 +1411,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     m_caster->SetOrientation(float(urand(0, 62832)) / 10000.0f);
                     WorldPacket data;
-                    m_caster->BuildHeartBeatMsg(&data);
                     m_caster->SendMessageToSet(&data, true);
                     return;
                 }
@@ -1646,15 +1662,9 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 //Juggernaut Cooldown
                 if (m_caster->HasAura(64976))
                 {
-                    m_caster->CastSpell(m_caster, 65156, true);
-                    m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
+                    m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
+                    m_caster->CastSpell(m_caster, 96216, true); // Spell Maker CDs
                 }
-                return;
-            }
-	     // Concussion Blow
-            if (m_spellInfo->SpellFamilyFlags[0] & SPELLFAMILYFLAG_WARRIOR_CONCUSSION_BLOW)
-            {
-                m_damage += CalculatePct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                 return;
             }
             switch (m_spellInfo->Id)
@@ -1664,7 +1674,10 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     // Juggernaut CD part
                     if (m_caster->HasAura(64976))
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13); // intelligent :D
+		      {
+                        m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
+                        m_caster->CastSpell(m_caster, 96215, true); // Spell Maker CDs
+		      }
                     return;
                 }
             }
