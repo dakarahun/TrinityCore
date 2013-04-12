@@ -1698,7 +1698,8 @@ struct SpellEffectEntry
     uint32    EffectImplicitTargetB;                        // 23        m_implicitTargetB
     uint32    EffectSpellId;                                // 24        new 4.0.0
     uint32    EffectIndex;                                  // 25        new 4.0.0
-    //uint32  Unk0                                          // 26        4.2.0 only 0 or 1
+    uint32    EffectBonusCoefficient;                       // 26        new 4.0.0                        
+    //uint32  Unk0                                          // 27        4.2.0 only 0 or 1
 };
 
 #define MAX_SPELL_EFFECTS 3
@@ -2068,6 +2069,8 @@ struct TalentEntry
     //uint64  allowForPet;                                  // 17       m_categoryMask its a 64 bit mask for pet 1<<m_categoryEnumID in CreatureFamily.dbc
 };
 
+#define MAX_MASTERY_SPELLS 2
+
 struct TalentTabEntry
 {
     uint32  TalentTabID;                                    // 0
@@ -2079,7 +2082,7 @@ struct TalentTabEntry
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
     //uint32 rolesMask;                                     // 8 4.0.0
-    //uint32 MasterySpells[2];                              // 9-10 passive mastery bonus spells?
+    uint32 MasterySpellId[MAX_MASTERY_SPELLS];              // 9-10 passive mastery bonus spells
 };
 
 struct TalentTreePrimarySpellsEntry

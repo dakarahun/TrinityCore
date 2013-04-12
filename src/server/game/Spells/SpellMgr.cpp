@@ -2679,6 +2679,9 @@ void SpellMgr::LoadSpellCustomAttr()
                 case SPELL_AURA_POWER_BURN:
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_INITIAL_THREAT;
                     break;
+              /*  case SPELL_AURA_SWAP_SPELLS:
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_SCALABLE; // Meh i dont think this is a proper name..
+                    break;*/
             }
 
             switch (spellInfo->Effects[j].Effect)
@@ -3692,6 +3695,21 @@ void SpellMgr::LoadSpellInfoCorrections()
     properties->Type = SUMMON_TYPE_TOTEM;
     properties = const_cast<SummonPropertiesEntry*>(sSummonPropertiesStore.LookupEntry(647)); // 52893
     properties->Type = SUMMON_TYPE_TOTEM;
+
+    for (uint32 i = 0; i < sTalentTabStore.GetNumRows(); ++i)
+    {
+        TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(i);
+        if (!talentTab)
+            continue;
+
+        spellInfo = mSpellInfoMap[talentTab->MasterySpellId[0]];
+        if (spellInfo)
+            spellInfo->AttributesEx8 |= SPELL_ATTR8_AURA_SEND_AMOUNT;
+
+        spellInfo = mSpellInfoMap[talentTab->MasterySpellId[1]];
+        if (spellInfo)
+            spellInfo->AttributesEx8 |= SPELL_ATTR8_AURA_SEND_AMOUNT;
+    }
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded SpellInfo corrections in %u ms", GetMSTimeDiffToNow(oldMSTime));
 }

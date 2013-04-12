@@ -859,6 +859,8 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
 
     SetPendingBind(0, 0);
 
+    _canUseMastery = false;
+
     _activeCheats = CHEAT_NONE;
     _maxPersonalArenaRate = 0;
 
@@ -1780,6 +1782,7 @@ void Player::Update(uint32 p_time)
             if (_pendingBindId == GetInstanceId())
                 BindToInstance();
             SetPendingBind(0, 0);
+
         }
         else
             _pendingBindTimer -= p_time;
@@ -3705,6 +3708,9 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
             {
                 if (spellInfo->IsPassive() && IsNeedCastPassiveSpellAtLearn(spellInfo))
                     CastSpell (this, spellId, true);
+
+                if (CanUseMastery())
+                    CastMasterySpells(this);
             }
             else if (IsInWorld())
             {
@@ -4044,6 +4050,11 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
                 learnSpell(itr2->second, false);
         }
     }
+    if (!learning)
+        return;
+    // If the learned spell is one of the mastery passives, activate the mastery spell.
+    if (HasAura(SPELL_AURA_MASTERY))
+        CastMasterySpells(this);
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -4515,6 +4526,11 @@ bool Player::ResetTalents(bool no_cost)
         if (specSpells)
             for (size_t i = 0; i < specSpells->size(); ++i)
                 removeSpell(specSpells->at(i), true);
+
+       TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetTalentTabPages(getClass())[i]);
+        for (uint32 j = 0; j < MAX_MASTERY_SPELLS; ++j)
+            if (uint32 mastery = talentTabInfo->MasterySpellId[j])
+                removeSpell(mastery, true);
     }
 
     SetPrimaryTalentTree(GetActiveSpec(), 0);
@@ -5996,6 +6012,9 @@ void Player::UpdateRating(CombatRating cr)
                 UpdateExpertise(BASE_ATTACK);
                 UpdateExpertise(OFF_ATTACK);
             }
+            break;
+        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
+            UpdateMastery();
             break;
         case CR_ARMOR_PENETRATION:
             if (affectStats)
@@ -8260,6 +8279,9 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE, -val, apply);
                 m_spellPenetrationItemMod += apply ? val : -val;
                 break;
+            case ITEM_MOD_MASTERY_RATING:
+                ApplyRatingMod(CR_MASTERY, int32(val), apply);
+                break;
             case ITEM_MOD_FIRE_RESISTANCE:
                 HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(val), apply);
                 break;
@@ -8809,6 +8831,67 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->prepare(&targets);
 
             ++count;
+        }
+    }
+}
+
+// These spells arent passive, they must be cast asap after player login.
+void Player::CastMasterySpells(Player* caster)
+{
+    if (!caster)
+        return;
+
+    switch (caster->getClass())
+    {
+        case CLASS_WARRIOR:
+        {
+            caster->CastSpell(caster,87500,true);
+            break;
+        }
+        case CLASS_PALADIN:
+        {
+            caster->CastSpell(caster,87494,true);
+            break;
+        }
+        case CLASS_HUNTER:
+        {
+            caster->CastSpell(caster,87493,true);
+            break;
+        }
+        case CLASS_ROGUE:
+        {
+            caster->CastSpell(caster,87496,true);
+            break;
+        }
+        case CLASS_PRIEST:
+        {
+            caster->CastSpell(caster,87495,true);
+            break;
+        }
+        case CLASS_DEATH_KNIGHT:
+        {
+            caster->CastSpell(caster,87492,true);
+            break;
+        }
+        case CLASS_SHAMAN:
+        {
+            caster->CastSpell(caster,87497,true);
+            break;
+        }
+        case CLASS_MAGE:
+        {
+            caster->CastSpell(caster,86467,true);
+            break;
+        }
+        case CLASS_WARLOCK:
+        {
+            caster->CastSpell(caster,87498,true);
+            break;
+        }
+        case CLASS_DRUID:
+        {
+            caster->CastSpell(caster,87491,true);
+            break;
         }
     }
 }
@@ -14204,6 +14287,9 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                         case ITEM_MOD_BLOCK_VALUE:
                             HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(enchant_amount), apply);
                             sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "+ %u BLOCK_VALUE", enchant_amount);
+                            break;
+                        case ITEM_MOD_MASTERY_RATING:
+                            ApplyRatingMod(CR_MASTERY, int32(enchant_amount), apply);
                             break;
                         default:
                             break;
@@ -25433,6 +25519,7 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
     sLog->outInfo(LOG_FILTER_GENERAL, "TalentID: %u Rank: %u Spell: %u Spec: %u\n", talentId, talentRank, spellid, GetActiveSpec());
 
     // set talent tree for player
+    // TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetTalentTabPages(getClass()));
     if (!GetPrimaryTalentTree(GetActiveSpec()))
     {
         SetPrimaryTalentTree(GetActiveSpec(), talentInfo->TalentTab);
@@ -25440,6 +25527,11 @@ bool Player::LearnTalent(uint32 talentId, uint32 talentRank)
         if (specSpells)
             for (size_t i = 0; i < specSpells->size(); ++i)
                 learnSpell(specSpells->at(i), false);
+
+       if (CanUseMastery())
+            for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
+                if (int32 mastery = talentTabInfo->MasterySpellId[i])
+                    learnSpell(mastery, false);
     }
 
     // update free talent points
@@ -26297,6 +26389,11 @@ void Player::ActivateSpec(uint8 spec)
         if (specSpells)
             for (size_t i = 0; i < specSpells->size(); ++i)
                 removeSpell(specSpells->at(i), true);
+
+        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetTalentTabPages(getClass())[i]);
+        for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
+            if (uint32 mastery = talentTabInfo->MasterySpellId[i])
+                removeSpell(mastery, true);
     }
 
     // set glyphs
@@ -26345,6 +26442,11 @@ void Player::ActivateSpec(uint8 spec)
         for (size_t i = 0; i < specSpells->size(); ++i)
             learnSpell(specSpells->at(i), false);
 
+    if (CanUseMastery())
+        if (TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec())))
+            for (uint32 i = 0; i < MAX_MASTERY_SPELLS; ++i)
+                if (uint32 mastery = talentTabInfo->MasterySpellId[i])
+                    learnSpell(mastery, false);
     // set glyphs
     for (uint8 slot = 0; slot < MAX_GLYPH_SLOT_INDEX; ++slot)
     {
