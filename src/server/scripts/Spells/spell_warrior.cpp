@@ -850,6 +850,42 @@ public:
     }
 };
 
+
+// 12294 - Mortal Strike
+class spell_warr_mortal_strike : public SpellScriptLoader
+{
+    public:
+        spell_warr_mortal_strike() : SpellScriptLoader("spell_warr_mortal_strike") { }
+
+        class spell_warr_mortal_strike_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_mortal_strike_SpellScript);
+
+            void OnHitTarget(SpellEffIndex /*effIndex*/)
+            {
+                Unit* caster = GetCaster();
+                Unit* target = GetHitUnit();
+                Aura* aura = target->GetAura(772, caster->GetGUID());
+
+                if (!aura)
+                    return;
+
+                int32 newDuration = aura->GetMaxDuration() - aura->GetDuration();
+                aura->SetDuration(std::min(newDuration, aura->GetMaxDuration()));
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_mortal_strike_SpellScript::OnHitTarget, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_mortal_strike_SpellScript;
+        }
+};
+
 void AddSC_warrior_spell_scripts()
 {
     new spell_warr_bloodthirst();
@@ -870,4 +906,5 @@ void AddSC_warrior_spell_scripts()
     new spell_warr_vigilance_trigger();
     new spell_warr_heroic_leap();
     new spell_warr_thunderclap();
+    new spell_warr_mortal_strike();
 }

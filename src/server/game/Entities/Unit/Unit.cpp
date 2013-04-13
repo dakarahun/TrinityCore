@@ -817,15 +817,18 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
    if (spellProto && m_havocTarget && GetTypeId() == TYPEID_PLAYER && m_havocTarget != NULL)
     {
-        int32 dmg = int32(damage * 0.15f);
-	 dmg /= 1.85f;
-        CastCustomSpell(m_havocTarget, 10444, &dmg, NULL, NULL, true); // Bane of Havoc 
+	if (victim && m_havocTarget && !victim->IsFriendlyTo(this) && !m_havocTarget->IsFriendlyTo(this) && m_havocTarget != victim)
+	{
+       	 int32 dmg = int32(damage * 0.15f);
+		 dmg /= 1.85f;
+       	 CastCustomSpell(m_havocTarget, 10444, &dmg, NULL, NULL, true); // Bane of Havoc 
+	}
     }
 
     if (spellProto && HasAura(13877)) 
     {
 	Unit* target = SelectNearbyTarget();
-	if (target && !target->IsFriendlyTo(this))
+	if (target && !target->IsFriendlyTo(this) && target != victim)
 	{
         int32 dmg = int32(damage);
         CastCustomSpell(target, 22482, &dmg, NULL, NULL, true); // Blade flurry
@@ -5533,6 +5536,15 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 triggered_spell_id = 29442;
                 break;
             }
+          // Permafrost
+          if (dummySpell->SpellIconID == 143)
+
+              if (!procSpell)
+                  return false;
+
+              basepoints0 = damage * triggerAmount / 100;
+              triggered_spell_id = 91394;
+              break;
             // Arcane Potency
             if (dummySpell->SpellIconID == 2120)
             {
@@ -7830,13 +7842,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 					return false;
 				CastSpell(this, trigger_spell_id, true);
 		        break;
-       		 case 85285: // Sacred Shield
-			 	if (!HealthBelowPctDamaged(30, damage))
-			          	return false;	
-
-	    		       CastCustomSpell(this, 96263, &triggerAmount, NULL, NULL, true);
-				CastSpell(this, 11426, true);
-			  break;
                     case 64568:             // Blood Reserve
                     {
                         if (HealthBelowPctDamaged(35, damage))
@@ -8281,7 +8286,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 	 case 80128: //Impeding Victory Rush
 	 case 80129: 
 	 {
-	       if (!HealthBelowPctDamaged(20, damage))
+	       if (!victim->HealthBelowPct(20))
 	            return false;	
 	   break;
 	 }
@@ -8294,6 +8299,12 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             int32 ap = int32(GetTotalAttackPowerValue(BASE_ATTACK) * 0.9f);
             basepoints0 = int32(CalculatePct(ap, 280));
             break;
+        }
+        case 29723: // Sudden Death
+	 case 29725: // Sudden Death
+	 {
+	    	ToPlayer()->RemoveSpellCooldown(86346, true);
+	     break;
         }
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:

@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
@@ -123,7 +123,7 @@ char const SpellDifficultyfmt[] = "niiii";
 const std::string CustomSpellDifficultyfmt = "ppppp";
 const std::string CustomSpellDifficultyIndex = "id";
 char const SpellDurationfmt[] = "niii";
-char const SpellEffectEntryfmt[] = "nifiiiffiiiiiifiifiiiiiiiix";
+char const SpellEffectEntryfmt[] = "nifiiiffiiiiiifiifiiiiiiiif";
 char const SpellEntryfmt[] = "niiiiiiiiiiiiiiifiiiissxxiixxifiiiiiiixiiiiiiiix";
 const std::string CustomSpellEntryfmt = "papppppppppppapapaaaaaaaaaaapaaapapppppppaaaaapaapaaaaaaaaaaaaaaaaaappppppppppppppppppppppppppppppppppppaaaaaapppppppppaaapppppppppaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaappppppppapppaaaaappaaaaaaa";
 const std::string CustomSpellEntryIndex = "Id";
@@ -151,7 +151,7 @@ char const SpellShapeshiftFormfmt[] = "nxxiixiiixxiiiiiiiixx";
 char const StableSlotPricesfmt[] = "ni";
 char const SummonPropertiesfmt[] = "niiiii";
 char const TalentEntryfmt[] = "niiiiiiiiixxixxxxxx";
-char const TalentTabEntryfmt[] = "nxxiiixxxxx";
+char const TalentTabEntryfmt[] = "nxxiiixxxii";
 char const TalentTreePrimarySpellsfmt[] = "diix";
 char const TaxiNodesEntryfmt[] = "nifffsiiixx";
 char const TaxiPathEntryfmt[] = "niii";

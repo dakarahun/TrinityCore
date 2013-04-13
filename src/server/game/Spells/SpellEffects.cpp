@@ -427,9 +427,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 		  {
 		      if (m_caster->HasAura(12311))
 			  if (roll_chance_i(50.0f))
-			     m_caster->CastSpell(unitTarget, 18498, true);
+			     m_caster->CastSpell(m_caster, 18498, true);
 		      if (m_caster->HasAura(12958))
-			     m_caster->CastSpell(unitTarget, 18498, true);
+			     m_caster->CastSpell(m_caster, 18498, true);
 	         }
                 // Bloodthirst
           	  if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
@@ -1656,31 +1656,30 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 		// Charge
             if (m_spellInfo->SpellVisual[0] == 867)
             {
-                int32 chargeBasePoints0 = damage;
-                m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true);
+                /*int32 chargeBasePoints0 = damage;
+                m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, NULL, NULL, true); */
 
-                //Juggernaut Cooldown
-                if (m_caster->HasAura(64976))
-                {
-                    m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
-                    m_caster->CastSpell(m_caster, 96216, true); // Spell Maker CDs
-                }
+              	 //Juggernaut Cooldown
+                	if (m_caster->HasAura(64976))
+                	{
+                        m_caster->ToPlayer()->AddSpellCooldown(20252, 0, time(NULL) + 30);
+                 	   m_caster->CastSpell(m_caster, 96216, true); // Spell Maker CDs
+                 	   m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
+               	 }	
                 return;
             }
-            switch (m_spellInfo->Id)
-            {
                 // Intercept
-                case 20252:
-                {
+		if (m_spellInfo->Id == 20252)
+		{
                     // Juggernaut CD part
                     if (m_caster->HasAura(64976))
 		      {
+                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
                         m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
                         m_caster->CastSpell(m_caster, 96215, true); // Spell Maker CDs
 		      }
                     return;
-                }
-            }
+               }
             break;
 	case SPELLFAMILY_DRUID:
 		{

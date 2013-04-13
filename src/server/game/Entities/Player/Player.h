@@ -1994,6 +1994,8 @@ class Player : public Unit, public GridObject<Player>
         void ApplyRatingMod(CombatRating cr, int32 value, bool apply);
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
+
+        // Mastery System
         void UpdateMastery();
         bool CanUseMastery() const { return _canUseMastery; }
         void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }

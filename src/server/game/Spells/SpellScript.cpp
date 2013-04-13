@@ -20,6 +20,7 @@
 #include "SpellAuras.h"
 #include "SpellScript.h"
 #include "SpellMgr.h"
+#include "Player.h"
 
 bool _SpellScript::_Validate(SpellInfo const* entry)
 {
@@ -1128,4 +1129,5 @@ AuraApplication const* AuraScript::GetTargetApplication() const
 {
     return m_auraApplication;
 }
+
 

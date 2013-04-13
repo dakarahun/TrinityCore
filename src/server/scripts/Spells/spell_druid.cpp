@@ -1127,12 +1127,13 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
             {
                 if (Player* player = GetCaster()->ToPlayer())
                 {
-                    Unit* gtarget = GetExplTargetUnit();
+                    if (Unit* gtarget = GetExplTargetUnit())
+		      {
                     PreventHitDefaultEffect(effIndex);
                     SpellInfo const* spell = GetSpellInfo();
 
                     std::list<Creature*> list;
-                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 500.0f);
+                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 90.0f);
                     for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
                     {
                         if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
@@ -1144,13 +1145,13 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     }
 
                     // Max 3 Wild Mushroom
-                    if ((int32)list.size() >= spell->Effects[0].BasePoints)
-                        list.front()->ToTempSummon()->UnSummon();
+                    if ((int32)list.size() >= 3)
+                         return;
 
                     Position pos;
                     gtarget->GetPosition(&pos);
-					const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spell->Effects[effIndex].MiscValueB);
-					TempSummon* summon = player->SummonCreature(spell->Effects[0].MiscValue, pos, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
+		      const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spell->Effects[effIndex].MiscValueB);
+			TempSummon* summon = player->SummonCreature(spell->Effects[0].MiscValue, pos, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
 
                     if (!summon)
                         return;
@@ -1161,7 +1162,7 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     summon->SetMaxHealth(5);
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                     summon->StopMoving();
-                    summon->SetControlled(true, UNIT_STATE_STUNNED);
+		    }
                 }
             }
 
@@ -1203,7 +1204,7 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
 
                 std::list<Creature*> list;
                 std::list<TempSummon*> summonList;
-                player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 500.0f);
+                player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 90.0f);
 
                 for (std::list<Creature*>::const_iterator i = list.begin(); i != list.end(); ++i)
                 {
@@ -1301,7 +1302,7 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
                     // Stop Moving on Fungal Growth
                     std::list<Creature*> fungal_list;
                     std::list<TempSummon*> fungalsummonList;
-                    player->GetCreatureListWithEntryInGrid(fungal_list, npcfungal, 250.0f);
+                    player->GetCreatureListWithEntryInGrid(fungal_list, npcfungal, 90.0f);
 
                     for (std::list<Creature*>::const_iterator i = fungal_list.begin(); i != fungal_list.end(); ++i)
                     {
