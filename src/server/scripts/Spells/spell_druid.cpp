@@ -1145,8 +1145,8 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     }
 
                     // Max 3 Wild Mushroom
-                    if ((int32)list.size() >= 3)
-                         return;
+                    if ((int32)list.size() >= spell->Effects[0].BasePoints)
+                        list.front()->ToTempSummon()->UnSummon();
 
                     Position pos;
                     gtarget->GetPosition(&pos);
@@ -1166,9 +1166,33 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                 }
             }
 
+            SpellCastResult CheckCast()
+            {
+                Player* player = GetCaster()->ToPlayer();
+                std::list<Creature*> list;
+
+                player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 90.0f);
+                    for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
+                    {
+                        if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player && (*i)->ToTempSummon()->isAlive())
+                            if (!player)
+                                return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+                        continue;
+
+                        list.remove((*i));
+                    }
+
+
+		  if ((int32)list.size() >= 3)
+		       return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;  
+
+		return SPELL_CAST_OK;
+            }
+
             void Register()
             {
                 OnEffectHit += SpellEffectFn(spell_druid_wild_mushroom_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+                OnCheckCast += SpellCheckCastFn(spell_druid_wild_mushroom_SpellScript::CheckCast);
             }
         };
 
