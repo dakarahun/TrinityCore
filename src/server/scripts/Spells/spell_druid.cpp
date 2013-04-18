@@ -1133,7 +1133,7 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     SpellInfo const* spell = GetSpellInfo();
 
                     std::list<Creature*> list;
-                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 90.0f);
+                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 40.0f);
                     for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
                     {
                         if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
@@ -1151,7 +1151,7 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
                     Position pos;
                     gtarget->GetPosition(&pos);
 		      const SummonPropertiesEntry* properties = sSummonPropertiesStore.LookupEntry(spell->Effects[effIndex].MiscValueB);
-			TempSummon* summon = player->SummonCreature(spell->Effects[0].MiscValue, pos, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, spell->GetDuration());
+			TempSummon* summon = player->SummonCreature(spell->Effects[0].MiscValue, pos, TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN, 75000);
 
                     if (!summon)
                         return;
@@ -1344,13 +1344,12 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
                         {
                             (*iter)->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
                             (*iter)->StopMoving();
-                            (*iter)->SetControlled(true, UNIT_STATE_STUNNED);
                         }
                     }
 
                     // Cleanup Wild Mushroom
                     std::list<Creature*> list;
-                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 250.0f);
+                    player->GetCreatureListWithEntryInGrid(list, SPELL_DRUID_NPC_WILD_MUSHROOM, 90.0f);
                     for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
                     {
                         if ((*i)->isSummon() && (*i)->GetCharmerOrOwner() == player)
@@ -1362,7 +1361,11 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
                     }
 
                     if ((int32)list.size() > 0)
-                        list.front()->ToTempSummon()->UnSummon();
+                   	 for (std::list<Creature*>::iterator i = list.begin(); i != list.end(); ++i)
+			 {
+                        (*i)->ToTempSummon()->UnSummon();
+			   list.front()->ToTempSummon()->UnSummon();
+			 }
                 }
             }
 

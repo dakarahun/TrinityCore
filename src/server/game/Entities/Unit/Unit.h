@@ -354,6 +354,7 @@ class Vehicle;
 class VehicleJoinEvent;
 class TransportBase;
 class SpellCastTargets;
+
 namespace Movement
 {
     class ExtraMovementStatusElement;
@@ -2171,6 +2172,17 @@ class Unit : public WorldObject
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
 
+        void AddSpellSwap(uint32 oldSpell, uint32 newSpell) { _spellSwaps[oldSpell] = newSpell; }
+        void RemoveSpellSwap(uint32 originalSpell) { _spellSwaps.erase(originalSpell); }
+        uint32 GetSpellForCast(uint32 spellId) const
+        {
+            std::map<uint32, uint32>::const_iterator itr = _spellSwaps.find(spellId);
+            if (itr != _spellSwaps.end())
+                return itr->second;
+
+            return spellId;
+        }
+
         // Movement info
         Movement::MoveSpline * movespline;
 
@@ -2320,6 +2332,7 @@ class Unit : public WorldObject
 
         Spell const* _focusSpell;   ///> Locks the target during spell cast for proper facing
         bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
+        std::map<uint32, uint32> _spellSwaps;
 
         time_t _lastDamagedTime; // Part of Evade mechanics
 };

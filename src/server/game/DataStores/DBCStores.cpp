@@ -497,12 +497,42 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineStore,              dbcPath, "SkillLine.dbc");//14545
     LoadDBC(availableDbcLocales, bad_dbc_files, sSkillLineAbilityStore,       dbcPath, "SkillLineAbility.dbc");//14545
     LoadDBC(availableDbcLocales, bad_dbc_files, sSoundEntriesStore,           dbcPath, "SoundEntries.dbc");//14545
-    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                  dbcPath, "Spell.dbc"/*, &CustomSpellEntryfmt, &CustomSpellEntryIndex*/);//
+    LoadDBC(availableDbcLocales, bad_dbc_files, sSpellStore,                  dbcPath, "Spell.dbc", &CustomSpellEntryfmt, &CustomSpellEntryIndex);//
     for (uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
-        SpellCategoriesEntry const* spell = sSpellCategoriesStore.LookupEntry(i);
-        if (spell && spell->Category)
-            sSpellCategoryStore[spell->Category].insert(i);
+        SpellEntry const* spell = sSpellStore.LookupEntry(i);
+        if (spell && spell->SpellCategoriesId)
+            sSpellCategoryStore[spell->SpellCategoriesId].insert(i);
+    }
+
+   for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+
+        if (!skillLine)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+
+        if (spellInfo && spellInfo->Attributes & SPELL_ATTR0_PASSIVE)
+        {
+            for (uint32 i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
+            {
+                CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
+                if (!cFamily)
+                    continue;
+
+                if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
+                    continue;
+                if (spellInfo->SpellLevelsId)
+                    continue;
+
+                if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+                    continue;
+
+                sPetFamilySpellsStore[i].insert(spellInfo->Id);
+            }
+        }
     }
 
     LoadDBC(availableDbcLocales, bad_dbc_files, sSpellReagentsStore,          dbcPath,"SpellReagents.dbc");//14545

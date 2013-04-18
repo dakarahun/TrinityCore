@@ -3097,6 +3097,15 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         if (!m_casttime && !m_spellInfo->StartRecoveryTime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
     }
+    Unit::AuraEffectList const& AurasList = m_caster->GetAuraEffectsByType(SPELL_AURA_SWAP_SPELLS);
+    for (Unit::AuraEffectList::const_iterator itr = AurasList.begin(); itr != AurasList.end(); ++itr)
+    {
+        if (!m_spellInfo->IsPositive() && m_spellInfo->CasterAuraSpell == (*itr)->GetId()) // Only remove negative spell
+        {
+            m_caster->RemoveAurasByType(SPELL_AURA_SWAP_SPELLS);
+            break;
+        }
+    }
 }
 
 void Spell::cancel()
@@ -5199,7 +5208,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                     target->GetContactPoint(m_caster, pos.m_positionX, pos.m_positionY, pos.m_positionZ);
                     target->GetFirstCollisionPosition(pos, CONTACT_DISTANCE, target->GetRelativeAngle(m_caster));
 
-                    m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 1.5f);
+                    m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 1.6f);
+
+		      if (m_spellInfo->Id == 93983) // Skull Bash Wrong Recalculate Path
+                         m_preGeneratedPath.SetPathLengthLimit(m_spellInfo->GetMaxRange(true) * 13.0f); // 13*Yds
+
                     bool result = m_preGeneratedPath.CalculatePath(pos.m_positionX, pos.m_positionY, pos.m_positionZ + target->GetObjectSize());
                     if (m_preGeneratedPath.GetPathType() & PATHFIND_SHORT)
                         return SPELL_FAILED_NOPATH;
@@ -5352,7 +5365,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_ALREADY_HAVE_SUMMON;
                 }
 
-                if (m_caster->GetCharmGUID())
+                if (m_caster->GetCharmGUID() && m_caster->GetCharm()->GetEntry() != 1964)
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
                 break;
             }

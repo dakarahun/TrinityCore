@@ -390,8 +390,8 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //329 SPELL_AURA_MOD_RUNE_REGEN_SPEED
     &AuraEffect::HandleNoImmediateEffect,                         //330 SPELL_AURA_CAST_WHILE_WALKING
     &AuraEffect::HandleAuraForceWeather,                          //331 SPELL_AURA_FORCE_WEATHER
-    &AuraEffect::HandleNoImmediateEffect,                         //332 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS implemented in WorldSession::HandleCastSpellOpcode
-    &AuraEffect::HandleNoImmediateEffect,                         //333 SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2 implemented in WorldSession::HandleCastSpellOpcode
+    &AuraEffect::HandleAuraSwapSpells,                            //332 SPELL_AURA_SWAP_SPELLS ( old - SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_1 )
+    &AuraEffect::HandleAuraSwapSpells,                            //333 SPELL_AURA_SWAP_SPELLS_2
     &AuraEffect::HandleNULL,                                      //334 SPELL_AURA_MOD_BLIND
     &AuraEffect::HandleNULL,                                      //335 SPELL_AURA_335
     &AuraEffect::HandleNULL,                                      //336 SPELL_AURA_MOD_FLYING_RESTRICTIONS
@@ -504,7 +504,29 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                         }
                     }
 
-    // custom amount calculations go here
+         // custom amount calculations go here
+         if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_GENERIC)
+            {
+                // Replenishment (0.25% from max)
+                // Infinite Replenishment
+                if (m_spellInfo->SpellIconID == 3184 && m_spellInfo->SpellVisual[0] == 12495)
+                    amount = GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA) * 25 / 10000;
+            }
+            // Innervate
+            else if (m_spellInfo->Id == 29166)
+            {
+                if (GetBase()->GetCaster() == GetBase()->GetUnitOwner())
+                {
+                    if (GetBase()->GetCaster()->HasAura(33597))  // Dreamstate rank1
+                        amount += 15;
+                    if (GetBase()->GetCaster()->HasAura(33599))  // Dreamstate rank2
+                        amount += 30;
+                }
+                ApplyPct(amount, float(GetBase()->GetUnitOwner()->GetMaxPower(POWER_MANA)) / GetTotalTicks());
+            }
+            // Owlkin Frenzy
+            else if (m_spellInfo->Id == 48391)
+                ApplyPct(amount, GetBase()->GetUnitOwner()->GetCreatePowers(POWER_MANA));
     switch (GetAuraType())
     {
         // crowd control auras
@@ -5008,6 +5030,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     target->RemoveAurasDueToSpell(spellId);
                     break;
                 }
+		  case 61336:                                 // Survival Instincts
+		  {
+				if (!(mode & AURA_EFFECT_HANDLE_REAL))
+					break;
+
+				if (apply)
+                      		target->CastSpell(target, 50322, true);
+				else
+					target-> RemoveAurasDueToSpell(50322);
+				break;
+		  }
                 // Restless Strength
                 case 24661:
                 {
@@ -5418,36 +5451,6 @@ void AuraEffect::HandleAuraModFakeInebriation(AuraApplication const* aurApp, uin
     target->UpdateObjectVisibility();
 }
 
-void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const
-{
-    if (!(mode & AURA_EFFECT_HANDLE_REAL))
-        return;
-
-    Player* target = aurApp->GetTarget()->ToPlayer();
-
-    if (!target || !target->IsInWorld())
-        return;
-
-    uint32 overrideId = uint32(GetMiscValue());
-
-    if (apply)
-    {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, overrideId);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
-            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
-                if (uint32 spellId = overrideSpells->spellId[i])
-                    target->AddTemporarySpell(spellId);
-    }
-    else
-    {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, 0);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
-            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
-                if (uint32 spellId = overrideSpells->spellId[i])
-                    target->RemoveTemporarySpell(spellId);
-    }
-}
-
 void AuraEffect::HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_REAL))
@@ -5478,6 +5481,96 @@ void AuraEffect::HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode,
 
     if (apply)
         target->ToPlayer()->SendOnCancelExpectedVehicleRideAura();
+}
+
+void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+
+    if (!target || !target->IsInWorld())
+        return;
+
+    uint32 overrideId = uint32(GetMiscValue());
+
+	if (overrideId == 6229 && !target->HasAura(91713))
+		return;
+
+    if (apply)
+    {
+        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, overrideId);
+        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
+	 {
+            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
+                if (uint32 spellId = overrideSpells->spellId[i])
+                    target->AddTemporarySpell(spellId);
+
+	 if (target->HasAura(94338))
+	    target->AddTemporarySpell(93402);
+	}
+    }
+    else
+    {
+        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, 0);
+        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
+            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
+                if (uint32 spellId = overrideSpells->spellId[i])
+                    target->RemoveTemporarySpell(spellId);
+    }
+}
+
+void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode, bool apply) const
+{
+    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+
+    if (!target)
+        return;
+
+    uint32 newSpellId = uint32(GetAmount());
+    bool foundAny = false;
+    PlayerSpellMap const& spells = target->GetSpellMap();
+
+    for (PlayerSpellMap::const_iterator itr = spells.begin(); itr != spells.end(); ++itr)
+    {
+        if (itr->second->state == PLAYERSPELL_REMOVED)
+            continue;
+
+        if (!itr->second->active || itr->second->disabled)
+            continue;
+
+		if(itr->first == 6229 && !target->HasAura(91713))
+			return;
+
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+
+        if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
+            continue;
+
+        foundAny = true;
+
+	 if (target->HasAura(94338))
+	 {
+	    target->AddTemporarySpell(93402);
+	    target->AddSpellSwap(8921, 93402);
+	 }
+
+        if (apply)
+            target->AddSpellSwap(itr->first, newSpellId);
+        else
+            target->RemoveSpellSwap(itr->first);
+    }
+    if (foundAny)
+    {
+        if (apply)
+            target->AddTemporarySpell(newSpellId);
+        else
+            target->RemoveTemporarySpell(newSpellId);
+    }
 }
 
 void AuraEffect::HandlePreventResurrection(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -5562,6 +5655,7 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                     target->SetPower(POWER_RAGE, rage-mod);
                     break;
                 }
+		break; 
             }
             break;
         }

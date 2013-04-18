@@ -380,8 +380,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS);
-    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_ACTIONBAR_SPELLS_2);
+    Unit::AuraEffectList swaps = mover->GetAuraEffectsByType(SPELL_AURA_SWAP_SPELLS);
+    Unit::AuraEffectList const& swaps2 = mover->GetAuraEffectsByType(SPELL_AURA_SWAP_SPELLS_2);
     if (!swaps2.empty())
         swaps.insert(swaps.end(), swaps2.begin(), swaps2.end());
 

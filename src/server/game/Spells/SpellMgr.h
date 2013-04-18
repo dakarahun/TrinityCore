@@ -326,6 +326,14 @@ struct SpellBonusEntry
 
 typedef UNORDERED_MAP<uint32, SpellBonusEntry>     SpellBonusMap;
 
+struct ActionBarSpellOverride
+{
+	uint32 SwapSpell;
+	uint32 Aura;
+};
+
+typedef UNORDERED_MAP<uint32, ActionBarSpellOverride> ActionBarSpellOverrideMap;
+
 enum SpellGroup
 {
     SPELL_GROUP_NONE             = 0,
@@ -665,6 +673,9 @@ class SpellMgr
         SpellProcEntry const* GetSpellProcEntry(uint32 spellId) const;
         bool CanSpellTriggerProcOnEvent(SpellProcEntry const& procEntry, ProcEventInfo& eventInfo) const;
 
+	// Actionbar override spell
+	ActionBarSpellOverride const* GetActionBarSpellOverride(uint32 SpellId) const;
+
         // Spell bonus data table
         SpellBonusEntry const* GetSpellBonusData(uint32 spellId) const;
 
@@ -722,6 +733,7 @@ class SpellMgr
         void UnloadSpellInfoImplicitTargetConditionLists();
         void LoadSpellCustomAttr();
         void LoadSpellInfoCorrections();
+	 void LoadActionBarSpellOverride();
 
     private:
         SpellDifficultySearcherMap mSpellDifficultySearcherMap;
@@ -751,6 +763,7 @@ class SpellMgr
         PetLevelupSpellMap         mPetLevelupSpellMap;
         PetDefaultSpellsMap        mPetDefaultSpellsMap;           // only spells not listed in related mPetLevelupSpellMap entry
         SpellInfoMap               mSpellInfoMap;
+        ActionBarSpellOverrideMap  mActionBarSpellOverrideMap;
 };
 
 #define sSpellMgr ACE_Singleton<SpellMgr, ACE_Null_Mutex>::instance()

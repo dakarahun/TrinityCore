@@ -2172,8 +2172,8 @@ void SpellMgr::LoadSpellLinked()
 
     mSpellLinkedMap.clear();    // need for reload case
 
-    //                                                0              1             2
-    QueryResult result = WorldDatabase.Query("SELECT spell_trigger, spell_effect, type FROM spell_linked_spell");
+    //                                                0              1             2        3
+    QueryResult result = WorldDatabase.Query("SELECT spell_trigger, spell_effect, type, req_aura FROM spell_linked_spell");
     if (!result)
     {
         sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 linked spells. DB table `spell_linked_spell` is empty.");
@@ -2188,6 +2188,7 @@ void SpellMgr::LoadSpellLinked()
         int32 trigger = fields[0].GetInt32();
         int32 effect = fields[1].GetInt32();
         int32 type = fields[2].GetUInt8();
+        int32 req_aura = fields[3].GetUInt32();
 
         SpellInfo const* spellInfo = GetSpellInfo(abs(trigger));
         if (!spellInfo)
@@ -2199,6 +2200,12 @@ void SpellMgr::LoadSpellLinked()
         if (!spellInfo)
         {
             sLog->outError(LOG_FILTER_SQL, "Spell %u listed in `spell_linked_spell` does not exist", abs(effect));
+            continue;
+        }
+
+	 if (req_aura != 0 && !sSpellStore.LookupEntry(req_aura))
+        {
+            sLog->outError(LOG_FILTER_SQL, "Aura %u listed in `spell_linked_spell` does not exist", req_aura);
             continue;
         }
 
@@ -2975,6 +2982,14 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
+	     case 77505:
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(3); // 20yd Damn, it hack i know
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS); // 10yd
+		break;
+	     case 28176: // nether ward // fel armor // demon armor
+	     case 687:
+		spellInfo->Effects[2].BasePoints = 91711;
+		break;
             case 53096: // Quetz'lun's Judgment
                 spellInfo->MaxAffectedTargets = 1;
                 break;
@@ -2984,6 +2999,19 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 59735:
                 spellInfo->Effects[EFFECT_1].TriggerSpell = 59736;
                 break;
+             case 82661: // Aspect of the Fox
+                 spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
+                 break;
+            case 73920: // Healing rain targets fix
+            case 81262: // Efflorescence
+            case 88685: // Holy word: Sanctuary
+				spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
+				spellInfo->Effects[0].TargetB = TARGET_DEST_DYNOBJ_ALLY;
+				spellInfo->Effects[0].Amplitude = 2000; // Interval
+                break;
+             case 87934: // Serpent Spread
+             case 87935:
+                 spellInfo->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
             case 52611: // Summon Skeletons
             case 52612: // Summon Skeletons
                 spellInfo->Effects[EFFECT_0].MiscValueB = 64;
@@ -3363,6 +3391,11 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 64596: // Cosmic Smash (Algalon the Observer)
                 spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(6);  // 100yd
                 break;
+            case 101681: // Triggering Spell
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(6);  // 100yd
+                spellInfo->Effects[EFFECT_1].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS); //E102 -> 2yd
+                spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_2_YARDS); //E213 -> 2yd
+		  break;
             case 64014: // Expedition Base Camp Teleport
             case 64024: // Conservatory Teleport
             case 64025: // Halls of Invention Teleport
@@ -3712,4 +3745,66 @@ void SpellMgr::LoadSpellInfoCorrections()
     }
 
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded SpellInfo corrections in %u ms", GetMSTimeDiffToNow(oldMSTime));
+}
+
+
+void SpellMgr::LoadActionBarSpellOverride()
+{
+	uint32 oldMSTime = getMSTime();
+	mActionBarSpellOverrideMap.clear();
+	
+	QueryResult result = WorldDatabase.Query("SELECT SpellId, SwapSpell, Aura FROM spell_swap WHERE Allow=1 ORDER BY SpellId ASC"); 
+	
+	if (!result)
+	{
+		sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded 0 actionbar spell spell_swap. DB table `spell_swap` is empty.");
+		return;
+	}
+
+	do
+	{
+		Field *fields = result->Fetch();
+
+		uint32 SpellId = fields[0].GetUInt32();
+		uint32 SwapSpell = fields[1].GetUInt32();
+		uint32 Aura = fields[2].GetUInt32();
+
+		//Check if Spell & Aura Exist
+		if (!sSpellStore.LookupEntry(SpellId))
+		{
+			sLog->outError(LOG_FILTER_SERVER_LOADING, "Spell (SpellId) %u listed in `spell_swap` does not exist", SpellId);
+			continue;
+		}
+
+		if (!sSpellStore.LookupEntry(SwapSpell))
+		{
+			sLog->outError(LOG_FILTER_SERVER_LOADING, "Spell (SwapSpell) %u listed in `spell_swap` does not exist", SwapSpell);
+			continue;
+		}
+
+		if (Aura != 0 && !sSpellStore.LookupEntry(Aura))
+		{
+			sLog->outError(LOG_FILTER_SERVER_LOADING, "Spell (Aura) %u listed in `spell_swap` does not exist", Aura);
+			continue;
+		}
+
+		ActionBarSpellOverride actbarSpellov;
+		actbarSpellov.SwapSpell = SwapSpell;
+		actbarSpellov.Aura = Aura;
+
+		mActionBarSpellOverrideMap[SpellId] = actbarSpellov;
+	}
+	while (result->NextRow());
+	
+	sLog->outInfo(LOG_FILTER_SERVER_LOADING, ">> Loaded %u actionbar spell override in %u ms", mActionBarSpellOverrideMap.size(), GetMSTimeDiffToNow(oldMSTime));
+}
+
+ActionBarSpellOverride const* SpellMgr::GetActionBarSpellOverride(uint32 SpellId) const
+{
+	ActionBarSpellOverrideMap::const_iterator itr = mActionBarSpellOverrideMap.find(SpellId);
+
+	if(itr == mActionBarSpellOverrideMap.end())
+		return NULL;
+	else
+		return &itr->second;
 }

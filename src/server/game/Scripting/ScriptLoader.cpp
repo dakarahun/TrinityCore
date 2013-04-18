@@ -340,6 +340,12 @@ void AddSC_boss_earthrager_ptah();
 void AddSC_boss_anraphet();
 void AddSC_instance_firelands();
 void AddSC_boss_alysrazor();
+// New Cataclysm Scripts
+void AddSC_boss_altairus();                  //Vortex Pinnacle
+void AddSC_boss_asaad();
+void AddSC_boss_grand_vizier_ertan();
+void AddSC_vortex_pinnacle();
+void AddSC_instance_vortex_pinnacle();
 
 void AddSC_ashenvale();
 void AddSC_azshara();
@@ -978,6 +984,12 @@ void AddKalimdorScripts()
     AddSC_instance_wailing_caverns();
     AddSC_zulfarrak();                      //Zul'Farrak generic
     AddSC_instance_zulfarrak();             //Zul'Farrak instance script
+    // New Cataclysm Scripts
+    AddSC_boss_altairus();                  //Vortex Pinnacle
+    AddSC_boss_asaad();
+    AddSC_boss_grand_vizier_ertan(); 
+    AddSC_vortex_pinnacle();
+    AddSC_instance_vortex_pinnacle();
 
     AddSC_ashenvale();
     AddSC_azshara();

@@ -494,8 +494,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             {
 		  // Soulburn Healthstone
 		  if (m_spellInfo->Id == 6262)
-		         if (m_caster->HasAura(74434))
+		  {
+		       if (m_caster->HasAura(74434))
                          m_caster->CastSpell(m_caster, 79437, true); // Soulburn: Healthstone
+		  }
                 // Rain of Fire
                 if (m_spellInfo->Id == 42223)
                 {
@@ -1744,11 +1746,21 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
            break;
          }
         case SPELLFAMILY_PALADIN:
-            switch (m_spellInfo->Id)
-            {
              if (m_spellInfo->Id == 31884) // Avenging Wrath
 		  if (m_caster->HasAura(53375) || m_caster->HasAura(53376) || m_caster->HasAura(90286)) // Sanctified Wrath
 		     m_caster->CastSpell(m_caster, 57318, true); // Trigger for Hammer of Wrath
+            switch (m_spellInfo->Id)
+            {
+		  case 31884: // Avenging Wrath
+		  {
+		      m_caster->ToPlayer()->AddSpellCooldown(642, 0, time(NULL) + 30);
+		   break;
+		  }
+		  case 642: // Divine shield
+		  {
+		      m_caster->ToPlayer()->AddSpellCooldown(31884, 0, time(NULL) + 30);
+		   break;
+		  }
                // Guardian of Ancient Kings
                 case 86150:
                 {
@@ -1847,12 +1859,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 }
                 // Improved Lava Lash
                 if (AuraEffect const* ill = m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 4780, 1))
-                // Searing Flames
-                if (AuraEffect const* sf = unitTarget->GetAuraEffect(77661, 0, m_caster->GetOwner()->GetGUID()))
-                {
-                    AddPct(m_damage, sf->GetBase()->GetStackAmount() * ill->GetAmount());
-                    unitTarget->RemoveAura(77661);
-                }
+                	if (AuraEffect const* sf = unitTarget->GetAuraEffect(77661, 0, m_caster->GetOwner()->GetGUID()))  // Searing Flames
+               	{
+                   		 AddPct(m_damage, sf->GetBase()->GetStackAmount() * ill->GetAmount());
+                   		 unitTarget->RemoveAura(77661);
+               	}
                 return;
             }
             break;
@@ -2720,6 +2731,10 @@ void Spell::EffectHeal(SpellEffIndex /*effIndex*/)
                 tickcount = 6;
 
             addhealth += tickheal * tickcount;
+
+             // Efflorescence
+	      if (caster->HasAura(34151) || caster->HasAura(81274) || caster->HasAura(81275))
+		  caster->CastSpell(unitTarget, 81262, true);
 
             // Glyph of Swiftmend
             if (!caster->HasAura(54824))

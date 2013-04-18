@@ -119,6 +119,12 @@ set(scripts_STAT_SRCS
   Kalimdor/Firelands/instance_firelands.cpp
   Kalimdor/Firelands/firelands.h
   Kalimdor/Firelands/boss_alysrazor.cpp
+  Kalimdor/VortexPinnacle/boss_altairus.cpp
+  Kalimdor/VortexPinnacle/boss_asaad.cpp
+  Kalimdor/VortexPinnacle/boss_grand_vizier_ertan.cpp
+  Kalimdor/VortexPinnacle/instance_vortex_pinnacle.cpp
+  Kalimdor/VortexPinnacle/vortex_pinnacle.cpp
+  Kalimdor/VortexPinnacle/vortex_pinnacle.h 
 )
 
 message("  -> Prepared: Kalimdor")

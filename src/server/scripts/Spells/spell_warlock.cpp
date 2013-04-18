@@ -1039,33 +1039,6 @@ public:
 	  }
 };
 
-// 28176 - Fel Armor
-class spell_warl_fel_armor: public SpellScriptLoader
-{
-   public:
-       spell_warl_fel_armor() : SpellScriptLoader("spell_warl_fel_armor") {}
-
-   class spell_warl_fel_armor_AuraScript: public AuraScript
-   {
-       PrepareAuraScript(spell_warl_fel_armor_AuraScript);
-
-       void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount,  bool & /*canBeRecalculated*/) 
-      {
-           amount = 8; // 8%
-       }
-
-       void Register()
-       {
-           DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_fel_armor_AuraScript::CalculateAmount, EFFECT_0, SPELL_AURA_MOD_SPELL_POWER_PCT);
-       }
-   };
-
-   AuraScript *GetAuraScript() const
-   {
-       return new spell_warl_fel_armor_AuraScript();
-   }
-};
-
 // 687,28176 Demon armor and Fel armor swap controller
 class spell_warl_nether_ward_swap_supressor: public SpellScriptLoader
 {
@@ -1199,7 +1172,6 @@ void AddSC_warlock_spell_scripts()
     new spell_warl_unstable_affliction();
     new spell_warl_drain_life();
     new spell_warl_dark_intent();
-    new spell_warl_fel_armor();
     new spell_warl_nether_ward_swap_supressor();
     new spell_warl_demonic_pact();
     new spell_warl_hand_of_guldan();

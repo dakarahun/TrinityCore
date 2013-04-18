@@ -148,7 +148,7 @@ void AuraApplication::_InitFlags(Unit* caster, uint8 effMask)
         _flags |= positiveFound ? AFLAG_POSITIVE : AFLAG_NEGATIVE;
     }
 
-    if (GetBase()->GetSpellInfo()->AttributesEx8 & SPELL_ATTR8_AURA_SEND_AMOUNT)
+    if (GetBase()->GetSpellInfo()->HasAura(SPELL_AURA_SWAP_SPELLS))
         _flags |= AFLAG_ANY_EFFECT_AMOUNT_SENT;
 }
 
@@ -1205,6 +1205,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             case SPELLFAMILY_DRUID:
                 if (!caster)
                     break;
+	     if (GetId() == 48517) // Sunfire Swapper
+		if (caster->HasAura(94338))
+		   	GetEffect(2)->SetAmount(93402);
                 // Rejuvenation
                 if (GetSpellInfo()->SpellFamilyFlags[0] & 0x10 && GetEffect(EFFECT_0))
                 {
@@ -1350,14 +1353,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					caster->SetHavocTarget(target);
 				else
 					caster->SetHavocTarget(NULL);
-			}
-			if(GetId() == 687 || GetId() == 28176) // Fel / Demon Armor
-			{
-				if (caster->HasAura(91713)) // Nether ward talent
-					GetEffect(2)->SetAmount(91711);
-				else 
-					GetEffect(1)->SetAmount(6229);
-				
 			}
  			if(GetId() == 702) // Curse of weakness
  			{
@@ -1530,9 +1525,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else if(caster->HasAura(79123)) // Rank 1
                         caster->CastSpell(target, 79124, true);
                 }
-                // Remove Vanish on stealth remove
-                if (GetId() == 1784)
-                    target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
+                // Cast stealth at vanish 3 seconds end
+                if (GetId() == 11327 && removeMode == AURA_REMOVE_BY_EXPIRE)
+                    caster->AddAura(1784 /* == stealth */, caster);
+                // Rupture & venomeous wounds energy regain at target's death
+                else if(GetId() == 1943 && removeMode == AURA_REMOVE_BY_DEATH &&        // If rupture's target dies
+                    (caster->HasSpell(79133) || caster->HasSpell(79134)))               // Only if has talent
+                {
+                    int32 basepoints0 = GetDuration() / 200;
+                    // for each remaining 0.2 second, give 1 energy
+                    caster->CastCustomSpell(caster, 51637, &basepoints0, NULL, NULL, true);
+                }
+                // Blackjack/Groggy on sap removal
+                else if(GetId() == 6770)
+               {
+                   if(caster->HasAura(79125)) // Rank 2
+                        caster->CastSpell(target, 79126, true);
+                    else if(caster->HasAura(79123)) // Rank 1
+                        caster->CastSpell(target, 79124, true);
+                }
 
                         // Rupture & venomeous wounds energy regain at target's death
                        if(GetId() == 1943 && removeMode == AURA_REMOVE_BY_DEATH &&    // If rupture's target dies

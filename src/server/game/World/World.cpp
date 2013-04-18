@@ -1417,6 +1417,9 @@ void World::SetInitialWorldSettings()
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Spell Group Stack Rules...");
     sSpellMgr->LoadSpellGroupStackRules();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Actionbar Spell override...");
+    sSpellMgr->LoadActionBarSpellOverride();
+
     sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Loading Spell Phase Dbc Info...");
     sObjectMgr->LoadSpellPhaseInfo();
 

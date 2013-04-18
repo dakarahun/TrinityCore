@@ -1751,6 +1751,7 @@ struct SpellTotemsEntry
     uint32    Totem[MAX_SPELL_TOTEMS];                        // 2        m_totem
 };
 
+
 // Spell.dbc
 struct SpellEntry
 {
@@ -1762,26 +1763,26 @@ struct SpellEntry
     uint32    AttributesEx4;                                // 5        m_attributesExD
     uint32    AttributesEx5;                                // 6        m_attributesExE
     uint32    AttributesEx6;                                // 7        m_attributesExF
-    uint32    AttributesEx7;                                // 8        m_attributesExG
-    uint32    AttributesEx8;                                // 9        m_attributesExH
+    uint32    AttributesEx7;                                // 8        3.2.0 (0x20 - totems, 0x4 - paladin auras, etc...)
+    uint32    AttributesEx8;                                // 9        m_attributesExH  
     uint32    AttributesEx9;                                // 10       m_attributesExI
     uint32    AttributesEx10;                               // 11       m_attributesExJ
     uint32    CastingTimeIndex;                             // 12       m_castingTimeIndex
     uint32    DurationIndex;                                // 13       m_durationIndex
-    uint32    powerType;                                    // 14       m_powerType
+    uint32    powerType;                                    // 14       _powerType
     uint32    rangeIndex;                                   // 15       m_rangeIndex
     float     speed;                                        // 16       m_speed
     uint32    SpellVisual[2];                               // 17-18    m_spellVisualID
     uint32    SpellIconID;                                  // 19       m_spellIconID
     uint32    activeIconID;                                 // 20       m_activeIconID
     char* SpellName;                                        // 21       m_name_lang
-    char* Rank;                                             // 22       m_nameSubtext_lang
+    char* Rank;                                             // 22       m_rank_lang
     //char* Description;                                    // 23       m_description_lang not used
     //char* ToolTip;                                        // 24       m_auraDescription_lang not used
     uint32    SchoolMask;                                   // 25       m_schoolMask
     uint32    runeCostID;                                   // 26       m_runeCostID
     //uint32    spellMissileID;                             // 27       m_spellMissileID not used
-    //uint32  spellDescriptionVariableID;                   // 28       m_spellDescriptionVariableID, 3.2.0
+    //uint32  spellDescriptionVariableID;                   // 28       3.2.0
     uint32  SpellDifficultyId;                              // 29       m_spellDifficultyID - id from SpellDifficulty.dbc
     float  SpellCoef;                                       // 30
     uint32 SpellScalingId;                                  // 31       SpellScaling.dbc
@@ -1802,6 +1803,7 @@ struct SpellEntry
     uint32 SpellTotemsId;                                   // 46       SpellTotems.dbc
     //uint32 ResearchProject;                               // 47       ResearchProject.dbc
 };
+
 
 // SpellCategories.dbc
 struct SpellCategoriesEntry

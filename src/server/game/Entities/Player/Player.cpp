@@ -812,6 +812,7 @@ Player::Player(WorldSession* session): Unit(true), phaseMgr(this)
     m_baseManaRegen = 0;
     m_baseHealthRegen = 0;
     m_spellPenetrationItemMod = 0;
+    m_spellPowerFromIntellect = 0;
 
     // Honor System
     m_lastHonorUpdateTime = time(NULL);
