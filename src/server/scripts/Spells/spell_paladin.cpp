@@ -998,11 +998,10 @@ public:
 
         int32 totalheal;
 
-        bool Validate (SpellInfo *const /*spellEntry*/)
+        bool Validate (SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_WORD_OF_GLORY))
                 return false;
-
             return true;
         }
 
@@ -1093,11 +1092,10 @@ public:
     {
         PrepareAuraScript(spell_pal_word_of_glory_heal_AuraScript)
 
-        bool Validate (SpellInfo *const /*spellEntry*/)
+        bool Validate (SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_WORD_OF_GLORY)->Effects[1].Effect)
                 return false;
-
             return true;
         }
 
@@ -1190,11 +1188,10 @@ class spell_pal_selfless_healer : public SpellScriptLoader
                 return true;
             }
 
-            bool Validate (SpellInfo *const /*spellEntry*/)
+            bool Validate (SpellInfo const* /*spellEntry*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SELFLESS_HEALER_PROC))
                     return false;
-
                 return true;
             }
 
@@ -1304,13 +1301,12 @@ public:
             return true;
         }
 
-        bool Validate (SpellInfo *const /*spellEntry*/)
+        bool Validate (SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_HOLY_GUARDIAN) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_RETRI_GUARDIAN) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_PROT_GUARDIAN))
                 return false;
-
             return true;
         }
 
@@ -1367,7 +1363,7 @@ public:
             return true;
          }
 
-        bool Validate (SpellInfo *const /*spellEntry*/)
+        bool Validate (SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_DAMAGE) ||
                 !sSpellMgr->GetSpellInfo(SPELL_PALADIN_CONSECRATION_SUMMON))
