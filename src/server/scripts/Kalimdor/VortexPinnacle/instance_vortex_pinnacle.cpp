@@ -48,12 +48,12 @@ class instance_vortex_pinnacle : public InstanceMapScript
 
             void OnGameObjectCreate(GameObject* go) {}
 
-            uint64 GetData64(uint32 type)
+            uint64 GetData64(uint32 type) const
             {
                 return 0;
             }
 
-            uint32 GetData(uint32 type)
+            uint32 GetData(uint32 type) const
             {
                 return Encounter[type];
             }

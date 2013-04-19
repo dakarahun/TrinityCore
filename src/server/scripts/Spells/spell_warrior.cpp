@@ -736,7 +736,7 @@ class spell_warr_heroic_leap : public SpellScriptLoader
         {
             PrepareSpellScript(spell_warr_heroic_leap_SpellScript)
 
-            bool Validate(SpellEntry const * /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
                 if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_HEROIC_LEAP))
                     return false;

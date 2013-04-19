@@ -1085,11 +1085,10 @@ public:
     {
         PrepareAuraScript(spell_warl_demonic_pact_AuraScript);
 
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_WARLOCK_DEMONIC_PACT_SPELL))
                 return false;
-
             return true;
         }
 

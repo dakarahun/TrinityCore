@@ -62,7 +62,7 @@ public:
                     player->ModifyCurrency(395, DUNGEON_MODE(3000, 7000));
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
                 return;

@@ -2084,7 +2084,7 @@ public:
                         owner->CastSpell(owner, GLYPH_OF_SHADOWFIEND_MANA, true);
         }
 
-        void UpdateAI(uint32 const /*diff*/)
+        void UpdateAI(uint32 /*diff*/)
 	 {
             if (!UpdateVictim())
                 return;
@@ -3020,7 +3020,7 @@ public:
             me->GetMotionMaster()->MovePoint(0, newx, newy, z);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!me->isInCombat() && CombatCheck == false)
             {
@@ -3108,7 +3108,7 @@ public:
             me->GetMotionMaster()->MovePoint(0, newx, newy, z);
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 diff)
         {
             if (!me->isInCombat() && CombatCheck == false)
             {
@@ -3182,7 +3182,7 @@ public:
             }
         }
 
-        void UpdateAI (const uint32 diff)
+        void UpdateAI (uint32 diff)
         {
             if (!UpdateVictim())
             {
