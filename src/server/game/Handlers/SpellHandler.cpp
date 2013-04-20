@@ -345,6 +345,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if (Player* plrMover = mover->ToPlayer())
+        spellId = plrMover->GetSpellForCast(spellId);
+
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
     if (!spellInfo)
     {

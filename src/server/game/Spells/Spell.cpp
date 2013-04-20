@@ -1052,7 +1052,10 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         ASSERT(false && "Spell::SelectImplicitConeTargets: received not implemented target reference type");
         return;
     }
+
+
     std::list<WorldObject*> targets;
+    CallScriptObjectAreaTargetSelectHandlers(targets, effIndex);
     SpellTargetObjectTypes objectType = targetType.GetObjectType();
     SpellTargetCheckTypes selectionType = targetType.GetCheckType();
     ConditionList* condList = m_spellInfo->Effects[effIndex].ImplicitTargetConditions;
@@ -1064,8 +1067,6 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
         Trinity::WorldObjectSpellConeTargetCheck check(coneAngle, radius, m_caster, m_spellInfo, selectionType, condList);
         Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellConeTargetCheck> searcher(m_caster, targets, check, containerTypeMask);
         SearchTargets<Trinity::WorldObjectListSearcher<Trinity::WorldObjectSpellConeTargetCheck> >(searcher, containerTypeMask, m_caster, m_caster, radius);
-
-        CallScriptObjectAreaTargetSelectHandlers(targets, effIndex);
 
         if (!targets.empty())
         {
@@ -3101,6 +3102,7 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         if (!m_casttime && !m_spellInfo->StartRecoveryTime && !m_castItemGUID && GetCurrentContainer() == CURRENT_GENERIC_SPELL)
             cast(true);
     }
+
     Unit::AuraEffectList const& AurasList = m_caster->GetAuraEffectsByType(SPELL_AURA_SWAP_SPELLS);
     for (Unit::AuraEffectList::const_iterator itr = AurasList.begin(); itr != AurasList.end(); ++itr)
     {

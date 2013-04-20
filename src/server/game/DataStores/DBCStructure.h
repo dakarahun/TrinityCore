@@ -1784,7 +1784,7 @@ struct SpellEntry
     //uint32    spellMissileID;                             // 27       m_spellMissileID not used
     //uint32  spellDescriptionVariableID;                   // 28       3.2.0
     uint32  SpellDifficultyId;                              // 29       m_spellDifficultyID - id from SpellDifficulty.dbc
-    float  SpellCoef;                                       // 30
+    //float  SpellCoef;                                       // 30
     uint32 SpellScalingId;                                  // 31       SpellScaling.dbc
     uint32 SpellAuraOptionsId;                              // 32       SpellAuraOptions.dbc
     uint32 SpellAuraRestrictionsId;                         // 33       SpellAuraRestrictions.dbc

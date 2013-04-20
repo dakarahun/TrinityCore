@@ -1114,14 +1114,14 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScriptLoader
 };
 
 // Wild mushroom, 88747
-class spell_druid_wild_mushroom : public SpellScriptLoader
+class spell_dru_wild_mushroom : public SpellScriptLoader
 {
     public:
-        spell_druid_wild_mushroom() : SpellScriptLoader("spell_druid_wild_mushroom") { }
+        spell_dru_wild_mushroom() : SpellScriptLoader("spell_dru_wild_mushroom") { }
 
-        class spell_druid_wild_mushroom_SpellScript : public SpellScript
+        class spell_dru_wild_mushroom_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_druid_wild_mushroom_SpellScript)
+            PrepareSpellScript(spell_dru_wild_mushroom_SpellScript)
 
             void HandleSummon(SpellEffIndex effIndex)
             {
@@ -1191,26 +1191,26 @@ class spell_druid_wild_mushroom : public SpellScriptLoader
 
             void Register()
             {
-                OnEffectHit += SpellEffectFn(spell_druid_wild_mushroom_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
-                OnCheckCast += SpellCheckCastFn(spell_druid_wild_mushroom_SpellScript::CheckCast);
+                OnEffectHit += SpellEffectFn(spell_dru_wild_mushroom_SpellScript::HandleSummon, EFFECT_0, SPELL_EFFECT_SUMMON);
+                OnCheckCast += SpellCheckCastFn(spell_dru_wild_mushroom_SpellScript::CheckCast);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_druid_wild_mushroom_SpellScript();
+            return new spell_dru_wild_mushroom_SpellScript();
         }
 };
 
 // Wild mushroom : Detonate, 88751
-class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
+class spell_dru_wild_mushroom_detonate : public SpellScriptLoader
 {
     public:
-        spell_druid_wild_mushroom_detonate() : SpellScriptLoader("spell_druid_wild_mushroom_detonate") { }
+        spell_dru_wild_mushroom_detonate() : SpellScriptLoader("spell_dru_wild_mushroom_detonate") { }
 
-        class spell_druid_wild_mushroom_detonate_SpellScript : public SpellScript
+        class spell_dru_wild_mushroom_detonate_SpellScript : public SpellScript
         {
-            PrepareSpellScript(spell_druid_wild_mushroom_detonate_SpellScript)
+            PrepareSpellScript(spell_dru_wild_mushroom_detonate_SpellScript)
 
             // Globals variables
             float spellRange;
@@ -1371,14 +1371,14 @@ class spell_druid_wild_mushroom_detonate : public SpellScriptLoader
 
             void Register() 
             {
-                OnCheckCast += SpellCheckCastFn(spell_druid_wild_mushroom_detonate_SpellScript::CheckCast);
-                OnEffectHitTarget += SpellEffectFn(spell_druid_wild_mushroom_detonate_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnCheckCast += SpellCheckCastFn(spell_dru_wild_mushroom_detonate_SpellScript::CheckCast);
+                OnEffectHitTarget += SpellEffectFn(spell_dru_wild_mushroom_detonate_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
         SpellScript* GetSpellScript() const
         {
-            return new spell_druid_wild_mushroom_detonate_SpellScript();
+            return new spell_dru_wild_mushroom_detonate_SpellScript();
         }
 };
 
@@ -1408,6 +1408,6 @@ void AddSC_druid_spell_scripts()
     new spell_dru_tiger_s_fury();
     new spell_dru_typhoon();
     new spell_dru_t10_restoration_4p_bonus();
-    new spell_druid_wild_mushroom();
-    new spell_druid_wild_mushroom_detonate();
+    new spell_dru_wild_mushroom();
+    new spell_dru_wild_mushroom_detonate();
 }

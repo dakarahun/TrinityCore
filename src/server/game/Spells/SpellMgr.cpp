@@ -2982,10 +2982,17 @@ void SpellMgr::LoadSpellInfoCorrections()
 
         switch (spellInfo->Id)
         {
-	     case 77505:
-                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(3); // 20yd Damn, it hack i know
+	     case 77505: // EarthQuake Trigger
+                spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(3); // 10yd Damn, it hack i know
                 spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS); // 10yd
-		break;
+		  break;
+            case 88667: // Holy Word: Sanctuary
+            case 88668: // Holy Word: Sanctuary
+                spellInfo->SpellFamilyName = SPELLFAMILY_PRIEST;
+                break;
+            case 65156: // Juggernaut Buff
+                spellInfo->AttributesEx3 |=  SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
+                break;
 	     case 28176: // nether ward // fel armor // demon armor
 	     case 687:
 		spellInfo->Effects[2].BasePoints = 91711;
@@ -3002,6 +3009,28 @@ void SpellMgr::LoadSpellInfoCorrections()
              case 82661: // Aspect of the Fox
                  spellInfo->Effects[0].ApplyAuraName = SPELL_AURA_PROC_TRIGGER_SPELL;
                  break;
+             case 93072: // Bring our Boys back
+                 spellInfo->Effects[0].TargetA = TARGET_UNIT_NEARBY_ENTRY;
+                 break;
+             case 11113: // Blast Wave
+                // Had to do this, currently this spell is impossible to be correctly implemented
+                 // on the current proc system
+                 spellInfo->Effects[2].Effect = NULL;
+                 spellInfo->ExplicitTargetMask = TARGET_FLAG_DEST_LOCATION;
+                 break;
+            // Polymorph spells used to have no proc data (no charges too, duh) back on 3.3.5, thus they never passed the
+            // ProcFlag check on AuraEffect::CalculateAmount thus they never received an amount that needed to be calculated on 
+            // Unit::ProcDamageAndSpellFor, so i decided to simple add a charge to it (making them break on the first damage received)
+            // instead of removing the proc data (wich is needed for improved polymorph and god knows what else spell)
+             case 118:   // Polymorph
+             case 61305: // Polymorph (other animal)
+             case 28272: // polymorph (other animal)
+             case 61721: // Polymorph (other animal)
+             case 61780: // Polymorph (other animal)
+             case 28271: // Polymorph (other animal)
+                spellInfo->AuraInterruptFlags = AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+                spellInfo->ProcCharges = 1;
+                break;
             case 73920: // Healing rain targets fix
             case 81262: // Efflorescence
             case 88685: // Holy word: Sanctuary

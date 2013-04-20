@@ -5483,41 +5483,56 @@ void AuraEffect::HandleAuraSetVehicle(AuraApplication const* aurApp, uint8 mode,
         target->ToPlayer()->SendOnCancelExpectedVehicleRideAura();
 }
 
+
 void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
-    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+   if (!(mode & AURA_EFFECT_HANDLE_REAL))
         return;
 
     Player* target = aurApp->GetTarget()->ToPlayer();
 
-    if (!target || !target->IsInWorld())
+    if (!target)
         return;
 
-    uint32 overrideId = uint32(GetMiscValue());
+    uint32 newSpellId = uint32(GetAmount());
+    bool foundAny = false;
+    PlayerSpellMap const& spells = target->GetSpellMap();
 
-	if (overrideId == 6229 && !target->HasAura(91713))
-		return;
-
-    if (apply)
+    for (PlayerSpellMap::const_iterator itr = spells.begin(); itr != spells.end(); ++itr)
     {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, overrideId);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
-	 {
-            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
-                if (uint32 spellId = overrideSpells->spellId[i])
-                    target->AddTemporarySpell(spellId);
+        if (itr->second->state == PLAYERSPELL_REMOVED)
+            continue;
+
+        if (!itr->second->active || itr->second->disabled)
+            continue;
+
+		if(itr->first == 6229 && !target->HasAura(91713))
+			return;
+
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+
+        if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
+            continue;
+
+        foundAny = true;
 
 	 if (target->HasAura(94338))
+	 {
 	    target->AddTemporarySpell(93402);
-	}
+	    target->AddSpellSwap(8921, 93402);
+	 }
+
+        if (apply)
+            target->AddSpellSwap(itr->first, newSpellId);
+        else
+            target->RemoveSpellSwap(itr->first);
     }
-    else
+    if (foundAny)
     {
-        target->SetUInt16Value(PLAYER_FIELD_BYTES2, 0, 0);
-        if (OverrideSpellDataEntry const* overrideSpells = sOverrideSpellDataStore.LookupEntry(overrideId))
-            for (uint8 i = 0; i < MAX_OVERRIDE_SPELL; ++i)
-                if (uint32 spellId = overrideSpells->spellId[i])
-                    target->RemoveTemporarySpell(spellId);
+        if (apply)
+            target->AddTemporarySpell(newSpellId);
+        else
+            target->RemoveTemporarySpell(newSpellId);
     }
 }
 
