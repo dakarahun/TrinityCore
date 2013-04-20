@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2008-2013 TrinityCore <http://www.trinitycore.org/>
  *
@@ -1519,12 +1520,12 @@ public:
 
 enum Judgements
 {
- 	SPELL_JUDGEMENT_TRIGGER           = 23590, 
-       SPELL_JUDGEMENT_LONG_ARM_OF_LAWL  = 87173,
-       SPELL_JUDGEMENT_WISE              = 31930,
-       SPELL_JUDGEMENT_BOLD              = 89906,
+	SPELL_JUDGEMENT_TRIGGER           = 23590, 
+	SPELL_JUDGEMENT_LONG_ARM_OF_LAWL  = 87173,
+	SPELL_JUDGEMENT_WISE              = 31930,
+	SPELL_JUDGEMENT_BOLD              = 89906,
 	SPELL_JUDGEMENT_PURE              = 53655,
- 	SPELL_JUDGEMENT_ENLIGHTENED       = 87188,
+	SPELL_JUDGEMENT_ENLIGHTENED       = 87188,
 };
 
 /// Updated 4.3.4
@@ -1545,13 +1546,13 @@ class spell_pal_judgements : public SpellScriptLoader
 
          	   if (Unit* target = GetExplTargetUnit())
            	   {
-               	 if (!target->IsFriendlyTo(caster) || target->getAttackers().empty())
+               	   if (!target->IsFriendlyTo(caster) || target->getAttackers().empty())
                   	    return SPELL_FAILED_BAD_TARGETS;
            	   }
-          	  else
+          	   else
                	 return SPELL_FAILED_BAD_TARGETS;
 
-             	return SPELL_CAST_OK;
+             return SPELL_CAST_OK;
             }
 
             void HandleDummy(SpellEffIndex effIndex)
@@ -1559,43 +1560,45 @@ class spell_pal_judgements : public SpellScriptLoader
                 PreventHitDefaultEffect(effIndex);
                 Unit* caster = GetCaster();
                 if (Unit* target = GetHitUnit())
-		  {
-                	 caster->CastSpell(target, SPELL_JUDGEMENT_TRIGGER, true);
-                	 int32 regen = 0;
+		        {
+                	caster->CastSpell(target, SPELL_JUDGEMENT_TRIGGER, true);
+                	int32 regen = 0;
 
-         	       if (caster->HasAura(89901)) // Jugements of the bold
+         	        if (caster->HasAura(89901)) // Jugements of the bold
                  	{
                    	   regen = int32(caster->GetCreateMana() * 0.025);
                    	   caster->CastCustomSpell(caster, SPELL_JUDGEMENT_BOLD, &regen, 0, 0, true);
-		  	}
-         	  	if (caster->HasAura(31878)) // Judgements of the Wise
+		  	        }
+         	  	    if (caster->HasAura(31878)) // Judgements of the Wise
                 	{
                         regen = int32(caster->GetCreateMana() * 0.030);
-                   	   caster->CastCustomSpell(caster, SPELL_JUDGEMENT_WISE, &regen, 0, 0, true);
-		  	}
+                   	    caster->CastCustomSpell(caster, SPELL_JUDGEMENT_WISE, &regen, 0, 0, true);
+		  	        }
 
-		 	  if (caster->HasAura(87168)) // Long arm of Lawl Rank 1
-			  {
+		 	        if (caster->HasAura(87168)) // Long arm of Lawl Rank 1
+				    {
                   		  if (roll_chance_i(50.0f))
                       		  if (caster->GetDistance(target) > 15.0f || !caster->IsWithinDistInMap(target, 15.0f)) 
                     				caster->CastSpell(caster, SPELL_JUDGEMENT_LONG_ARM_OF_LAWL, true);
-			  }
-		   	  else if (caster->HasAura(87172)) // Long arm of Lawl Rank 2
+			        }
+		   	        else if (caster->HasAura(87172)) // Long arm of Lawl Rank 2
+					{
                        	 if (caster->GetDistance(target) > 15.0f || !caster->IsWithinDistInMap(target, 15.0f)) 
-                    			  caster->CastSpell(caster, SPELL_JUDGEMENT_LONG_ARM_OF_LAWL, true);
+                    	     caster->CastSpell(caster, SPELL_JUDGEMENT_LONG_ARM_OF_LAWL, true);
+				    }
 
-		 	  if (caster->HasAura(53671)) // Judgements of the Pure
+		 		    if (caster->HasAura(53671)) // Judgements of the Pure
                     		caster->CastSpell(caster, SPELL_JUDGEMENT_PURE, true);
-		  	  if (caster->HasAura(53673)) 
+		  	        if (caster->HasAura(53673)) 
                     		caster->CastSpell(caster, SPELL_JUDGEMENT_PURE+1, true);
-		  	  if (caster->HasAura(54151)) 
+		  	        if (caster->HasAura(54151)) 
                     		caster->CastSpell(caster, SPELL_JUDGEMENT_PURE+2, true);
 
-		  	  if (caster->HasAura(53556)) // Enlightened Judgements
+		  	        if (caster->HasAura(53556)) // Enlightened Judgements
                     		caster->CastSpell(caster, SPELL_JUDGEMENT_ENLIGHTENED, true);
-		  	  if (caster->HasAura(53557)) 
+		  	        if (caster->HasAura(53557)) 
                     		caster->CastSpell(caster, SPELL_JUDGEMENT_ENLIGHTENED+1, true);
-		 }
+		        }
             } 
 
 
@@ -1705,12 +1708,10 @@ public:
 
                 damage += (caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.08) + (caster->ToPlayer()->GetBaseSpellPowerBonus() * 0.23);
 		  
-		     if (caster->HasAura(86700))
-		     {
-                           if (Aura* ancientpower = caster->GetAura(86700))
-		       		damage += damage * ancientpower->GetStackAmount();
-			damage /= 2;
-		     }
+              if (Aura* ancientpower = caster->GetAura(86700))
+			  {
+		       		damage += (damage * 0.34f) * ancientpower->GetStackAmount();
+			  }
 
                 SetHitDamage(damage);
             }

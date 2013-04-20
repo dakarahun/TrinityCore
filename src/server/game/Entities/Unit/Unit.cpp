@@ -7756,9 +7756,9 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 /*damage*/, Aura* triggeredByAura
                     }
                     break;
                  }
-	      }
-	   break;
-	 }
+	         }
+	      break;
+	    }
         case SPELLFAMILY_PRIEST:
         {
             if (dummySpell->Id == 14751) // Chakra

@@ -823,11 +823,11 @@ public:
                     return;
 
                 if (DynamicObject* dynObj = GetCaster()->GetDynObject(61882))
-	         {
+	            {
                     GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHAMAN_EARTHQUAKE_DAMAGE, true);
-		      if (roll_chance_i(10))
-                      GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN, true);
-	         }
+		            if (roll_chance_i(10))
+                        GetCaster()->CastSpell(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ(), SPELL_SHAMAN_EARTHQUAKE_KNOCKDOWN, true);
+	            }
         }
 
         void Register()
