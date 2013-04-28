@@ -602,6 +602,13 @@ void WorldSession::HandleSpellClick(WorldPacket& recvData)
     if (!unit->IsInWorld())
         return;
 
+    if (!_player->isAlive())
+    {
+        sLog->outError(LOG_FILTER_GENERAL, "Possible hacking attempt: Player %s [guid: %u] tried to HandleSpellClick [guid: %u, entry: %u] in dead state!",
+        _player->GetName().c_str(), _player->GetGUIDLow(), unit->GetGUIDLow(), unit->GetEntry());
+        return;
+    }
+
     unit->HandleSpellClick(_player);
 }
 
