@@ -45,34 +45,35 @@ void TargetedMovementGeneratorMedium<T,D>::_setTargetLocation(T* owner, bool upd
         if (!i_offset)
         {
             float dist_min; //Min Contact Dist
-            dist_min = i_target->GetCombatReach() - i_target->GetObjectSize() - 1.0f;   // Get min Dist
+            dist_min = i_target->GetCombatReach() - (i_target->GetObjectSize() + 1.0f);   // Get min Dist
 
             if (dist_min <= 0) 
-               dist_min = 0.25f;
+               dist_min = 0.5f;
             // to nearest contact position
             i_target->GetContactPoint(owner, x, y, z, dist_min);
         }
         else
         {
-           float dist;
-          
+            float dist;
+            float size;
+
             // Pets need special handling.
             // We need to subtract GetObjectSize() because it gets added back further down the chain
             //  and that makes pets too far away. Subtracting it allows pets to properly
             //  be (GetCombatReach() + i_offset) away.
             // Only applies when i_target is pet's owner otherwise pets and mobs end up
             //   doing a "dance" while fighting
+                dist = i_target->GetCombatReach();
+                size = i_target->GetCombatReach() - (i_target->GetObjectSize() + 1);
 
-            dist = i_target->GetCombatReach() - i_target->GetObjectSize() - 1.0f;
-	      if (dist <= 0)
-		  dist = 0.25;
 
             if (i_target->IsWithinDistInMap(owner, dist))
-                i_target->GetContactPoint(owner, x, y, z, dist);
+                return;
 
             // to at i_offset distance from target and i_angle from target facing
-            // i_target->GetClosePoint(x, y, z, dist, i_offset, i_angle);
+            i_target->GetClosePoint(x, y, z, size, i_offset, i_angle);
         }
+
     }
     else
     {
