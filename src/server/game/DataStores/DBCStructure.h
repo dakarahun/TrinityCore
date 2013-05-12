@@ -2083,7 +2083,7 @@ struct TalentTabEntry
     //char* internalname;                                   // 6        m_backgroundFile
     //char* description;                                    // 7
     //uint32 rolesMask;                                     // 8 4.0.0
-    uint32 MasterySpellId[MAX_MASTERY_SPELLS];              // 9-10 passive mastery bonus spells
+    uint32 MasterySpellId[MAX_MASTERY_SPELLS];              // 9-10 passive mastery bonus spells?
 };
 
 struct TalentTreePrimarySpellsEntry

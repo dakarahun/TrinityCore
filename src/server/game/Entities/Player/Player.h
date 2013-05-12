@@ -113,6 +113,8 @@ struct PlayerTalent
     uint8 spec             : 8;
 };
 
+extern uint32 const MasterySpells[MAX_CLASSES];
+
 enum TalentTree // talent tabs
 {
     TALENT_TREE_WARRIOR_ARMS         = 746,
@@ -1774,6 +1776,7 @@ class Player : public Unit, public GridObject<Player>
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell) const;
         bool IsSpellFitByClassAndRace(uint32 spell_id) const;
         bool IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const;
+        bool IsCurrentSpecMasterySpell(SpellInfo const* spellInfo) const;
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
@@ -1994,6 +1997,8 @@ class Player : public Unit, public GridObject<Player>
         void ApplyRatingMod(CombatRating cr, int32 value, bool apply);
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
+        void UpdateMastery();
+        bool CanUseMastery() const;
 
         // Mastery System
         void UpdateMastery();
