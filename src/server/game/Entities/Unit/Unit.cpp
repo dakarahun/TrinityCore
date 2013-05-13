@@ -5418,7 +5418,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     triggered_spell_id = 81301;
                     break;
                 }
-		  if (dummySpell->Id == 6229)
+		  if (dummySpell->Id == 28176 || dummySpell->Id == 687)
 		  {
 		     if (HasAura(91713))
 				triggered_spell_id = 91711;
