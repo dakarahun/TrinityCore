@@ -5555,18 +5555,7 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
             continue;
 
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
-		if(spellInfo->Id == 28176 && !target->HasAura(91713))
-		{
-			foundAny = false;
-			apply = false;
-			return;
-		}
-		if(spellInfo->Id == 6229 && !target->HasAura(91713))
-		{
-			foundAny = false;
-			apply = false;
-			return;
-		}
+
         if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
             continue;
 
@@ -5577,6 +5566,13 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
 	    target->AddTemporarySpell(93402);
 	    target->AddSpellSwap(8921, 93402);
 	 }
+
+	 	if(this->GetId() == 28176 && !target->HasAura(91713))
+		{
+			foundAny = false;
+			apply = false;
+			return;
+		}
 
         if (apply)
             target->AddSpellSwap(itr->first, newSpellId);
