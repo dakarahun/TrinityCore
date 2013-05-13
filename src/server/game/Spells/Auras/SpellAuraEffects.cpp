@@ -5558,11 +5558,13 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
 		if(spellInfo->Id == 28176 && !target->HasAura(91713))
 		{
 			foundAny = false;
+			apply = false;
 			return;
 		}
 		if(spellInfo->Id == 6229 && !target->HasAura(91713))
 		{
 			foundAny = false;
+			apply = false;
 			return;
 		}
         if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))
