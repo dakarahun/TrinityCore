@@ -2001,8 +2001,6 @@ class Player : public Unit, public GridObject<Player>
         bool CanUseMastery() const;
 
         // Mastery System
-        void UpdateMastery();
-        bool CanUseMastery() const { return _canUseMastery; }
         void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }
         void CastMasterySpells(Player* caster);
 
