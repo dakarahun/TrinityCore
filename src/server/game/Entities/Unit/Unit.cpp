@@ -5421,7 +5421,9 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
 		  if (dummySpell->Id == 6229)
 		  {
 		     if (HasAura(91713))
-			 triggered_spell_id = 91711;
+				triggered_spell_id = 91711;
+			 else
+				 triggered_spell_id = 6229;
 		     CastSpell(this, triggered_spell_id, true);
 		  }
                 // Purified Shard of the Scale - Onyxia 10 Caster Trinket

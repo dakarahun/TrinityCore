@@ -5567,13 +5567,6 @@ void AuraEffect::HandleAuraSwapSpells(AuraApplication const * aurApp, uint8 mode
 	    target->AddSpellSwap(8921, 93402);
 	 }
 
-	 	if(this->GetId() == 28176 && !target->HasAura(91713))
-		{
-			foundAny = false;
-			apply = false;
-			return;
-		}
-
         if (apply)
             target->AddSpellSwap(itr->first, newSpellId);
         else
