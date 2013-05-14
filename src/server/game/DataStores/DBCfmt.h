@@ -127,7 +127,7 @@ char const SpellDurationfmt[] = "niii";
 char const SpellEffectEntryfmt[] =            "nifiiiffiiiiiifiifiiiiiiiix";
 const std::string CustomSpellEffectEntryfmt = "ppppppppppapppappppppppppp";
 const std::string CustomSpellEffectEntryIndex = "Id";
-//                                       0         10        20        30        40     47
+//										 0         10        20        30        40     47
 char const SpellEntryfmt[] =            "niiiiiiiiiiiiiiifiiiissxxiixxifiiiiiiixiiiiiiiix";
 const std::string CustomSpellEntryfmt = "ppppppppppppppapaaaaaaaaapaaaaaapapppaapppaaapap";
 const std::string CustomSpellEntryIndex = "Id";
