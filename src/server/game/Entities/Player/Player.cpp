@@ -3736,9 +3736,6 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
             {
                 if (spellInfo->IsPassive() && IsNeedCastPassiveSpellAtLearn(spellInfo))
                     CastSpell (this, spellId, true);
-
-                if (CanUseMastery())
-                    CastMasterySpells(this);
             }
             else if (IsInWorld())
             {
@@ -6053,12 +6050,12 @@ void Player::UpdateRating(CombatRating cr)
                 UpdateExpertise(OFF_ATTACK);
             }
             break;
-        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
-            UpdateMastery();
-            break;
         case CR_ARMOR_PENETRATION:
             if (affectStats)
                 UpdateArmorPenetration(amount);
+            break;
+        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
+            UpdateMastery();
             break;
     }
 }
