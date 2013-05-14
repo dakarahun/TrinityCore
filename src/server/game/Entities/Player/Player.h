@@ -1995,11 +1995,8 @@ class Player : public Unit, public GridObject<Player>
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
 
-        // Mastery System
-        void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }
-        void CastMasterySpells(Player* caster);
-
-        // Mastery System
+        void UpdateMastery();
+        bool CanUseMastery() const { return _canUseMastery; }
         void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }
         void CastMasterySpells(Player* caster);
 
