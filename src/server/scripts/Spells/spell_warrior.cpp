@@ -918,6 +918,106 @@ public:
 	}
 };
 
+// Shockwave
+// Spell Id: 46968
+class spell_warr_shockwave : public SpellScriptLoader
+{
+    public:
+        spell_warr_shockwave() : SpellScriptLoader("spell_warr_shockwave") { }
+
+        class spell_warr_shockwave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_shockwave_SpellScript);
+
+            void CalculateDamage(SpellEffIndex effect)
+            {
+                // Formula: [Effect2BasePoints] / 100 * AttackPower
+                if (Unit* caster = GetCaster())
+                {
+                    int32 bp2 = caster->CalculateSpellDamage(GetHitUnit(), GetSpellInfo(), EFFECT_2);
+                    SetHitDamage(int32(bp2 / 100 * caster->GetTotalAttackPowerValue(BASE_ATTACK)));
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_shockwave::spell_warr_shockwave_SpellScript::CalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_shockwave_SpellScript();
+        }
+};
+
+// Victory Rush
+// Spell Id: 34428
+class spell_warr_victory_rush : public SpellScriptLoader
+{
+    public:
+        spell_warr_victory_rush() : SpellScriptLoader("spell_warr_victory_rush") { }
+
+        class spell_warr_victory_rush_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_victory_rush_SpellScript);
+
+            void CalculateDamage(SpellEffIndex effect)
+            {
+                // Formula: AttackPower * BasePoints / 100
+                if (Unit* caster = GetCaster())
+                    SetHitDamage(int32(GetHitDamage() * caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100));
+            }
+
+            void HandleAfterHit()
+            {
+                if (Unit* caster = GetCaster())
+                    caster->RemoveAurasDueToSpell(32216); // Remove Victorious aura
+            }
+
+            void Register()
+            {
+                AfterHit += SpellHitFn(spell_warr_victory_rush::spell_warr_victory_rush_SpellScript::HandleAfterHit);
+                OnEffectHitTarget += SpellEffectFn(spell_warr_victory_rush::spell_warr_victory_rush_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_victory_rush_SpellScript();
+        }
+};
+
+// Cleave
+// Spell Id: 845
+class spell_warr_cleave : public SpellScriptLoader
+{
+    public:
+        spell_warr_cleave() : SpellScriptLoader("spell_warr_cleave") { }
+
+        class spell_warr_cleave_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_warr_cleave_SpellScript);
+
+            void CalculateDamage(SpellEffIndex effect)
+            {
+                // Formula: 6 + AttackPower * 0.45
+                if (Unit* caster = GetCaster())
+                    SetHitDamage(int32(6 + caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.45f));
+            }
+
+            void Register()
+            {
+                OnEffectHitTarget += SpellEffectFn(spell_warr_cleave::spell_warr_cleave_SpellScript::CalculateDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_warr_cleave_SpellScript();
+        }
+};
+
 
 void AddSC_warrior_spell_scripts()
 {
@@ -941,4 +1041,7 @@ void AddSC_warrior_spell_scripts()
 	new spell_warr_thunderclap();
 	new spell_warr_intercept_triggered();
 	new spell_warr_heroic_strike();
+	new spell_warr_shockwave();
+	new spell_warr_victory_rush();
+    new spell_warr_cleave();
 }
