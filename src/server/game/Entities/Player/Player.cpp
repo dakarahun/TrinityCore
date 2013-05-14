@@ -4086,8 +4086,6 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
                 learnSpell(itr2->second, false);
         }
     }
-    if (!learning)
-        return;
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
