@@ -77,7 +77,8 @@ enum PaladinSpells
     SPELL_PALADIN_CONSECRATION_DAMAGE            = 81297,
 
     SPELL_GENERIC_ARENA_DAMPENING                = 74410,
-    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411
+    SPELL_GENERIC_BATTLEGROUND_DAMPENING         = 74411,
+    SPELL_PALADIN_SPEED_OF_LIGHT_BUFF            = 85497
 };
 
 // 31850 - Ardent Defender
@@ -1817,6 +1818,42 @@ public:
     }
 };
 
+// 85495,85498,85499 - Speed of Light
+/// Updated 4.3.4
+class spell_pal_speed_of_light : public SpellScriptLoader
+{
+    public:
+        spell_pal_speed_of_light() : SpellScriptLoader("spell_pal_speed_of_light") { }
+
+        class spell_pal_speed_of_light_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pal_speed_of_light_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_SPEED_OF_LIGHT_BUFF))
+                    return false;
+                return true;
+            }
+
+            void HandleProc(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+            {
+                PreventDefaultAction();
+                if (Unit* caster = GetCaster())
+                    caster->CastCustomSpell(SPELL_PALADIN_SPEED_OF_LIGHT_BUFF, SPELLVALUE_BASE_POINT0, aurEff->GetAmount(), caster);
+            }
+
+            void Register()
+            {
+                OnEffectProc += AuraEffectProcFn(spell_pal_speed_of_light_AuraScript::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pal_speed_of_light_AuraScript();
+        }
+};
 
 
 void AddSC_paladin_spell_scripts()
@@ -1851,4 +1888,5 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_avenging_shield();
     new spell_pal_hammer_of_wrath();
     new spell_pal_exorcism(); 
+	new spell_pal_speed_of_light();
 }
