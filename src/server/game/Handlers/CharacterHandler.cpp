@@ -1133,8 +1133,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_playerLoading = false;
 
-   pCurrChar->CastMasterySpells(pCurrChar);
-
     sScriptMgr->OnPlayerLogin(pCurrChar);
     delete holder;
 }
