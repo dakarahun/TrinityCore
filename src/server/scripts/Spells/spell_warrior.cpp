@@ -497,7 +497,7 @@ public:
 				int32 mws = caster->GetAttackTime(BASE_ATTACK);
 				float mwbMin = caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
 				float mwbMax = caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
-				float mwb = ((mwbMin + mwbMax) / 2 + ap * mws / 14000) / 6;
+				float mwb = ((mwbMin + mwbMax) / 2 + ap * mws / 14000);
 				amount += int32(caster->ApplyEffectModifiers(GetSpellInfo(), aurEff->GetEffIndex(), mwb * 0.25));
 			}
 		}
