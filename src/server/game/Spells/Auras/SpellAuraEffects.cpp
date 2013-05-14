@@ -472,12 +472,22 @@ void AuraEffect::GetApplicationList(std::list<AuraApplication*> & applicationLis
 
 int32 AuraEffect::CalculateAmount(Unit* caster)
 {
-    int32 amount = 0;
+    // default amount calculation
+    int32 amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
 
-    if (!(m_spellInfo->AttributesEx8 & SPELL_ATTR8_MASTERY_SPECIALIZATION) || G3D::fuzzyEq(m_spellInfo->Effects[m_effIndex].BonusMultiplier, 0.0f))
-        amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
-    else if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-        amount = 2506;
+	if(m_spellInfo->Id == 86467 ||
+	   m_spellInfo->Id == 87491 ||
+	   m_spellInfo->Id == 87492 ||
+	   m_spellInfo->Id == 87493 ||
+	   m_spellInfo->Id == 87494 ||
+	   m_spellInfo->Id == 87495 ||
+	   m_spellInfo->Id == 87496 ||
+	   m_spellInfo->Id == 87497 ||
+	   m_spellInfo->Id == 87498 ||
+	   m_spellInfo->Id == 87500)
+	{
+		amount = 2506;
+	}
 
     // check item enchant aura cast
     if (!amount && caster)
