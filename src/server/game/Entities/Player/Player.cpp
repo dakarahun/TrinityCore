@@ -14303,6 +14303,7 @@ void Player::ApplyEnchantment(Item* item, EnchantmentSlot slot, bool apply, bool
                             sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "+ %u BLOCK_VALUE", enchant_amount);
                             break;
                         case ITEM_MOD_MASTERY_RATING:
+                            ApplyRatingMod(CR_MASTERY, int32(enchant_amount), apply);
                             break;
                         default:
                             break;
