@@ -1999,6 +1999,10 @@ class Player : public Unit, public GridObject<Player>
         void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }
         void CastMasterySpells(Player* caster);
 
+        // Mastery System
+        void SetMasteryState(bool apply) { _canUseMastery = apply; UpdateMastery(); }
+        void CastMasterySpells(Player* caster);
+
         void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, float& min_damage, float& max_damage);
 
         inline void RecalculateRating(CombatRating cr) { ApplyRatingMod(cr, 0, true);}
