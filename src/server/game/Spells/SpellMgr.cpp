@@ -3055,6 +3055,9 @@ void SpellMgr::LoadSpellInfoCorrections()
 	     case 687:
 		spellInfo->Effects[2].BasePoints = 91711;
 		break;
+		 case 79268: // soul harvest
+			 spellInfo->Effects[0].Amplitude = 3000;
+			 break;
             case 53096: // Quetz'lun's Judgment
                 spellInfo->MaxAffectedTargets = 1;
                 break;

@@ -5653,6 +5653,13 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                 target->CastSpell((Unit*)NULL, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
             break;
         }
+		case SPELLFAMILY_WARLOCK:
+		{
+			if(GetId() == 79268)
+				caster->CastSpell(caster, 101977, true, NULL, NULL, GetCasterGUID());
+			
+			break;
+		}
         case SPELLFAMILY_DRUID:
         {
             switch (GetSpellInfo()->Id)
