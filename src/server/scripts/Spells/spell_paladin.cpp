@@ -47,6 +47,8 @@ enum PaladinSpells
     SPELL_PALADIN_DIVINE_STORM_DUMMY             = 54171,
     SPELL_PALADIN_DIVINE_STORM_HEAL              = 54172,
 
+	SPELL_PALADIN_AVENGER_S_SHIELD               = 31935,
+
     SPELL_PALADIN_EYE_FOR_AN_EYE_DAMAGE          = 25997,
 
     SPELL_PALADIN_FORBEARANCE                    = 25771,
@@ -484,6 +486,42 @@ class spell_pal_eye_for_an_eye : public SpellScriptLoader
         AuraScript* GetAuraScript() const
         {
             return new spell_pal_eye_for_an_eye_AuraScript();
+        }
+};
+
+// 75806, 85043, 85416 - Grand Crusader
+/// Updated 4.3.4
+class spell_pal_grand_crusader : public SpellScriptLoader
+{
+    public:
+        spell_pal_grand_crusader() : SpellScriptLoader("spell_pal_grand_crusader") { }
+
+        class spell_pal_grand_crusader_AuraScript : public AuraScript
+        {
+            PrepareAuraScript(spell_pal_grand_crusader_AuraScript);
+
+            bool Validate(SpellInfo const* /*spellInfo*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_PALADIN_AVENGER_S_SHIELD))
+                    return false;
+                return true;
+            }
+
+            void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (Unit* caster = GetCaster())
+                    caster->ToPlayer()->RemoveSpellCooldown(SPELL_PALADIN_AVENGER_S_SHIELD, true);
+            }
+
+            void Register()
+            {
+                OnEffectApply += AuraEffectApplyFn(spell_pal_grand_crusader_AuraScript::HandleApply, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            }
+        };
+
+        AuraScript* GetAuraScript() const
+        {
+            return new spell_pal_grand_crusader_AuraScript();
         }
 };
 
@@ -1740,6 +1778,7 @@ void AddSC_paladin_spell_scripts()
     new spell_pal_divine_storm();
     new spell_pal_divine_storm_dummy();
     new spell_pal_exorcism_and_holy_wrath_damage();
+	new spell_pal_grand_crusader();
     new spell_pal_eye_for_an_eye();
     new spell_pal_guarded_by_the_light();
     new spell_pal_hand_of_sacrifice();
