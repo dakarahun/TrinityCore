@@ -475,16 +475,16 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
     // default amount calculation
     int32 amount = m_spellInfo->Effects[m_effIndex].CalcValue(caster, &m_baseAmount, GetBase()->GetOwner()->ToUnit());
 
-	if(m_spellInfo->Id == 86467 ||
-	   m_spellInfo->Id == 87491 ||
-	   m_spellInfo->Id == 87492 ||
-	   m_spellInfo->Id == 87493 ||
-	   m_spellInfo->Id == 87494 ||
-	   m_spellInfo->Id == 87495 ||
-	   m_spellInfo->Id == 87496 ||
-	   m_spellInfo->Id == 87497 ||
-	   m_spellInfo->Id == 87498 ||
-	   m_spellInfo->Id == 87500)
+	if(m_spellInfo->Id == 86473 ||
+	   m_spellInfo->Id == 86470 ||
+	   m_spellInfo->Id == 86471 ||
+	   m_spellInfo->Id == 86472 ||
+	   m_spellInfo->Id == 86474 ||
+	   m_spellInfo->Id == 86475 ||
+	   m_spellInfo->Id == 86476 ||
+	   m_spellInfo->Id == 86477 ||
+	   m_spellInfo->Id == 86478 ||
+	   m_spellInfo->Id == 86479)
 	{
 		amount = 2506;
 	}
