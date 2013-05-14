@@ -3736,6 +3736,9 @@ bool Player::addSpell(uint32 spellId, bool active, bool learning, bool dependent
             {
                 if (spellInfo->IsPassive() && IsNeedCastPassiveSpellAtLearn(spellInfo))
                     CastSpell (this, spellId, true);
+
+                if (CanUseMastery())
+                    CastMasterySpells(this);
             }
             else if (IsInWorld())
             {
@@ -4086,6 +4089,11 @@ void Player::learnSpell(uint32 spell_id, bool dependent)
                 learnSpell(itr2->second, false);
         }
     }
+    if (!learning)
+        return;
+    // If the learned spell is one of the mastery passives, activate the mastery spell.
+    if (HasAura(SPELL_AURA_MASTERY))
+        CastMasterySpells(this);
 }
 
 void Player::removeSpell(uint32 spell_id, bool disabled, bool learn_low_rank)
@@ -6045,12 +6053,12 @@ void Player::UpdateRating(CombatRating cr)
                 UpdateExpertise(OFF_ATTACK);
             }
             break;
+        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
+            UpdateMastery();
+            break;
         case CR_ARMOR_PENETRATION:
             if (affectStats)
                 UpdateArmorPenetration(amount);
-            break;
-        case CR_MASTERY:                                    // Implemented in Player::UpdateMastery
-            UpdateMastery();
             break;
     }
 }
@@ -8863,6 +8871,67 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             spell->prepare(&targets);
 
             ++count;
+        }
+    }
+}
+
+// These spells arent passive, they must be cast asap after player login.
+void Player::CastMasterySpells(Player* caster)
+{
+    if (!caster)
+        return;
+
+    switch (caster->getClass())
+    {
+        case CLASS_WARRIOR:
+        {
+            caster->CastSpell(caster,87500,true);
+            break;
+        }
+        case CLASS_PALADIN:
+        {
+            caster->CastSpell(caster,87494,true);
+            break;
+        }
+        case CLASS_HUNTER:
+        {
+            caster->CastSpell(caster,87493,true);
+            break;
+        }
+        case CLASS_ROGUE:
+        {
+            caster->CastSpell(caster,87496,true);
+            break;
+        }
+        case CLASS_PRIEST:
+        {
+            caster->CastSpell(caster,87495,true);
+            break;
+        }
+        case CLASS_DEATH_KNIGHT:
+        {
+            caster->CastSpell(caster,87492,true);
+            break;
+        }
+        case CLASS_SHAMAN:
+        {
+            caster->CastSpell(caster,87497,true);
+            break;
+        }
+        case CLASS_MAGE:
+        {
+            caster->CastSpell(caster,86467,true);
+            break;
+        }
+        case CLASS_WARLOCK:
+        {
+            caster->CastSpell(caster,87498,true);
+            break;
+        }
+        case CLASS_DRUID:
+        {
+            caster->CastSpell(caster,87491,true);
+            break;
         }
     }
 }
