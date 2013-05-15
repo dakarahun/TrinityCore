@@ -2933,8 +2933,38 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
+	Unit* caster = GetCaster();
+
+	if(GetSpellInfo()->Id == 2812) // Holy Wrath
+    {
+        if(caster->HasAura(56420)) // Glyph of Holy Wrath
+        {
+            if((target->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_ELEMENTAL-1))) == 0 && (target->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_DRAGONKIN-1))) == 0 && ((target->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD)) == 0 || target->GetTypeId() == TYPEID_PLAYER) // ToDo: find a better way to check
+            {
+                if(apply)
+                    target->RemoveAurasDueToSpell(2812);
+                return;
+            }
+        }
+        if (((target->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD) == 0) || target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(apply)
+                target->RemoveAurasDueToSpell(2812);
+            return;
+        }
+    }
 
     target->SetControlled(apply, UNIT_STATE_STUNNED);
+
+	if(GetSpellInfo()->Id == 44572) // Deep freeze
+    {
+        if(Creature* trg = target->ToCreature())
+        {
+            if(trg->IsImmunedToSpellEffect(GetSpellInfo(),0)) // Target is immune to deep freeze stun
+                caster->CastSpell(target,71757,true); // Deal damage
+        }
+    }
+
 }
 
 void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const
