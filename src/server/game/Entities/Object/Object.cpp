@@ -188,8 +188,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
     /** lower flag1 **/
     if (target == this)                                      // building packet for yourself
         flags |= UPDATEFLAG_SELF;
-    else if (GetTypeId() == TYPEID_PLAYER)
-        valCount = PLAYER_END_NOT_SELF;
 
     switch (GetGUIDHigh())
     {
@@ -280,8 +278,6 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     UpdateMask updateMask;
     uint32 valCount = m_valuesCount;
-    if (GetTypeId() == TYPEID_PLAYER && target != this)
-        valCount = PLAYER_END_NOT_SELF;
 
     updateMask.SetCount(valCount);
 
@@ -736,8 +732,6 @@ void Object::_BuildValuesUpdate(uint8 updateType, ByteBuffer* data, UpdateMask* 
     }
 
     uint32 valCount = m_valuesCount;
-    if (GetTypeId() == TYPEID_PLAYER && target != this)
-        valCount = PLAYER_END_NOT_SELF;
 
     ASSERT(updateMask && updateMask->GetCount() == valCount);
 
