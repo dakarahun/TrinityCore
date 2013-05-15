@@ -1114,45 +1114,15 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
     // no used
-//    recvData.rfinish();                       // prevent warnings spam
-
-    uint64 guid;
-    recvData >> guid;
-
-    // now can skip not our packet
-    if (_player->GetGUID() != guid)
-    {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
-    }
-
-    recvData.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo;
-    movementInfo.guid = guid;
-    ReadMovementInfo(recvData, &movementInfo);
-    recvData.read_skip<float>();                           // unk2
+    recvData.rfinish();                       // prevent warnings spam
 
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 {
     // no used
- //   recvData.rfinish();                       // prevent warnings spam
+    recvData.rfinish();                       // prevent warnings spam
 
-    uint64 guid;
-    recvData >> guid;
-
-    // now can skip not our packet
-    if (_player->GetGUID() != guid)
-    {
-        recvData.rfinish();                   // prevent warnings spam
-        return;
-    }
-
-    recvData.read_skip<uint32>();                          // unk
-
-    MovementInfo movementInfo;
 
 }
 
