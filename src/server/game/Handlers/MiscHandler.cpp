@@ -1114,7 +1114,7 @@ void WorldSession::HandleFeatherFallAck(WorldPacket& recvData)
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 {
     // no used
-    recvData.rfinish();                       // prevent warnings spam
+//    recvData.rfinish();                       // prevent warnings spam
 
     uint64 guid;
     recvData >> guid;
@@ -1140,7 +1140,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
 void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
 {
     // no used
-    recvData.rfinish();                       // prevent warnings spam
+ //   recvData.rfinish();                       // prevent warnings spam
 
     uint64 guid;
     recvData >> guid;
