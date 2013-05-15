@@ -1126,8 +1126,6 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recvData)
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_PACKETIO, "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK");
-
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
@@ -1152,12 +1150,9 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recvData)
         return;
     }
 
-    sLog->outDebug(LOG_FILTER_PACKETIO, "WORLD: CMSG_FORCE_MOVE_ROOT_ACK");
-
     recvData.read_skip<uint32>();                          // unk
 
     MovementInfo movementInfo;
-    ReadMovementInfo(recvData, &movementInfo);
 
 }
 
