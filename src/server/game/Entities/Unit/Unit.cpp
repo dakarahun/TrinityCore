@@ -8353,7 +8353,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 					if(!caster)
 						return false;
 
-					triggered_spell_id = 77616;
+					trigger_spell_id = 77616;
 					basepoints0 = procSpell->Id;
 					target = caster;
 				}
