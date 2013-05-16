@@ -200,7 +200,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:
         {
-            if (TempSummon const* summon = ToUnit()->ToTempSummon())
+            if (this != NULL)
+				if(TempSummon const* summon = ToUnit()->ToTempSummon())
                 if (IS_PLAYER_GUID(summon->GetSummonerGUID()))
                     updateType = UPDATETYPE_CREATE_OBJECT2;
 
