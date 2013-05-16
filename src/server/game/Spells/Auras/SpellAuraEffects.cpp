@@ -1110,7 +1110,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
         case SPELL_AURA_PERIODIC_ENERGIZE:
             HandlePeriodicEnergizeAuraTick(target, caster);
             break;
-        case SPELL_AURA_POWER_BURN_MANA:
+		case SPELL_AURA_POWER_BURN:
             HandlePeriodicPowerBurnAuraTick(target, caster);
             break;
         case SPELL_AURA_DUMMY:
