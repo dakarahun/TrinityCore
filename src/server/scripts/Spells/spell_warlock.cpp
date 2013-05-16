@@ -1061,7 +1061,9 @@ public:
             // If the warlock doesnt have the Nether Ward talent,
             // do not allow the swap effect to hit the warlock
             if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
-                target = NULL;
+                  if (Aura* aura = GetHitAura())
+                    if (AuraEffect* aurEff = aura->GetEffect(EFFECT_2))
+                        aurEff->SetAmount(6229);
         }
 
         void Register()
