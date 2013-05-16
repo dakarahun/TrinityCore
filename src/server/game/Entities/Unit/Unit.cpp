@@ -5632,12 +5632,8 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             }
             switch (dummySpell->Id)
             {
-
                 case 79683: // Arcane Missiles!
                 {
-                    if (!roll_chance_i(20.0f))
-                        return false;
-
                     // Do not let arcane missiles missile remove the activation aura
                     if (procSpell->Id == 7268)
                         return false;
