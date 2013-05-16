@@ -1268,6 +1268,9 @@ class spell_mage_cauterize : public SpellScriptLoader
 
                 target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
                 target->SetHealth(target->CountPctFromMaxHealth(40));
+
+				target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R1, 0, time(NULL) + 60);
+				target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R2, 0, time(NULL) + 60);
             }
 
             void Register()
