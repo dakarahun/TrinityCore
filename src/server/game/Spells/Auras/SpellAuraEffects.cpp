@@ -1067,10 +1067,11 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 			if (!target->isAlive())
 				return;
 
-			if (target->HasUnitState(UNIT_STATE_ISOLATED)) {
+			if (target->HasUnitState(UNIT_STATE_ISOLATED)) 
+			{
 				SendTickImmune(target, caster);
 			return;
-		}
+		    }
 			// Dark Evangelism
 			if (target->HasAura(15407)) // Mind Flay
 			{
@@ -1112,6 +1113,28 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 				if(roll_chance_i(pct)) //Summon the apparition
 					caster->CastSpell(caster,87426,true);
 			}
+			// shadow word: pain or mind flay + shadow orbs passive aura
+			if((target->HasAura(589) || target->HasAura(15407)) && caster->HasAura(95740))
+			{
+				 uint32 chance = 10;
+                //Harnessed Shadows increase chance of creating a shadow orb by 4 and 8%
+                //Rank 1
+				if(caster->HasAura(33191))
+                {
+                    chance += 4;
+                }
+                //Rank 2
+				else if(caster->HasAura(78228))
+                {
+                    chance += 8;
+                }
+                //Proc shadow orb
+                if(roll_chance_i(chance))
+                {
+                    caster->CastSpell(caster,77487,true);
+                }
+			}
+
 			// Flame shock
 			if(target->HasAura(8050))
 			{
