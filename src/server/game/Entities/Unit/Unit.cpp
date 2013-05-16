@@ -8342,6 +8342,21 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                         if (ToPlayer()->GetRuneCooldown(i) == 0)
                             return false;
                 }
+				// Dark Simulacrum
+				if (auraSpellInfo->Id == 77606)
+				{
+					if(!procSpell || procSpell->PowerType != POWER_MANA || (procSpell->ManaCost == 0 && procSpell->ManaCostPercentage == 0 && procSpell->ManaCostPerlevel == 0))
+						return false;
+
+					Unit* caster = triggeredByAura->GetCaster();
+
+					if(!caster)
+						return false;
+
+					triggered_spell_id = 77616;
+					basepoints0 = procSpell->Id;
+					target = caster;
+				}
                 break;
             }
             case SPELLFAMILY_WARLOCK:
