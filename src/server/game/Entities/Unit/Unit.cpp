@@ -5946,6 +5946,48 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                 victim->CastSpell(victim, 57669, true, castItem, triggeredByAura);
                 return true;                                // no hidden cooldown
             }
+            // Shadow Word: PAIN
+            if(dummySpell->Id == 589)
+            {
+                uint32 chance = 10;
+                //Harnessed Shadows increase chance of creating a shadow orb by 4 and 8%
+                //Rank 1
+                if(AuraEffect const *auraEff = GetAuraEffect(33191, 0))
+                {
+                    chance += 4;
+                }
+                //Rank 2
+                else if(AuraEffect const *auraEff = GetAuraEffect(78228, 0))
+                {
+                    chance += 8;
+                }
+                //Proc shadow orb
+                if(roll_chance_i(chance))
+                {
+                    CastSpell(this,77487,true);
+                }
+            }
+            // Mind Flay
+            if(dummySpell->Id == 15407)
+            {
+                uint32 chance = 10;
+                //Harnessed Shadows increase chance of creating a shadow orb by 4 and 8%
+                //Rank 1
+                if(AuraEffect const *auraEff = GetAuraEffect(33191, 0))
+                {
+                    chance += 4;
+                }
+                //Rank 2
+                else if(AuraEffect const *auraEff = GetAuraEffect(78228, 0))
+                {
+                    chance += 8;
+                }
+                //Proc shadow orb
+                if(roll_chance_i(chance))
+                {
+                    CastSpell(this,77487,true);
+                }
+            }
             // Body and Soul
             if (dummySpell->SpellIconID == 2218)
             {
