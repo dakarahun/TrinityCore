@@ -76,10 +76,6 @@ enum MageSpells
     SPELL_MAGE_NETHER_VORTEX_R1                  = 86181,
     SPELL_MAGE_NETHER_VORTEX_R2                  = 86209,
  
-    SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
-    SPELL_MAGE_EARLY_FROST_R2_T                  = 83050,
-    SPELL_MAGE_EARLY_FROST_R1_CD                 = 83162,
-    SPELL_MAGE_EARLY_FROST_R2_CD                 = 83239,
     SPELL_MAGE_CAUTERIZE_R2                      = 86949,
     SPELL_MAGE_CAUTERIZE_R1                      = 86948,
     SPELL_MAGE_CAUTERIZE_DOT                     = 87023,
