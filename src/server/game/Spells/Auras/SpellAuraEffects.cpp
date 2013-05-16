@@ -1088,6 +1088,54 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 				}
 				caster->CastSpell(caster, 87154, true);
 			}
+			if(target->HasAura(589)) //Shadow word: Pain
+			{
+				int32 pct = 0;
+				if(caster->HasAura(78204)) //Shadowy Apparition rank 3
+				{
+					pct = 12;
+					if(caster->isMoving()) // Chance increased to 60 if the caster is moving
+						pct = 60;
+				}
+				if(caster->HasAura(78203)) //Shadowy Apparition rank 2
+				{
+					pct = 8;
+					if(caster->isMoving()) // Chance increased to 40 if the caster is moving
+						pct = 40;
+				}
+				if(caster->HasAura(78202)) //Shadowy Apparition rank 1
+				{
+					pct = 4;
+					if(caster->isMoving()) // Chance increased to 20 if the caster is moving
+						pct = 20;
+				}
+				if(roll_chance_i(pct)) //Summon the apparition
+					caster->CastSpell(caster,87426,true);
+			}
+			// Flame shock
+			if(target->HasAura(8050))
+			{
+				// Lava Surge (Rank 2)
+				if(Aura* lava2 = caster->GetAura(77756))
+				{
+					// 20% to reset cooldown of lava burst
+					if(caster->ToPlayer()->HasSpellCooldown(51505))
+					{
+						if(roll_chance_i(20))
+							caster->CastSpell(caster, 77762, true);
+					}
+				}
+				// Lava Surge (Rank 1)
+				else if(Aura * lava1 = caster->GetAura(77755))
+				{
+					//10% to reset cooldown of lava burst
+					if(caster->ToPlayer()->HasSpellCooldown(51505))
+					{
+						if(roll_chance_i(10))
+							caster->CastSpell(caster, 77762, true);
+					}
+				}
+			}
             HandlePeriodicDamageAurasTick(target, caster);
             break;
 			}

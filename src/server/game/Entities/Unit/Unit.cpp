@@ -5905,26 +5905,7 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             break;
         }
         case SPELLFAMILY_PRIEST:
-        {
-            // Shadowy Apparition
-            if (dummySpell->SpellIconID == 4879)
-            {
-                if (!victim || !victim->isAlive())
-                    return false;
-
-                int32 roll_chance = dummySpell->Effects[EFFECT_0].CalcValue();
-
-                if(ToPlayer()->isMoving())
-                        roll_chance *= int32(dummySpell->Effects[EFFECT_1].CalcValue() / 3);
-
-                // Summon Shadowy Apparition
-                if (roll_chance_i(roll_chance))
-                {
-                    ToPlayer()->CastSpell(ToPlayer(), 87212, true, castItem, triggeredByAura);
-                    return true;
-                }
-                return false;
-            }   
+        {  
             // Vampiric Touch
             if (dummySpell->SpellFamilyFlags[1] & 0x00000400)
             {
