@@ -5536,9 +5536,6 @@ void AuraEffect::HandleAuraOverrideSpells(AuraApplication const* aurApp, uint8 m
         if (!itr->second->active || itr->second->disabled)
             continue;
 
-		if(itr->first == 6229 && !target->HasAura(91713))
-			return;
-
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
         if (spellInfo && !(spellInfo->SpellFamilyFlags & GetSpellInfo()->Effects[GetEffIndex()].SpellClassMask))

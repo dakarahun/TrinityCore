@@ -1063,7 +1063,9 @@ public:
             if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
                   if (Aura* aura = GetHitAura())
                     if (AuraEffect* aurEff = aura->GetEffect(EFFECT_2))
+					{
                         aurEff->SetAmount(6229);
+					}
         }
 
         void Register()

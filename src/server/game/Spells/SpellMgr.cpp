@@ -2987,10 +2987,6 @@ void SpellMgr::LoadSpellInfoCorrections()
             case 65156: // Juggernaut Buff
                 spellInfo->AttributesEx3 |=  SPELL_ATTR3_CAN_PROC_WITH_TRIGGERED;
                 break;
-	     case 28176: // nether ward // fel armor // demon armor
-	     case 687:
-		spellInfo->Effects[2].BasePoints = 91711;
-		break;
 		 case 79268: // soul harvest
 			 spellInfo->Effects[0].Amplitude = 3000;
 			 break;
