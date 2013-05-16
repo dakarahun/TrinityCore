@@ -54,16 +54,6 @@ enum MageSpells
     SPELL_MAGE_CHILLED_R1                        = 12484,
     SPELL_MAGE_CHILLED_R2                        = 12485,
 
-    SPELL_MAGE_CONE_OF_COLD_AURA_R1              = 11190,
-    SPELL_MAGE_CONE_OF_COLD_AURA_R2              = 12489,
-    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R1           = 83301,
-    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2           = 83302,
-
-    SPELL_MAGE_SHATTERED_BARRIER_R1              = 44745,
-    SPELL_MAGE_SHATTERED_BARRIER_R2              = 54787,
-    SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1       = 55080,
-    SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2       = 83073,
-
     SPELL_MAGE_IMPROVED_MANA_GEM_TRIGGERED       = 83098,
 
     SPELL_MAGE_FINGERS_OF_FROST                  = 44544,
@@ -75,16 +65,6 @@ enum MageSpells
     SPELL_MAGE_SLOW                              = 31589,
     SPELL_MAGE_NETHER_VORTEX_R1                  = 86181,
     SPELL_MAGE_NETHER_VORTEX_R2                  = 86209,
- 
-    SPELL_MAGE_CAUTERIZE_R2                      = 86949,
-    SPELL_MAGE_CAUTERIZE_R1                      = 86948,
-    SPELL_MAGE_CAUTERIZE_DOT                     = 87023,
-
-	//early frost
-    SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
-    SPELL_MAGE_EARLY_FROST_R2_T                  = 83050,
-    SPELL_MAGE_EARLY_FROST_R1_CD                 = 83162,
-    SPELL_MAGE_EARLY_FROST_R2_CD                 = 83239,
 
     SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
     SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
@@ -316,6 +296,14 @@ class spell_mage_cold_snap : public SpellScriptLoader
         }
 };
 
+enum ConeOfCold
+{
+	SPELL_MAGE_CONE_OF_COLD_AURA_R1              = 11190,
+    SPELL_MAGE_CONE_OF_COLD_AURA_R2              = 12489,
+    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R1           = 83301,
+    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2           = 83302,
+}
+
 // 120 - Cone of Cold
 /// Updated 4.3.4
 class spell_mage_cone_of_cold : public SpellScriptLoader
@@ -540,6 +528,14 @@ class spell_mage_focus_magic : public SpellScriptLoader
         }
 };
 
+enum Frostbolt
+{
+	SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
+    SPELL_MAGE_EARLY_FROST_R2_T                  = 83050,
+    SPELL_MAGE_EARLY_FROST_R1_CD                 = 83162,
+    SPELL_MAGE_EARLY_FROST_R2_CD                 = 83239
+}
+
 // 116 - Frostbolt
 /// Updated 4.3.4
 class spell_mage_frostbolt : public SpellScriptLoader
@@ -563,24 +559,23 @@ class spell_mage_frostbolt : public SpellScriptLoader
                    }
                }
            }
-	    void HandleEarlyFrostScript()
+	       void HandleEarlyFrostScript()
            {
+          	   if (Unit* caster = GetCaster())
+           	   {
+	       	       if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T))
+	            	   if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD))
+		         	       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
 
-          	  if (Unit* caster = GetCaster())
-           	  {
-	       	 if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
-	            		if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger 
-		         	  caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
-
-	      		  if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T)) // Check Talent
-	        	      if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger 
-		         	   caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
+	      		   if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T))
+	        	       if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD))
+		         	       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
                 }
-	    }
+	       }
            void Register()
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-		 AfterCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript);
+		       AfterCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript);
            }
        };
 
@@ -628,6 +623,14 @@ class spell_mage_living_bomb : public SpellScriptLoader
             return new spell_mage_living_bomb_AuraScript();
         }
 };
+
+enum IceBarrier
+{
+	SPELL_MAGE_SHATTERED_BARRIER_R1              = 44745,
+    SPELL_MAGE_SHATTERED_BARRIER_R2              = 54787,
+    SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1       = 55080,
+    SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2       = 83073
+}
 
 // 11426 - Ice Barrier
 /// Updated 4.3.4
@@ -1218,8 +1221,15 @@ class spell_mage_combustion : public SpellScriptLoader
             return new spell_mage_combustion_SpellScript();
         }
 };
+enum cauterize
+{
+    SPELL_MAGE_CAUTERIZE_R2                      = 86949,
+    SPELL_MAGE_CAUTERIZE_R1                      = 86948,
+    SPELL_MAGE_CAUTERIZE_DOT                     = 87023
+}
 
 // Cauterize
+/// Updated 4.3.4
 class spell_mage_cauterize : public SpellScriptLoader
 {
     public:
@@ -1257,10 +1267,7 @@ class spell_mage_cauterize : public SpellScriptLoader
                     return;    
 
                 target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
-		  target->SetHealth(target->CountPctFromMaxHealth(40));
-                target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R1, 0, time(NULL) + 60);
-                target->AddSpellCooldown(SPELL_MAGE_CAUTERIZE_R2, 0, time(NULL) + 60);
-
+		        target->SetHealth(target->CountPctFromMaxHealth(40));
             }
 
             void Register()
@@ -1416,46 +1423,6 @@ class spell_mage_mirror_image : public SpellScriptLoader
         }
 };
 
-
-// INSERT INTO `spell_script_names` VALUES (116, 'spell_mage_frost_bolt');
-class spell_mage_frost_bolt : public SpellScriptLoader
-{
-public:
-   spell_mage_frost_bolt() : SpellScriptLoader("spell_mage_frost_bolt") { }
-
-    class spell_mage_frost_bolt_SpellScript : public SpellScript
-    {
-       PrepareSpellScript(spell_mage_frost_bolt_SpellScript);
-
-        void HandleFrostBoltScript(SpellEffIndex /*effIndex*/)
-       {
-
-        Unit* caster = GetCaster();
- 
-	      if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger
-	      {
-	       if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
-		       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
-	      } 
-          else if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger (R2)
-      {
-           if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T))  // Check Talent (R2)
-	          caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger (R2) - 15Sec Cooldown
-	      }
-
-       }
-        void Register()
-       {
-           OnEffectHitTarget += SpellEffectFn(spell_mage_frost_bolt_SpellScript::HandleFrostBoltScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-       }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mage_frost_bolt_SpellScript();
-    }
-};
-
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1483,5 +1450,4 @@ void AddSC_mage_spell_scripts()
     new spell_mage_cauterize();
     new spell_mage_arcane_blast();
     new spell_mage_mirror_image();
-	new spell_mage_frost_bolt();
 }

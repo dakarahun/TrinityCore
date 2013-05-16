@@ -413,26 +413,17 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     ApplyPct(damage, m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
                     m_caster->RemoveAurasDueToSpell(32216); // Victorious
                 }
-                // Shockwave
-                if (m_spellInfo->Id == 46968)
-                {
-                    int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, 2);
-                    if (pct > 0)
-                        damage += int32(CalculatePct(m_caster->GetTotalAttackPowerValue(BASE_ATTACK), pct));
-				
-                    break;
-                }
-		  // Gag Order
-		  if (m_spellInfo->Id == 6552)
-		  {
-		      if (m_caster->HasAura(12311))
-			  if (roll_chance_i(50.0f))
-			     m_caster->CastSpell(m_caster, 18498, true);
-		      if (m_caster->HasAura(12958))
-			     m_caster->CastSpell(m_caster, 18498, true);
-	         }
+		        // Gag Order
+		        if (m_spellInfo->Id == 6552)
+				{
+					if (m_caster->HasAura(12311))
+					    if (roll_chance_i(50.0f))
+						    m_caster->CastSpell(m_caster, 18498, true);
+					if (m_caster->HasAura(12958))
+						m_caster->CastSpell(m_caster, 18498, true);
+				}
                 // Bloodthirst
-          	  if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
+          	    if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
                     damage = uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.8);
                 if (m_spellInfo->Id == 6343)
                 {
@@ -450,8 +441,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PALADIN:
             {
-		switch (m_spellInfo->Id)
-		{
+		        switch (m_spellInfo->Id)
+		        {
                     // Ancient Fury
                     case 86704:
                     {
@@ -463,41 +454,40 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = (damage * ancientpower->GetStackAmount()) ;
                         break;
                     }
-		      case 498: // Divine Protection triggering: Speed of Light
-		     {
-			int32 speed;
+		            case 498: // Divine Protection triggering: Speed of Light
+		            {
+			             int32 speed;
 
-		  	if (m_caster->HasAura(85495))
-			    speed = 20;
-			if (m_caster->HasAura(85498))
-			    speed = 40;
-			if (m_caster->HasAura(95499))
-			    speed = 60;
+		  	             if (m_caster->HasAura(85495))
+			                 speed = 20;
+			             if (m_caster->HasAura(85498))
+			                 speed = 40;
+			             if (m_caster->HasAura(95499))
+			                 speed = 60;
 
-			if (speed)
-			     m_caster->CastCustomSpell(m_caster, 85497, &speed, NULL, NULL, true);
-			break;
-		     }
-		      // Hammer of the Rightneouses
+			             if (speed)
+			                 m_caster->CastCustomSpell(m_caster, 85497, &speed, NULL, NULL, true);
+			             break;
+		            }
+		            // Hammer of the Rightneouses
                     case 53595:
                     {
-                    		damage = uint32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.25);
-				m_caster->CastCustomSpell(unitTarget, 88263, &damage, NULL, NULL, true);
-				break;
-			}
-		   break;
-		}
-
-            break;
+                         damage = uint32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.25);
+				         m_caster->CastCustomSpell(unitTarget, 88263, &damage, NULL, NULL, true);
+				         break;
+			        }
+		            break;
+		        }
+                break;
             }
             case SPELLFAMILY_WARLOCK:
             {
-		  // Soulburn Healthstone
-		  if (m_spellInfo->Id == 6262)
-		  {
-		       if (m_caster->HasAura(74434))
+		        // Soulburn Healthstone
+		        if (m_spellInfo->Id == 6262)
+		        {
+		             if (m_caster->HasAura(74434))
                          m_caster->CastSpell(m_caster, 79437, true); // Soulburn: Healthstone
-		  }
+		        }
                 // Rain of Fire
                 if (m_spellInfo->Id == 42223)
                 {
@@ -596,7 +586,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             m_caster->CastSpell(m_caster, 94229, true); //The cooldown marker
                         break;
                     }
-		   break;
+		        break;
                 }
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
@@ -772,7 +762,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // 25 energy = 100% more damage
                     AddPct(damage, energy * 4);
                 }
-		// Wrath
+		        // Wrath
                 if (m_spellInfo->Id == 5176)
                 {
                     // Improved Insect Swarm
