@@ -1069,132 +1069,23 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
 
 			if (target->HasUnitState(UNIT_STATE_ISOLATED)) {
 				SendTickImmune(target, caster);
-				return;
-			}
-
-			// Check for immune (not use charges)
-			if (target->IsImmunedToDamage(GetSpellInfo()))
-			{
-				SendTickImmune(target, caster);
-				break;
-			}
-			// some auras remove at specific health level or more
-			if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE)
-			{
-				switch (GetId())
-				{
-				case 43093: case 31956: case 38801:  // Grievous Wound
-				case 35321: case 38363: case 39215:  // Gushing Wound
-					if (target->IsFullHealth())
-					{
-						target->RemoveAurasDueToSpell(GetId());
-						return;
-					}
-					break;
-					// Mind flay
-				case 15407:
-
-					//Sin and Punishment rank 1
-					if(AuraEffect const * sin1 = caster->GetAuraEffect(87099,1))
-					{
-						uint32 cooldown = sin1->GetAmount() * 1000; //This should be 5 at cataclysm 4.0.6a
-						// If its critical strike
-						if(IsPeriodicTickCrit(target,caster))
-						{
-							//Reduce duration of ShadowFiend by 5 secs
-							if(caster->ToPlayer()->HasSpellCooldown(34433))
-							{
-								uint32 newCooldownDelay = caster->ToPlayer()->GetSpellCooldownDelay(34433);
-
-								if (newCooldownDelay < uint32(cooldown / -1000) + 1)
-									newCooldownDelay = 0;
-								else
-									newCooldownDelay += cooldown / 1000;
-
-								caster->ToPlayer()->AddSpellCooldown(34433,0, uint32(time(NULL) + newCooldownDelay));
-
-								WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
-								data << uint32(34433);                  // Spell ID
-								data << uint64(caster->GetGUID());              // Player GUID
-								data << int32(-5000);                // Cooldown mod in milliseconds
-								caster->ToPlayer()->GetSession()->SendPacket(&data);
-							}
-						}
-					}
-					//Sin and Punishment rank 2
-					if(AuraEffect const * sin1 = caster->GetAuraEffect(87100,1))
-					{
-						uint32 cooldown = (sin1->GetAmount()) * 1000;
-						// If its critical strike
-						if(caster->isSpellCrit(target,m_spellInfo,m_spellInfo->GetSchoolMask()))
-						{
-							//Reduce duration of ShadowFiend by 5 secs
-							if(caster->ToPlayer()->HasSpellCooldown(34433))
-							{
-								uint32 newCooldownDelay = caster->ToPlayer()->GetSpellCooldownDelay(34433);
-
-								if (newCooldownDelay < uint32(cooldown / -1000) + 1)
-									newCooldownDelay = 0;
-								else
-									newCooldownDelay += cooldown / 1000;
-
-								caster->ToPlayer()->AddSpellCooldown(34433,0, uint32(time(NULL) + newCooldownDelay));
-
-								WorldPacket data(SMSG_MODIFY_COOLDOWN, 4+8+4);
-								data << uint32(34433);                  // Spell ID
-								data << uint64(caster->GetGUID());              // Player GUID
-								data << int32(-10000);                // Cooldown mod in milliseconds
-								caster->ToPlayer()->GetSession()->SendPacket(&data);
-							}
-						}
-					}
-					// Evangelism: Rank 1
-					if (Aura* evan1 = caster->GetAura(81659))
-					{
-						caster->CastSpell(caster, 87117, true);
-						caster->RemoveAurasDueToSpell(81661);
-						caster->RemoveAurasDueToSpell(81660);
-						//Trigger to activate archangel
-						caster->CastSpell(caster,87154,true);
-					}
-					// Evangelism: Rank 2
-					if (Aura* evan2 = caster->GetAura(81662))
-					{
-						caster->CastSpell(caster, 87118, true);
-						caster->RemoveAurasDueToSpell(81661);
-						caster->RemoveAurasDueToSpell(81660);
-						//Trigger to activate archangel
-						caster->CastSpell(caster,87154,true);
-					}
-					// Pain and Suffering: Rank 1
-					if (Aura* evan2 = caster->GetAura(47580))
-						if (Aura* swp = target->GetAura(589))
-							if (roll_chance_i(30))
-								swp->RefreshDuration();
-					// Pain and Suffering: Rank 2
-					if (Aura* evan2 = caster->GetAura(47581))
-						if (Aura* swp = target->GetAura(589))
-							if (roll_chance_i(60))
-								swp->RefreshDuration();
-					break;
-				}
-			}
+			return;
+		}
 			// Dark Evangelism
 			if (target->HasAura(15407)) // Mind Flay
 			{
-				if (caster->HasAura(81659) && roll_chance_i(25)) // Rank 1
+				if (caster->HasAura(81659)) // Rank 1
 				{
- 					caster->CastSpell(caster, 87117, true);
+					caster->CastSpell(caster, 87117, true);
 					caster->RemoveAurasDueToSpell(81660);
 					caster->RemoveAurasDueToSpell(81661);
 				}
-				else if (caster->HasAura(81662) && roll_chance_i(50)) // Rank 2
+				else if (caster->HasAura(81662)) // Rank 2
 				{
- 					caster->CastSpell(caster, 87118, true);
+					caster->CastSpell(caster, 87118, true);
 					caster->RemoveAurasDueToSpell(81660);
 					caster->RemoveAurasDueToSpell(81661);
 				}
-
 				caster->CastSpell(caster, 87154, true);
 			}
             HandlePeriodicDamageAurasTick(target, caster);
@@ -1219,13 +1110,19 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit* caster) const
         case SPELL_AURA_PERIODIC_ENERGIZE:
             HandlePeriodicEnergizeAuraTick(target, caster);
             break;
-        case SPELL_AURA_POWER_BURN:
+        case SPELL_AURA_POWER_BURN_MANA:
             HandlePeriodicPowerBurnAuraTick(target, caster);
+            break;
+        case SPELL_AURA_DUMMY:
+            // Haunting Spirits
+            if (GetId() == 7057)
+                target->CastSpell((Unit*)NULL, GetAmount(), true);
             break;
         default:
             break;
     }
 }
+
 
 void AuraEffect::HandleProc(AuraApplication* aurApp, ProcEventInfo& eventInfo)
 {
