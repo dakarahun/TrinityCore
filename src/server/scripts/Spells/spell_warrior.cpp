@@ -50,58 +50,19 @@ enum WarriorSpells
 	SPELL_WARRIOR_UNRELENTING_ASSAULT_TRIGGER_2     = 64850,
 	SPELL_WARRIOR_VIGILANCE_PROC                    = 50725,
 	SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT         = 59665,
+    SPELL_WARRIOR_SPELL_HEROIC_LEAP                 = 6544,
+	SPELL_WARRIOR_SPELL_RALLYING_CRY                = 97463
 
 	SPELL_PALADIN_BLESSING_OF_SANCTUARY             = 20911,
 	SPELL_PALADIN_GREATER_BLESSING_OF_SANCTUARY     = 25899,
 	SPELL_PRIEST_RENEWED_HOPE                       = 63944,
 	SPELL_GEN_DAMAGE_REDUCTION_AURA                 = 68066,
-	SPELL_WARRIOR_SPELL_HEROIC_LEAP                 = 6544,
-	WARRIOR_SPELL_RALLYING_CRY                      = 97463
 };
 
 enum WarriorSpellIcons
 {
 	WARRIOR_ICON_ID_SUDDEN_DEATH                    = 1989,
 };
-
-class spell_warr_rallying_cry : public SpellScriptLoader
-{
-public:
-    spell_warr_rallying_cry() : SpellScriptLoader("spell_warr_rallying_cry") { }
-
-    class spell_warr_rallying_cry_SpellScript : public SpellScript
-    {
-        PrepareSpellScript(spell_warr_rallying_cry_SpellScript);
-
-        bool Validate(SpellInfo const* /*spellEntry*/)
-        {
-            if (!sSpellMgr->GetSpellInfo(WARRIOR_SPELL_RALLYING_CRY))
-                return false;
-            return true;
-        }
-
-        void HandleDummy(SpellEffIndex /*effIndex*/)
-        {
-            if (Unit* caster = GetCaster())
-            {
-                int32 healthModSpellBasePoints0 = int32(caster->CountPctFromMaxHealth(GetEffectValue()));
-                caster->CastCustomSpell(caster, WARRIOR_SPELL_RALLYING_CRY, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
-            }
-        }
-
-        void Register()
-        {
-            // add dummy effect spell handler to Last Stand
-            OnEffectHitTarget += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
-        }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warr_rallying_cry_SpellScript();
-    }
-};
-
 
 /// Updated 4.3.4
 class spell_warr_bloodthirst : public SpellScriptLoader
@@ -832,7 +793,8 @@ public:
 
 		void OnCastHandler()
 		{
-			if (Unit* caster = GetCaster()){
+			if (Unit* caster = GetCaster())
+			{
 				if(caster->HasAura(80979)) // Thunderstruck rank1
 					caster->AddAura(87095,caster);
 				if(caster->HasAura(80980)) // Thunderstruck rank2
@@ -1050,6 +1012,45 @@ public:
 	}
 };
 
+// Rallying Cry
+/// Updated 4.3.4
+class spell_warr_rallying_cry : public SpellScriptLoader
+{
+public:
+    spell_warr_rallying_cry() : SpellScriptLoader("spell_warr_rallying_cry") { }
+
+    class spell_warr_rallying_cry_SpellScript : public SpellScript
+    {
+        PrepareSpellScript(spell_warr_rallying_cry_SpellScript);
+
+        bool Validate(SpellInfo const* /*spellEntry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(WARRIOR_SPELL_RALLYING_CRY))
+                return false;
+            return true;
+        }
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Unit* caster = GetCaster())
+            {
+                int32 healthModSpellBasePoints0 = int32(caster->CountPctFromMaxHealth(GetEffectValue()));
+                caster->CastCustomSpell(caster, WARRIOR_SPELL_RALLYING_CRY, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
+            }
+        }
+
+        void Register()
+        {
+            // add dummy effect spell handler to Last Stand
+            OnEffectHitTarget += SpellEffectFn(spell_warr_rallying_cry_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_warr_rallying_cry_SpellScript();
+    }
+};
 
 void AddSC_warrior_spell_scripts()
 {
@@ -1076,5 +1077,5 @@ void AddSC_warrior_spell_scripts()
 	new spell_warr_shockwave();
 	new spell_warr_victory_rush();
 	new spell_warr_cleave();
-	new spell_warr_rallying_cry();
+    new spell_warr_rallying_cry();
 }
