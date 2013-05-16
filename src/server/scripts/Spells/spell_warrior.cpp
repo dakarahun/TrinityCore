@@ -1025,7 +1025,7 @@ public:
 
         bool Validate(SpellInfo const* /*spellEntry*/)
         {
-            if (!sSpellMgr->GetSpellInfo(WARRIOR_SPELL_RALLYING_CRY))
+            if (!sSpellMgr->GetSpellInfo(SPELL_WARRIOR_SPELL_RALLYING_CRY))
                 return false;
             return true;
         }
@@ -1035,7 +1035,7 @@ public:
             if (Unit* caster = GetCaster())
             {
                 int32 healthModSpellBasePoints0 = int32(caster->CountPctFromMaxHealth(GetEffectValue()));
-                caster->CastCustomSpell(caster, WARRIOR_SPELL_RALLYING_CRY, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
+                caster->CastCustomSpell(caster, SPELL_WARRIOR_SPELL_RALLYING_CRY, &healthModSpellBasePoints0, NULL, NULL, true, NULL);
             }
         }
 
