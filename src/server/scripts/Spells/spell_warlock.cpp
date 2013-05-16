@@ -1040,45 +1040,41 @@ public:
 };
 
 // 687,28176 Demon armor and Fel armor swap controller
-class spell_warl_nether_ward_swap_supressor: public SpellScriptLoader
-{
+class spell_warl_nether_ward_swap_supressor: public SpellScriptLoader {
 public:
     spell_warl_nether_ward_swap_supressor() : SpellScriptLoader("spell_warl_nether_ward_swap_supressor") {}
 
-    class spell_warl_nether_ward_swap_supressor_SpellScript : public SpellScript
+    class spell_warl_nether_ward_swap_AuraScript: public AuraScript
     {
-        PrepareSpellScript(spell_warl_nether_ward_swap_supressor_SpellScript);
+        PrepareAuraScript(spell_warl_nether_ward_swap_AuraScript);
 
-            bool Validate(SpellInfo const* /*spellInfo*/)
-            {
-                if (!sSpellMgr->GetSpellInfo(91713))
-                    return false;
-                return true;
-            }
-
-        void PreventSwapApplicationOnCaster(WorldObject*& target)
+        bool Validate(SpellEntry const * /*spellEntry*/)
         {
-            // If the warlock doesnt have the Nether Ward talent,
-            // do not allow the swap effect to hit the warlock
-            if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
-                  if (Aura* aura = GetHitAura())
-                    if (AuraEffect* aurEff = aura->GetEffect(EFFECT_2))
-					{
-                        aurEff->SetAmount(6229);
-					}
+            if (!sSpellStore.LookupEntry(SPELL_WARLOCK_NETHER_WARD))
+                return false;
+
+            return true;
         }
 
+        void CalculateAmount(AuraEffect const * /*aurEff*/, int32 & amount, bool & canBeRecalculated)
+        {
+			if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
+				amount = 6229;
+        }
         void Register()
         {
-            OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_warl_nether_ward_swap_supressor_SpellScript::PreventSwapApplicationOnCaster, EFFECT_2, TARGET_UNIT_CASTER);
+			DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_warl_nether_ward_swap_AuraScript::CalculateAmount, EFFECT_2, SPELL_AURA_SWAP_SPELLS);
         }
     };
 
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_warl_nether_ward_swap_supressor_SpellScript();
+    AuraScript *GetAuraScript() const {
+        return new spell_warl_nether_ward_swap_AuraScript();
     }
 };
+
+
+
+
 
 // 47236 - Demonic Pact
 class spell_warl_demonic_pact: public SpellScriptLoader {
