@@ -69,7 +69,7 @@ enum MageSpells
     SPELL_MAGE_GLYPH_OF_MIRROR_IMAGE             = 63093,
     SPELL_MAGE_SUMMON_IMAGES_FROST               = 58832,
     SPELL_MAGE_SUMMON_IMAGES_FIRE                = 88092,
-    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091,
+    SPELL_MAGE_SUMMON_IMAGES_ARCANE              = 88091
 };
 
 enum MageIcons
@@ -298,11 +298,11 @@ class spell_mage_cold_snap : public SpellScriptLoader
 
 enum ConeOfCold
 {
-	SPELL_MAGE_CONE_OF_COLD_AURA_R1              = 11190,
+    SPELL_MAGE_CONE_OF_COLD_AURA_R1              = 11190,
     SPELL_MAGE_CONE_OF_COLD_AURA_R2              = 12489,
     SPELL_MAGE_CONE_OF_COLD_TRIGGER_R1           = 83301,
-    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2           = 83302,
-}
+    SPELL_MAGE_CONE_OF_COLD_TRIGGER_R2           = 83302
+};
 
 // 120 - Cone of Cold
 /// Updated 4.3.4
@@ -530,11 +530,11 @@ class spell_mage_focus_magic : public SpellScriptLoader
 
 enum Frostbolt
 {
-	SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
+    SPELL_MAGE_EARLY_FROST_R1_T                  = 83049,
     SPELL_MAGE_EARLY_FROST_R2_T                  = 83050,
     SPELL_MAGE_EARLY_FROST_R1_CD                 = 83162,
     SPELL_MAGE_EARLY_FROST_R2_CD                 = 83239
-}
+};
 
 // 116 - Frostbolt
 /// Updated 4.3.4
@@ -559,23 +559,23 @@ class spell_mage_frostbolt : public SpellScriptLoader
                    }
                }
            }
-	       void HandleEarlyFrostScript()
+           void HandleEarlyFrostScript()
            {
-          	   if (Unit* caster = GetCaster())
-           	   {
-	       	       if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T))
-	            	   if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD))
-		         	       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
+               if (Unit* caster = GetCaster())
+               {
+                   if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T))
+                       if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD))
+                           caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
 
-	      		   if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T))
-	        	       if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD))
-		         	       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
-                }
-	       }
+                   if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T))
+                       if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD))
+                           caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger - 15 Sec Cooldown
+               }
+           }
            void Register()
            {
                OnEffectHitTarget += SpellEffectFn(spell_mage_frostbolt_SpellScript::RecalculateDamage, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
-		       AfterCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript);
+               AfterCast += SpellCastFn(spell_mage_frostbolt_SpellScript::HandleEarlyFrostScript);
            }
        };
 
@@ -626,11 +626,11 @@ class spell_mage_living_bomb : public SpellScriptLoader
 
 enum IceBarrier
 {
-	SPELL_MAGE_SHATTERED_BARRIER_R1              = 44745,
+    SPELL_MAGE_SHATTERED_BARRIER_R1              = 44745,
     SPELL_MAGE_SHATTERED_BARRIER_R2              = 54787,
     SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R1       = 55080,
     SPELL_MAGE_SHATTERED_BARRIER_FREEZE_R2       = 83073
-}
+};
 
 // 11426 - Ice Barrier
 /// Updated 4.3.4
@@ -1226,7 +1226,7 @@ enum cauterize
     SPELL_MAGE_CAUTERIZE_R2                      = 86949,
     SPELL_MAGE_CAUTERIZE_R1                      = 86948,
     SPELL_MAGE_CAUTERIZE_DOT                     = 87023
-}
+};
 
 // Cauterize
 /// Updated 4.3.4
@@ -1267,7 +1267,7 @@ class spell_mage_cauterize : public SpellScriptLoader
                     return;    
 
                 target->CastSpell(target, SPELL_MAGE_CAUTERIZE_DOT, true);
-		        target->SetHealth(target->CountPctFromMaxHealth(40));
+                target->SetHealth(target->CountPctFromMaxHealth(40));
             }
 
             void Register()

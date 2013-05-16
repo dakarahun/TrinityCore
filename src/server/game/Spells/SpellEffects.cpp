@@ -414,13 +414,13 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     m_caster->RemoveAurasDueToSpell(32216); // Victorious
                 }
 		        // Gag Order
-		        if (m_spellInfo->Id == 6552)
-				{
-					if (m_caster->HasAura(12311))
-					    if (roll_chance_i(50.0f))
-						    m_caster->CastSpell(m_caster, 18498, true);
-					if (m_caster->HasAura(12958))
-						m_caster->CastSpell(m_caster, 18498, true);
+                if (m_spellInfo->Id == 6552)
+                {
+                    if (m_caster->HasAura(12311))
+                        if (roll_chance_i(50.0f))
+                            m_caster->CastSpell(m_caster, 18498, true);
+                    if (m_caster->HasAura(12958))
+                        m_caster->CastSpell(m_caster, 18498, true);
 				}
                 // Bloodthirst
           	    if (m_spellInfo->SpellFamilyFlags[1] & 0x400)
@@ -441,8 +441,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
             }
             case SPELLFAMILY_PALADIN:
             {
-		        switch (m_spellInfo->Id)
-		        {
+                switch (m_spellInfo->Id)
+                {
                     // Ancient Fury
                     case 86704:
                     {
@@ -458,7 +458,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 		            {
 			             int32 speed;
 
-		  	             if (m_caster->HasAura(85495))
+                         if (m_caster->HasAura(85495))
 			                 speed = 20;
 			             if (m_caster->HasAura(85498))
 			                 speed = 40;
@@ -473,31 +473,31 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     case 53595:
                     {
                          damage = uint32(m_caster->ToPlayer()->GetTotalAttackPowerValue(BASE_ATTACK) * 0.25);
-				         m_caster->CastCustomSpell(unitTarget, 88263, &damage, NULL, NULL, true);
-				         break;
-			        }
-		            break;
-		        }
+                         m_caster->CastCustomSpell(unitTarget, 88263, &damage, NULL, NULL, true);
+                         break;
+                    }
+                    break;
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
             {
 		        // Soulburn Healthstone
-		        if (m_spellInfo->Id == 6262)
-		        {
-		             if (m_caster->HasAura(74434))
+                if (m_spellInfo->Id == 6262)
+                {
+                     if (m_caster->HasAura(74434))
                          m_caster->CastSpell(m_caster, 79437, true); // Soulburn: Healthstone
-		        }
+                }
                 // Rain of Fire
                 if (m_spellInfo->Id == 42223)
                 {
                     if(m_caster->HasAura(85113)) // Aftermath Rank 1
-                        if (roll_chance_f(6.0f))
-                            m_caster->CastSpell(unitTarget, 85387, true);
+                       if (roll_chance_f(6.0f))
+                           m_caster->CastSpell(unitTarget, 85387, true);
 
                     if(m_caster->HasAura(85114)) // Aftermath Rank 2
-                        if (roll_chance_f(12.0f))
-                            m_caster->CastSpell(unitTarget, 85387, true);
+                       if (roll_chance_f(12.0f))
+                           m_caster->CastSpell(unitTarget, 85387, true);
                 }
                 // Conflagrate
                 if (m_spellInfo->Id == 17962)
@@ -511,9 +511,9 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             m_caster->CastSpell(unitTarget, 18118, true);
                 }
 
-	          switch(m_spellInfo->Id)
+                switch(m_spellInfo->Id)
                 {
- 		      case 5676: // Searing Pain
+                    case 5676: // Searing Pain
                     {
                         if(m_caster->HasAura(74434))
                         {
@@ -521,8 +521,8 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             m_caster->RemoveAurasDueToSpell(74434);
                         }
                         break;
-                    }
-		      case 61189:
+					}
+                    case 61189:
                     case 6353: // Soul Fire
                     {
                         int32 bp0 = 0;
@@ -548,7 +548,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         }
                         break;
                     }
-   		      case 86121: // Soul Swap
+   		            case 86121: // Soul Swap
                     {
                         m_caster->CastSpell(m_caster,86211,true); //This is the buff that overrides Soul Swap with Soul Swap: Exhale
                         std::list<AuraEffect const*> dotsList = unitTarget->GetAuraDoTsByCaster(m_caster->GetGUID());
@@ -586,7 +586,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             m_caster->CastSpell(m_caster, 94229, true); //The cooldown marker
                         break;
                     }
-		        break;
+                break;
                 }
                 // Incinerate Rank 1 & 2
                 if ((m_spellInfo->SpellFamilyFlags[1] & 0x000040) && m_spellInfo->SpellIconID == 2128)
@@ -762,7 +762,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                     // 25 energy = 100% more damage
                     AddPct(damage, energy * 4);
                 }
-		        // Wrath
+                // Wrath
                 if (m_spellInfo->Id == 5176)
                 {
                     // Improved Insect Swarm
