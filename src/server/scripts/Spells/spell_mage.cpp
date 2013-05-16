@@ -1416,46 +1416,6 @@ class spell_mage_mirror_image : public SpellScriptLoader
         }
 };
 
-
-// INSERT INTO `spell_script_names` VALUES (116, 'spell_mage_frost_bolt');
-class spell_mage_frost_bolt : public SpellScriptLoader
-{
-public:
-   spell_mage_frost_bolt() : SpellScriptLoader("spell_mage_frost_bolt") { }
-
-    class spell_mage_frost_bolt_SpellScript : public SpellScript
-    {
-       PrepareSpellScript(spell_mage_frost_bolt_SpellScript);
-
-        void HandleFrostBoltScript(SpellEffIndex /*effIndex*/)
-       {
-
-        Unit* caster = GetCaster();
- 
-	      if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_CD)) // Check Trigger
-	      {
-	       if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R1_T)) // Check Talent
-		       caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R1_CD, true); // Cast Trigger - 15 Sec Cooldown
-	      } 
-          else if (!caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_CD)) // Check Trigger (R2)
-      {
-           if (caster->HasAura(SPELL_MAGE_EARLY_FROST_R2_T))  // Check Talent (R2)
-	          caster->CastSpell(caster, SPELL_MAGE_EARLY_FROST_R2_CD, true); // Cast Trigger (R2) - 15Sec Cooldown
-	      }
-
-       }
-        void Register()
-       {
-           OnEffectHitTarget += SpellEffectFn(spell_mage_frost_bolt_SpellScript::HandleFrostBoltScript, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
-       }
-    };
-
-    SpellScript* GetSpellScript() const
-    {
-        return new spell_mage_frost_bolt_SpellScript();
-    }
-};
-
 void AddSC_mage_spell_scripts()
 {
     new spell_mage_blast_wave();
@@ -1483,5 +1443,4 @@ void AddSC_mage_spell_scripts()
     new spell_mage_cauterize();
     new spell_mage_arcane_blast();
     new spell_mage_mirror_image();
-	new spell_mage_frost_bolt();
 }
