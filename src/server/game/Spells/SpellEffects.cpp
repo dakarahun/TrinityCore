@@ -612,105 +612,156 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 break;
             }
             case SPELLFAMILY_PRIEST:
-            {
-                // Improved Mind Blast (Mind Blast in shadow form bonus)
-                if (m_caster->GetShapeshiftForm() == FORM_SHADOW && (m_spellInfo->SpellFamilyFlags[0] & 0x00002000))
-                {
-                    Unit::AuraEffectList const& ImprMindBlast = m_caster->GetAuraEffectsByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-                    for (Unit::AuraEffectList::const_iterator i = ImprMindBlast.begin(); i != ImprMindBlast.end(); ++i)
-                    {
-                        if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST &&
-                            ((*i)->GetSpellInfo()->SpellIconID == 95))
-                        {
-                            int chance = (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster);
-                            if (roll_chance_i(chance))
-                                // Mind Trauma
-                                m_caster->CastSpell(unitTarget, 48301, true, 0);
-                            break;
-                        }
-                    }
-                }
- 			 // Evangelism: Rank 1
-              	   if (m_spellInfo->Id == 585 || m_spellInfo->Id == 14914)
-                	   {
-                 	 	 // Smite | Holy Fire
-                 	 	 if (m_caster->HasAura(81659))
-		   	 	 {
-					m_caster->CastSpell(m_caster, 81660, true);
-					m_caster->RemoveAurasDueToSpell(87118);
-					m_caster->RemoveAurasDueToSpell(87117);
-		   	 	 }
-                 	  }
-                	 // Evangelism: Rank 2
-                	 if (m_spellInfo->Id == 585 || m_spellInfo->Id == 14914)
-                	 {
-                  		 // Smite | Holy Fire
-                  		 if (m_caster->HasAura(81662))
-		       	 {
-					m_caster->CastSpell(m_caster, 81661, true);
-					m_caster->RemoveAurasDueToSpell(87118);
-					m_caster->RemoveAurasDueToSpell(87117);
-				 }
-                 	}
-			if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
-				if (m_caster->HasAura(77487))
-					m_caster->CastSpell(m_caster, 95799, true);		   
-
-
-                	 if (m_spellInfo->Id == 73325 || m_spellInfo->Id == 17) // Leap of Faith and Power word: Shield
-			 {
-				if (unitTarget)
 				{
-                    			 if (m_caster->HasAura(64127)) // Body and Soul Rank 1
-						m_caster->CastSpell(unitTarget, 64128, true);
+					// Mind Blast - applies Mind Trauma if:
+					if (m_spellInfo->Id == 8092)
+					{
+						// We are in Shadow Form
+						if (m_caster->GetShapeshiftForm() == FORM_SHADOW)
+							// We have Improved Mind Blast
+								if (AuraEffect * aurEff = m_caster->GetDummyAuraEffect(SPELLFAMILY_PRIEST,95,0))
+									// Chance has been successfully rolled
+										if (roll_chance_i(aurEff->GetAmount()))
+											m_caster->CastSpell(unitTarget, 48301, true);
 
-                           		 if (m_caster->HasAura(64129)) // Body and Soul Rank 2
-						m_caster->CastSpell(unitTarget, 65081, true);
+						// Shadow Orb
+						if(Aura* shadowOrb = m_caster->GetAura(77487))
+						{
+							float incr = 0.10f;
+							if(m_caster->HasAura(77486)) // Shadow Orb Mastery
+							{
+								float mastery = m_caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+								incr += 0.0145*mastery;
+							}
+							damage += incr * shadowOrb->GetStackAmount();
+							m_caster->CastSpell(m_caster,95799,true);
+							m_caster->RemoveAurasDueToSpell(77487);
+						}
+
+						//Remove Mind Melt
+						m_caster->RemoveAurasDueToSpell(87160);
+						m_caster->RemoveAurasDueToSpell(81292);
+					}
+					// Mind Spike
+					if(m_spellInfo->Id == 73510)
+					{
+						// Shadow Orb
+						if(Aura* shadowOrb = m_caster->GetAura(77487))
+						{
+							float incr = 0.10f;
+							if(m_caster->HasAura(77486)) // Shadow Orb Mastery
+							{
+								float mastery = m_caster->ToPlayer()->GetFloatValue(PLAYER_MASTERY);
+								incr += 0.0145*mastery;
+							}
+							damage += incr * shadowOrb->GetStackAmount();
+							m_caster->CastSpell(m_caster,95799,true);
+							m_caster->RemoveAurasDueToSpell(77487);
+						}
+						if(m_caster->HasAura(14751)) // Chakra
+						{
+							m_caster->CastSpell(m_caster,81209,true);
+							m_caster->RemoveAurasDueToSpell(14751);
+						}
+					}
+					// Improved Mind Blast (Mind Blast in shadow form bonus)
+					if (m_caster->GetShapeshiftForm() == FORM_SHADOW && (m_spellInfo->SpellFamilyFlags[0] & 0x00002000))
+					{
+						Unit::AuraEffectList const& ImprMindBlast = m_caster->GetAuraEffectsByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+						for (Unit::AuraEffectList::const_iterator i = ImprMindBlast.begin(); i != ImprMindBlast.end(); ++i)
+						{
+							if ((*i)->GetSpellInfo()->SpellFamilyName == SPELLFAMILY_PRIEST &&
+								((*i)->GetSpellInfo()->SpellIconID == 95))
+							{
+								int chance = (*i)->GetSpellInfo()->Effects[EFFECT_1].CalcValue(m_caster);
+								if (roll_chance_i(chance))
+									// Mind Trauma
+										m_caster->CastSpell(unitTarget, 48301, true, 0);
+								break;
+							}
+						}
+					}
+					// Evangelism: Rank 1
+					if (m_spellInfo->Id == 585 || m_spellInfo->Id == 14914)
+					{
+						// Smite | Holy Fire
+						if (m_caster->HasAura(81659))
+						{
+							m_caster->CastSpell(m_caster, 81660, true);
+							m_caster->RemoveAurasDueToSpell(87118);
+							m_caster->RemoveAurasDueToSpell(87117);
+						}
+					}
+					// Evangelism: Rank 2
+					if (m_spellInfo->Id == 585 || m_spellInfo->Id == 14914)
+					{
+						// Smite | Holy Fire
+						if (m_caster->HasAura(81662))
+						{
+							m_caster->CastSpell(m_caster, 81661, true);
+							m_caster->RemoveAurasDueToSpell(87118);
+							m_caster->RemoveAurasDueToSpell(87117);
+						}
+					}
+					if (m_spellInfo->Id == 73510 || m_spellInfo->Id == 8092)
+						if (m_caster->HasAura(77487))
+							m_caster->CastSpell(m_caster, 95799, true);		   
+
+
+					if (m_spellInfo->Id == 73325 || m_spellInfo->Id == 17) // Leap of Faith and Power word: Shield
+					{
+						if (unitTarget)
+						{
+							if (m_caster->HasAura(64127)) // Body and Soul Rank 1
+								m_caster->CastSpell(unitTarget, 64128, true);
+
+							if (m_caster->HasAura(64129)) // Body and Soul Rank 2
+								m_caster->CastSpell(unitTarget, 65081, true);
+						}
+
+						if (m_caster->HasAura(64127)) // Body and Soul Rank 1
+							m_caster->CastSpell(m_caster, 64128, true);
+
+						if (m_caster->HasAura(64129)) // Body and Soul Rank 2
+							m_caster->CastSpell(m_caster, 65081, true);
+					}
+					// Shadow orbs
+					if (m_caster->HasAura(77487))
+					{
+						uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
+						uint32 pct = stack * 10;
+
+						// Mastery
+						//if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
+						//    if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PRIEST_SHADOW)
+						//        pct += 1.5f * m_caster->ToPlayer()->GetMasteryPoints();
+
+						AddPct(damage, pct);
+					}
+
+					//Mind Melt Aura remove
+					m_caster->RemoveAurasDueToSpell(87160);
+					m_caster->RemoveAurasDueToSpell(81292);
+					break;
+					switch(m_spellInfo->Id)
+					{
+						// Smite, Mind Spike
+					case 585:
+					case 73510:
+						// Chakra: Chastise 
+						if (m_caster->HasAura(14751)) 
+							m_caster->CastSpell(m_caster, 81209, true); 
+						if (m_caster->HasAura(14910)) // Mind melt Rank 1
+							m_caster->CastSpell(m_caster, 81292, true); 
+						if (m_caster->HasAura(33371)) // Mind Melt rank 2
+							m_caster->CastSpell(m_caster, 87160, true); 
+						break;
+					default:
+						break;
+					}
+					break;
+					break;
 				}
-
-                    		 if (m_caster->HasAura(64127)) // Body and Soul Rank 1
-				 	m_caster->CastSpell(m_caster, 64128, true);
-
-                             if (m_caster->HasAura(64129)) // Body and Soul Rank 2
-					m_caster->CastSpell(m_caster, 65081, true);
-			   }
-   			   // Shadow orbs
-                        if (m_caster->HasAura(77487))
-                        {
-                            uint8 stack = m_caster->GetAura(77487)->GetStackAmount();
-                            uint32 pct = stack * 10;
-
-                            // Mastery
-                            //if (m_caster->HasAuraType(SPELL_AURA_MASTERY))
-                            //    if (m_caster->ToPlayer()->GetTalentBranchSpec(m_caster->ToPlayer()->GetActiveSpec()) == BS_PRIEST_SHADOW)
-                            //        pct += 1.5f * m_caster->ToPlayer()->GetMasteryPoints();
-
-                            AddPct(damage, pct);
-                        }
-
-                        //Mind Melt Aura remove
-                        m_caster->RemoveAurasDueToSpell(87160);
-                        m_caster->RemoveAurasDueToSpell(81292);
-                        break;
-                    switch(m_spellInfo->Id)
-                    {
-                    // Smite, Mind Spike
-                    case 585:
-                    case 73510:
-                        // Chakra: Chastise 
-                        if (m_caster->HasAura(14751)) 
-                            m_caster->CastSpell(m_caster, 81209, true); 
-                        if (m_caster->HasAura(14910)) // Mind melt Rank 1
-                            m_caster->CastSpell(m_caster, 81292, true); 
-                        if (m_caster->HasAura(33371)) // Mind Melt rank 2
-                            m_caster->CastSpell(m_caster, 87160, true); 
-                        break;
-                    default:
-                        break;
-                }
-                break;
-             break;
-            }
             case SPELLFAMILY_DRUID:
             {
                 // Ferocious Bite

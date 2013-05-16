@@ -5969,23 +5969,23 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
                     int32 team = CalculatePct(int32(damage), triggerAmount / 2);
                     CastCustomSpell(this, 15290, &team, &self, NULL, true, castItem, triggeredByAura);
                     return true;                                // no hidden cooldown
-                }
-               // Shadow Orb
-                case 77487:
-                {
-          	 	 if (!HasAura(87327))
-			 {
-                         return false;
-			    RemoveAurasDueToSpell(77487);
-                      }
-			
-			 if (roll_chance_i(30.0f))
-			 {
-                         return false;
-			    RemoveAurasDueToSpell(77487);
-                      }
- 		    break;
-      	     	  }
+				}
+				// Shadow Orb
+				case 77487:
+					{
+						if (!HasAura(87327))
+						{
+							return false;
+							RemoveAurasDueToSpell(77487);
+						}
+
+						if (roll_chance_i(30.0f))
+						{
+							return false;
+							RemoveAurasDueToSpell(77487);
+						}
+						break;
+					}
                 // Priest Tier 6 Trinket (Ashtongue Talisman of Acumen)
                 case 40438:
                 {
