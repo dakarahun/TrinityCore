@@ -386,6 +386,12 @@ void BattlegroundMgr::BuildPvpLogDataPacket(WorldPacket* data, Battleground* bg)
         }
         Player* player = ObjectAccessor::FindPlayer(itr->first);
         ObjectGuid playerGUID = itr->first;
+		
+		if(!player)
+		{
+			sLog->outError(LOG_FILTER_BATTLEGROUND, "Weird issue");
+			return;
+		}
 
         data->WriteBit(0);              // Unk 1
         data->WriteBit(0);              // Unk 2
