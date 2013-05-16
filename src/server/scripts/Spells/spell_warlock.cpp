@@ -1060,6 +1060,8 @@ public:
         {
 			if (!GetCaster()->HasAura(SPELL_WARLOCK_NETHER_WARD))
 				amount = 6229;
+			else
+				amount = 91711;
         }
         void Register()
         {
