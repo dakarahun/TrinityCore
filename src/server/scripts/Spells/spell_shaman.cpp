@@ -45,8 +45,7 @@ enum ShamanSpells
     SPELL_SHAMAN_LAVA_FLOWS_R1                  = 51480,
     SPELL_SHAMAN_LAVA_FLOWS_TRIGGERED_R1        = 65264,
     SPELL_SHAMAN_SATED                          = 57724,
-	SPELL_SHAMAN_EARTH_GRASP_R1                 = 51483,
-	SPELL_SHAMAN_EARTH_GRASP_R2                 = 51485,
+	SPELL_SHAMAN_EARTH_GRASP                    = 51483,
     SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB      = 64695,
     SPELL_SHAMAN_TOTEM_EARTHBIND_TOTEM          = 6474,
     SPELL_SHAMAN_TOTEM_EARTHEN_POWER            = 59566,
@@ -313,14 +312,20 @@ class spell_sha_earthbind_totem : public SpellScriptLoader
                             GetTarget()->CastSpell((Unit*)NULL, SPELL_SHAMAN_TOTEM_EARTHEN_POWER, true);
             }
 
-        void Apply (AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
-        {
-            Unit* target = GetTarget();
-            if (Unit *caster = aurEff->GetBase()->GetCaster())
-                if (AuraEffect* aur = caster->GetDummyAuraEffect(SPELLFAMILY_SHAMAN, 20, 1))
-                    if (roll_chance_i(aur->GetBaseAmount()))
-						target->CastSpell(target, SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB, true, NULL, aurEff);
-        }
+            void Apply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+            {
+                if (!GetCaster())
+                    return;
+                Player* owner = GetCaster()->GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (!owner)
+                    return;
+                // Earth's Grasp
+				if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpell(SPELL_SHAMAN_EARTH_GRASP, EFFECT_1))
+                {
+                    if (roll_chance_i(aurEff->GetAmount()))
+						GetCaster()->CastSpell(GetCaster(), SPELL_SHAMAN_TOTEM_EARTHBIND_EARTHGRAB, false);
+                }
+            }
 
             void Register()
             {
