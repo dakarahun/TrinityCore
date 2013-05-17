@@ -8442,16 +8442,18 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
 
     // Custom requirements (not listed in procEx) Warning! damage dealing after this
     // Custom triggered spells
-    switch (auraSpellInfo->Id)
-    {
-    	case 84583:
-   	case 84587:
-    	case 84588:
-   	{
-       	if (victim->HasAura(94009, GetGUID()))
-                  victim->GetAura(94009, GetGUID())->RefreshDuration();
-       	break;
-       }
+	switch (auraSpellInfo->Id)
+	{
+		//Lambs to the Slaughter
+		case 84583:
+		case 84587:
+		case 84588:
+		{
+			if(procSpell->Id == 12294) // mortal strike
+				if (victim->HasAura(94009, GetGUID()))
+					victim->GetAura(94009, GetGUID())->RefreshDuration();
+			break;
+		}
         // Deep Wounds
         case 12834:
         case 12849:
