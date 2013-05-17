@@ -1048,7 +1048,7 @@ public:
     {
         PrepareAuraScript(spell_warl_nether_ward_swap_AuraScript);
 
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellInfo const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_WARLOCK_NETHER_WARD))
                 return false;
