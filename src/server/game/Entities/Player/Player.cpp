@@ -8733,7 +8733,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
             // Apply spell mods
             ApplySpellMod(pEnchant->spellid[s], SPELLMOD_CHANCE_OF_SUCCESS, chance);
 
-       /*     // Fan of Knives
+            // Fan of Knives
             if(FindCurrentSpellBySpellId(51723) && e_slot == TEMP_ENCHANTMENT_SLOT)
             {
                 if(HasAura(16513)) // Vile Poisons rank 1
@@ -8743,7 +8743,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 if(HasAura(16515)) // Vile Poisons rank 3
                     chance = 100.0f;
             }
-			
+
             // Shiv has 100% chance to apply the poison
             if (FindCurrentSpellBySpellId(5938) && e_slot == TEMP_ENCHANTMENT_SLOT)
                 chance = 100.0f;
@@ -8754,7 +8754,7 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                     CastSpell(this, spellInfo, true, item);
                 else
                     CastSpell(target, spellInfo, true, item);
-            }*/
+            }
         }
     }
 }
