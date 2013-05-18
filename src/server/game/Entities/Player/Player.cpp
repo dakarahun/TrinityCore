@@ -1354,8 +1354,8 @@ void Player::HandleDrowning(uint32 time_diff)
     if (!m_MirrorTimerFlags)
         return;
 
-    int32 disableFatigue;
-    int32 disableWater;
+    int32 disableFatigue = 0;
+    int32 disableWater = 0;
    
     switch (GetZoneId())
     { 

@@ -7327,7 +7327,7 @@ bool Spell::CanExecuteTriggersOnHit(uint8 effMask, SpellInfo const* triggeredByA
 void Spell::PrepareTriggersExecutedOnHit()
 {
     /// @todo move this to scripts
-    if (m_spellInfo->SpellFamilyName)
+	if (m_spellInfo->SpellFamilyName && (m_spellInfo->Id != 26679 || m_spellInfo->Id != 51723))
     {
         SpellInfo const* excludeCasterSpellInfo = sSpellMgr->GetSpellInfo(m_spellInfo->ExcludeCasterAuraSpell);
         if (excludeCasterSpellInfo && !excludeCasterSpellInfo->IsPositive())
