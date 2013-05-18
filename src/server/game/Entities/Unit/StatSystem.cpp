@@ -638,7 +638,7 @@ void Player::UpdateMastery()
         value = value < 0.0f ? 0.0f : value;
     }
     SetFloatValue(PLAYER_MASTERY, value);
-	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, value);
+	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, 8);
 
     TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec()));
     if (!talentTab)
