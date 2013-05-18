@@ -1621,14 +1621,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     target->ToPlayer()->RemoveRunesByAuraEffect(GetEffect(0));
                 }
                 break;
-            case SPELLFAMILY_HUNTER:
-                // Glyph of Freezing Trap
-                if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008)
-                    if (caster && caster->HasAura(56845))
-                        target->CastSpell(target, 61394, true);
-                break;
-        }
-    }
+			case SPELLFAMILY_HUNTER:
+				{
+					// Glyph of Freezing Trap
+					if (GetSpellInfo()->SpellFamilyFlags[0] & 0x00000008)
+						if (caster && caster->HasAura(56845))
+							target->CastSpell(target, 61394, true);
+					
+					if(GetId() == 82925) //Master marksman
+					{
+						if(GetStackAmount() >= 5)
+						{
+							caster->CastSpell(caster,82926,true); // Fire!
+							caster->RemoveAurasDueToSpell(82925);
+						}
+					}
+				}
+				break;
+		}
+	}
 
     // mods at aura apply or remove
     switch (GetSpellInfo()->SpellFamilyName)

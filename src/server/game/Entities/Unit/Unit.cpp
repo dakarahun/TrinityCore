@@ -8560,30 +8560,30 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = int32(CalculatePct(ap, 280));
             break;
         }
-		case 30881: // Nature's Guardian Rank 1
-		case 30883: // Nature's Guardian Rank 2
-		case 30884: // Nature's Guardian Rank 3
-			{
-				if (!HealthBelowPctDamaged(30, damage))
-					return false;
-				basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
-				break;
-			}
-		case 97463:
-			basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
-			break;
-		case 29723: // Sudden Death
-		case 29725: // Sudden Death
-			{
-				ToPlayer()->RemoveSpellCooldown(86346, true);
-				break;
-			}
-		case 93398: // Shooter Star
-		case 93399: // Shooter Star
-			{
-				ToPlayer()->RemoveSpellCooldown(78674, true);
-				break;
-			}
+        case 30881: // Nature's Guardian Rank 1
+        case 30883: // Nature's Guardian Rank 2
+        case 30884: // Nature's Guardian Rank 3
+        {
+             if (!HealthBelowPctDamaged(30, damage))
+                return false;
+            basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
+        break;
+        }
+	 case 97463:
+            basepoints0 = int32(CountPctFromMaxHealth(triggerAmount));
+	 break;
+        case 29723: // Sudden Death
+	 case 29725: // Sudden Death
+	 {
+	    	ToPlayer()->RemoveSpellCooldown(86346, true);
+	     break;
+        }
+        case 93398: // Shooter Star
+	 case 93399: // Shooter Star
+	 {
+	    	ToPlayer()->RemoveSpellCooldown(78674, true);
+	     break;
+        }
         // Greater Heal Refund (Avatar Raiment set)
         case 37594:
         {
@@ -8706,19 +8706,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             }
             break;
         }
-		case 82925: // Master Marksman
-			{ 
-				if(Aura* aura = target->GetAura(82925))
-				{
-					uint8 stack = aura->GetStackAmount();  
-					if (target->GetTypeId() == TYPEID_PLAYER && stack == 5)
-					{
-						target->CastSpell(target, 82926, true);
-						target->RemoveAura(82925);
-					}
-				}
-				break;
-			}
         // Sword and Board
         case 50227:
         {
