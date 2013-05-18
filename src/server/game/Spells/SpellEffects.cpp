@@ -6414,7 +6414,7 @@ void Spell::EffectDurabilityDamage(SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    int32 slot = m_spellInfo->Effects[effIndex].MiscValue;
+/*    int32 slot = m_spellInfo->Effects[effIndex].MiscValue;
 
     // -1 means all player equipped items and -2 all items
     if (slot < 0)
@@ -6432,7 +6432,7 @@ void Spell::EffectDurabilityDamage(SpellEffIndex effIndex)
     {
         unitTarget->ToPlayer()->DurabilityPointsLoss(item, damage);
         ExecuteLogEffectDurabilityDamage(effIndex, unitTarget, item->GetEntry(), slot);
-    }
+    }*/
 }
 
 void Spell::EffectDurabilityDamagePCT(SpellEffIndex effIndex)
