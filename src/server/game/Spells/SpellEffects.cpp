@@ -1606,6 +1606,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 							m_caster->CastCustomSpell(unitTarget, 83302, &bp, NULL, NULL, true, 0);
 					}
 					break;
+                    case 79683: //Arcane Missile!
+                    {
+                        if (m_caster->HasAura(44445) || // Hot Streak
+                            m_caster->HasAura(44546) || m_caster->HasAura(44548) || m_caster->HasAura(44549)) // Brain Freeze
+                        {
+                            m_caster->RemoveAurasDueToSpell(79683);
+                            break;
+                        }
+                    }
 				case 30455: // Ice lance
 					if (Aura* fof = m_caster->GetAura(44544))
 						AddPct(damage, 25*fof->GetCharges()); 

@@ -629,6 +629,7 @@ void Player::UpdateMastery()
     float value = GetTotalAuraModifier(SPELL_AURA_MASTERY);
     value += GetRatingBonusValue(CR_MASTERY);
     SetFloatValue(PLAYER_MASTERY, value);
+	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, value);
 
     TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec()));
     if (!talentTab)
