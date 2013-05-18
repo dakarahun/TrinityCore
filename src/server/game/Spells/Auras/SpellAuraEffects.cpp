@@ -5136,17 +5136,17 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     target->RemoveAurasDueToSpell(spellId);
                     break;
                 }
-		  case 61336:                                 // Survival Instincts
-		  {
-				if (!(mode & AURA_EFFECT_HANDLE_REAL))
-					break;
+				case 61336:                                 // Survival Instincts
+					{
+						if (!(mode & AURA_EFFECT_HANDLE_REAL))
+							break;
 
-				if (apply)
-                      		target->CastSpell(target, 50322, true);
-				else
-					target-> RemoveAurasDueToSpell(50322);
-				break;
-		  }
+						if (apply)
+							target->CastSpell(target, 50322, true);
+						else
+							target-> RemoveAurasDueToSpell(50322);
+						break;
+					}
                 // Restless Strength
                 case 24661:
                 {

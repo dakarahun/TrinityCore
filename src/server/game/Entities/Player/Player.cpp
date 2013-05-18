@@ -17768,6 +17768,14 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     _LoadCUFProfiles(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CUF_PROFILES));
 
+	RemoveAurasDueToSpell(76691); // Remove vengeance
+    SetHavocTarget(NULL); // Clean up Bane of Havoc
+    if(!HasSpell(31687) && getClass() == CLASS_MAGE) // If its not frost spec
+        if(Pet* p = GetPet()) // Remove the water elemental
+        {
+            p->DisappearAndDie(); // Workaround- ToDo: Correct fix
+            SetTemporaryUnsummonedPetNumber(0); // ?
+        }
     return true;
 }
 

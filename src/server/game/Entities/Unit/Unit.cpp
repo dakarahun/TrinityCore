@@ -815,9 +815,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     sLog->outDebug(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
 
-  /*
-
-  if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
+   if(victim->HasAura(93099) || victim->HasAura(84839) || victim->HasAura(93098)) //Vengeance
     {
         int32 atkpwr = damage * 0.05f;
         
@@ -842,16 +840,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         }
         else
             victim->RemoveAurasDueToSpell(76691);
-   }
-
-   if (spellProto && m_havocTarget && GetTypeId() == TYPEID_PLAYER && m_havocTarget != NULL)
-    {
-	if (victim && m_havocTarget && !victim->IsFriendlyTo(this) && !m_havocTarget->IsFriendlyTo(this) && m_havocTarget != victim)
-	{
-       	 int32 dmg = int32(damage * 0.15f);
-       	 CastCustomSpell(m_havocTarget, 10444, &dmg, NULL, NULL, true); // Bane of Havoc 
-	}
-    }*/
+    }
 
     if (spellProto && HasAura(13877)) 
     {

@@ -86,19 +86,21 @@ public:
             return false;
         }
 
-        char* triggeredStr = strtok(NULL, " ");
-        if (triggeredStr)
-        {
-            int l = strlen(triggeredStr);
-            if (strncmp(triggeredStr, "triggered", l) != 0)
-                return false;
-        }
+		char* ba0 = strtok(NULL, " ");
+		char* ba1 = strtok(NULL, " ");
+		char* ba2 = strtok(NULL, " ");
+		int32 basepoints0 = 0;
+		int32 basepoints1 = 0;
+		int32 basepoints2 = 0; 
+		if(ba0)
+			basepoints0 = (int32)atof(ba0);
+		if(ba1)
+			basepoints1 = (int32)atof(ba1);
+		if(ba2)
+			basepoints2 = (int32)atof(ba2);
 
-        bool triggered = (triggeredStr != NULL);
-
-        handler->GetSession()->GetPlayer()->CastSpell(target, spellId, triggered);
-
-        return true;
+		handler->GetSession()->GetPlayer()->CastCustomSpell(target, spellId,&basepoints0,&basepoints1,&basepoints2, false,NULL,NULL,NULL);
+		return true;
     }
 
     static bool HandleCastBackCommand(ChatHandler* handler, char const* args)

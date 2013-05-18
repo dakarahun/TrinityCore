@@ -998,6 +998,31 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                 }
                 break;
             }
+           case SPELLFAMILY_SHAMAN:
+                // Searing Bolt
+                if (m_spellInfo->Id == 3606)
+                {
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77655))
+                        if (roll_chance_i(33))
+                            m_caster->CastSpell(unitTarget, 77661, true);
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77656))
+                        if (roll_chance_i(67))
+                            m_caster->CastSpell(unitTarget, 77661, true);
+                    if (m_caster->GetOwner()->ToPlayer()->HasAura(77657))
+                        m_caster->CastSpell(unitTarget, 77661, true);
+                }
+                // Frost Shock
+                if(m_spellInfo->Id == 8056)
+                {
+                    if(m_caster->HasAura(63374)) // Frozen Power rank 2
+                        if(!m_caster->IsWithinDistInMap(unitTarget,15.0f)) // If is more than 15 yards
+                            m_caster->CastSpell(unitTarget,63685,true);
+                    if(m_caster->HasAura(63373)) // Frozen Power rank 1
+                        if(roll_chance_i(50))
+                            if(!m_caster->IsWithinDistInMap(unitTarget,15.0f)) // If is more than 15 yards
+                                m_caster->CastSpell(unitTarget,63685,true);
+                }
+                break;
             case SPELLFAMILY_DEATHKNIGHT:
             {
                 // Blood Boil - bonus for diseased targets
@@ -1715,18 +1740,18 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                	 }	
                 return;
             }
-                // Intercept
-		if (m_spellInfo->Id == 20252)
-		{
-                    // Juggernaut CD part
-                    if (m_caster->HasAura(64976))
-		      {
-                        m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
-                        m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
-                        m_caster->CastSpell(m_caster, 96215, true); // Spell Maker CDs
-		      }
-                    return;
-               }
+			// Intercept
+			if (m_spellInfo->Id == 20252)
+			{
+				// Juggernaut CD part
+				if (m_caster->HasAura(64976))
+				{
+					m_caster->ToPlayer()->AddSpellCooldown(100, 0, time(NULL) + 13);
+					m_caster->CastSpell(m_caster, 65156, true); // Buff Triggered by Juggernaut
+					m_caster->CastSpell(m_caster, 96215, true); // Spell Maker CDs
+				}
+				return;
+			}
             break;
 	case SPELLFAMILY_DRUID:
 		{
