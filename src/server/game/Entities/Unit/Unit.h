@@ -2174,17 +2174,6 @@ class Unit : public WorldObject
         void FocusTarget(Spell const* focusSpell, WorldObject const* target);
         void ReleaseFocus(Spell const* focusSpell);
 
-        uint32 m_heal_done[120];
-        uint32 m_damage_done[120];
-        uint32 m_damage_taken[120];
-        int32 DmgandHealDoneTimer;
-        uint32 GetHealingDoneInPastSecs(uint32 secs);
-        uint32 GetDamageDoneInPastSecs(uint32 secs);
-        uint32 GetDamageTakenInPastSecs(uint32 secs);
-        void ResetDamageDoneInPastSecs(uint32 secs);
-        void ResetHealingDoneInPastSecs(uint32 secs);
-        void ResetDamageTakenInPastSecs(uint32 secs);
-
         void AddSpellSwap(uint32 oldSpell, uint32 newSpell) { _spellSwaps[oldSpell] = newSpell; }
         void RemoveSpellSwap(uint32 originalSpell) { _spellSwaps.erase(originalSpell); }
         uint32 GetSpellForCast(uint32 spellId) const
@@ -2217,6 +2206,7 @@ class Unit : public WorldObject
         uint32 GetDamageTakenInPastSecs(uint32 secs);
         void ResetDamageDoneInPastSecs(uint32 secs);
         void ResetHealingDoneInPastSecs(uint32 secs);
+		void ResetDamageTakenInPastSecs(uint32 secs);
 
         float m_AbsorbHeal;
         float GetAbsorbHeal() const { return m_AbsorbHeal; };
