@@ -626,8 +626,17 @@ void Player::UpdateMastery()
         return;
     }
 
-    float value = GetTotalAuraModifier(SPELL_AURA_MASTERY);
-    value += GetRatingBonusValue(CR_MASTERY);
+    // No mastery
+    float value = 0.0f;
+    if (CanUseMastery())
+    {
+        value = 0.0f;
+        // Mastery from SPELL_AURA_MASTERY aura
+        value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
+        // Mastery from rating
+        value += GetRatingBonusValue(CR_MASTERY);
+        value = value < 0.0f ? 0.0f : value;
+    }
     SetFloatValue(PLAYER_MASTERY, value);
 	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, value);
 

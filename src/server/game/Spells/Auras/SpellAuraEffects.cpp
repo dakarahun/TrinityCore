@@ -3877,14 +3877,15 @@ void AuraEffect::HandleModBaseResistance(AuraApplication const* aurApp, uint8 mo
 
 void AuraEffect::HandleMastery(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
-    if (!(mode & AURA_EFFECT_HANDLE_REAL))
+    Unit* target = aurApp->GetTarget();
+
+    if (!target || target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player* target = aurApp->GetTarget()->ToPlayer();
-    if (!target)
-         return;
+    int32 rating = target->ToPlayer()->CalculateMasteryRating(GetAmount());
+    target->ToPlayer()->ApplyRatingMod(CR_MASTERY, rating, apply);
 
-    target->UpdateMastery();
+    target->ToPlayer()->UpdateMastery();
  }
 
 void AuraEffect::HandleModTargetResistance(AuraApplication const* aurApp, uint8 mode, bool apply) const
