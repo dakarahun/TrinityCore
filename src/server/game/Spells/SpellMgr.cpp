@@ -3317,8 +3317,8 @@ void SpellMgr::LoadSpellInfoCorrections()
            case 22842: //Frenzied regeneration
                 spellInfo->Effects[1].Effect = SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT;
                 break;
-			case 82928: // Aimed shot! should be instant
-				spellInfo->CastTimeEntry = 0;
+            case 82928: // Aimed Shot! - Master Marksman
+                spellInfo->CastTimeEntry = sSpellCastTimesStore.LookupEntry(1);
                 break;
             case 70728: // Exploit Weakness (needs target selection script)
             case 70840: // Devious Minds (needs target selection script)
