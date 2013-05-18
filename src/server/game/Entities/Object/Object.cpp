@@ -77,7 +77,7 @@ Object::Object() : m_PackGUID(sizeof(uint64)+1)
 
     m_uint32Values      = NULL;
     m_valuesCount       = 0;
-    _fieldNotifyFlags   = UF_FLAG_DYNAMIC;
+    _fieldNotifyFlags   = UF_FLAG_NONE;
 
     m_inWorld           = false;
     m_objectUpdated     = false;
@@ -999,7 +999,7 @@ void Object::BuildFieldsUpdate(Player* player, UpdateDataMapType& data_map) cons
 
 uint32 Object::GetUpdateFieldData(Player const* target, uint32*& flags) const
 {
-    uint32 visibleFlag = UF_FLAG_PUBLIC;
+    uint32 visibleFlag = UF_FLAG_PUBLIC | UF_FLAG_DYNAMIC;
 
     if (target == this)
         visibleFlag |= UF_FLAG_PRIVATE;

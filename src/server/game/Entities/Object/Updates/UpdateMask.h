@@ -46,7 +46,7 @@ class UpdateMask
 
         void SetBit(uint32 index) { _bits[index] = 1; }
         void UnsetBit(uint32 index) { _bits[index] = 0; }
-        bool GetBit(uint32 index) const { return _bits[index] != 0; }
+        bool GetBit(uint32 index) const { return _bits[index]; }
 
         void AppendToPacket(ByteBuffer* data)
         {
