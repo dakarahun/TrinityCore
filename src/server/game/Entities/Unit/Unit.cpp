@@ -271,6 +271,15 @@ Unit::Unit(bool isWorldObject) : WorldObject(isWorldObject),
     _focusSpell = NULL;
     _lastLiquid = NULL;
     _isWalkingBeforeCharm = false;
+
+	for (uint32 i = 0; i < 120 ; ++i)
+        m_damage_done[i] = 0;
+
+    for (uint32 i = 0; i < 120 ; ++i)
+        m_heal_done[i] = 0;
+
+    for (uint32 i = 0; i < 120 ; ++i)
+        m_damage_taken[i] = 0;
 }
 
 ////////////////////////////////////////////////////////////
@@ -329,6 +338,28 @@ void Unit::Update(uint32 p_time)
 
     if (!IsInWorld())
         return;
+    // This is required for GetHealingDoneInPastSecs(), GetDamageDoneInPastSecs() and GetDamageTakenInPastSecs()!
+    DmgandHealDoneTimer -= p_time;
+
+    if (DmgandHealDoneTimer <= 0)
+    {
+        for (uint32 i = 120; i > 0; i--)
+            m_damage_done[i] = m_damage_done[i-1];
+            
+        m_damage_done[0] = 0;
+
+        for (uint32 i = 120; i > 0; i--)
+            m_heal_done[i] = m_heal_done[i-1];
+
+        m_heal_done[0] = 0;
+
+        for (uint32 i = 120; i > 0; i--)
+            m_damage_taken[i] = m_damage_taken[i-1];
+
+        m_damage_taken[0] = 0;
+
+        DmgandHealDoneTimer = 1000;
+    }
 
     _UpdateSpells(p_time);
 
@@ -18382,3 +18413,77 @@ void Unit::ReleaseFocus(Spell const* focusSpell)
     if (focusSpell->GetSpellInfo()->AttributesEx5 & SPELL_ATTR5_DONT_TURN_DURING_CAST)
         ClearUnitState(UNIT_STATE_ROTATING);
 }
+uint32 Unit::GetHealingDoneInPastSecs(uint32 secs)
+{
+    uint32 heal = 0;
+
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs; i++)
+        heal += m_heal_done[i];
+
+    if (heal < 0)
+        return 0;
+
+    return heal;
+};
+
+uint32 Unit::GetDamageDoneInPastSecs(uint32 secs)
+{
+    uint32 damage = 0;
+
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs; i++)
+        damage += m_damage_done[i];
+
+    if (damage < 0)
+        return 0;
+
+    return damage;
+};
+
+uint32 Unit::GetDamageTakenInPastSecs(uint32 secs)
+{
+    uint32 tdamage = 0;
+
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs; i++)
+        tdamage += m_damage_taken[i];
+
+    if (tdamage < 0)
+        return 0;
+
+    return tdamage;
+};
+
+void Unit::ResetDamageDoneInPastSecs(uint32 secs)
+{
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs; i++)
+        m_damage_done[i] = 0;
+};
+
+void Unit::ResetDamageTakenInPastSecs(uint32 secs)
+{
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs ; ++i)
+        m_damage_taken[i] = 0;
+};
+
+void Unit::ResetHealingDoneInPastSecs(uint32 secs)
+{
+    if (secs > 120)
+        secs = 120;
+
+    for (uint32 i = 0; i < secs; i++)
+        m_heal_done[i] = 0;
+};
