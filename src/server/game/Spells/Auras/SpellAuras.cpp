@@ -1197,19 +1197,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 					}
 					if(GetId() == 2565) //shield block
 					{
-						if(caster->HasAura(29598)) // shield mastery
-						{
-							int32 bp0 = 7;
-							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
-						}
-						if(caster->HasAura(84607))
-						{
-							int32 bp0 = 14;
-							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
-						}
+						int32 bp0 = 0;
 						if(caster->HasAura(84608))
 						{
-							int32 bp0 = 21;
+							bp0 = 21;
+							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
+						}
+						else if(caster->HasAura(84607))
+						{
+							bp0 = 14;
+							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
+						}
+						else if(caster->HasAura(29598)) // shield mastery
+						{
+							bp0 = 7;
 							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
 						}
 					}
