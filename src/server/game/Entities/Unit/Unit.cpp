@@ -8511,14 +8511,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
 	switch (auraSpellInfo->Id)
 	{
-        // Impending Victory
-        case 80128:
-        case 80129:
-        {
-            if (!victim->HealthBelowPct(20))
-                return false;
-            break;
-        }
         // Strength of Soul
         case 89488:
         case 89489:
@@ -8634,13 +8626,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-	 case 80128: //Impeding Victory Rush
-	 case 80129: 
-	 {
-	       if (!victim->HealthBelowPct(20))
-	            return false;	
-	   break;
-	 }
 	 case 88611:
 	 {
 		if (IsFriendlyTo(victim))
@@ -9010,14 +8995,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
             basepoints0 = CalculatePct(triggerAmount, GetTotalAttackPowerValue(BASE_ATTACK));
             break;
         }
-	// Efflorescence
-	case 34151:
-	case 81274:
-	case 81275:
-	{
-		basepoints0 = CalculatePct(int32(damage), triggerAmount);
-		break;
-	}
         // Chakra: Serenity should proc only on direct heals
         case 81208:
         {
