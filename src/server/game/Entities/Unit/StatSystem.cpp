@@ -628,17 +628,19 @@ void Player::UpdateMastery()
 
     // No mastery
     float value = 0.0f;
+	float value2 = 0.0f;
     if (CanUseMastery())
     {
         value = 0.0f;
+		value2= 0.0f;
         // Mastery from SPELL_AURA_MASTERY aura
-        value += GetTotalAuraModifier(SPELL_AURA_MASTERY);
+        value2 += GetTotalAuraModifier(SPELL_AURA_MASTERY);
         // Mastery from rating
         value += GetRatingBonusValue(CR_MASTERY);
         value = value < 0.0f ? 0.0f : value;
     }
-    SetFloatValue(PLAYER_MASTERY, value);
-	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, 8);
+    SetFloatValue(PLAYER_MASTERY, value2);
+	SetInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_MASTERY, value);
 
     TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(GetPrimaryTalentTree(GetActiveSpec()));
     if (!talentTab)

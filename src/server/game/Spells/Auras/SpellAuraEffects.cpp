@@ -6494,7 +6494,28 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     }
     else
     {
-        // Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
+        // Second Wind
+        if (m_spellInfo->Id == 29841 || m_spellInfo->Id == 29842)
+            damage = m_spellInfo->Effects[1].BasePoints * caster->GetMaxHealth() / 1000;
+        // Recuperate
+        if (m_spellInfo->Id == 73651)
+		{
+			damage = m_spellInfo->Effects[0].BasePoints * caster->GetMaxHealth() / 100;
+			//Improved Recuperate
+			if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_ROGUE, 4819, 0))
+                damage += aurEff->GetAmount() / 1000;
+		}
+		// Remedy
+		if (m_spellInfo->Id == 77912)
+            damage += m_spellInfo->Effects[1].BasePoints;
+
+		// Recrecimiento
+		if (m_spellInfo->Id == 8936)
+			if (caster->HasAura(54743) &&
+                target->HealthBelowPct(50))
+                GetBase()->RefreshDuration();
+
+		// Wild Growth = amount + (6 - 2*doneTicks) * ticks* amount / 100
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 2864)
         {
             int32 addition = int32(float(damage * GetTotalTicks()) * ((6-float(2*(GetTickNumber()-1)))/100));
@@ -6520,6 +6541,16 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     uint32 absorb = 0;
     uint32 heal = uint32(damage);
+    // blood craze
+    if(m_spellInfo->Id == 16491 || m_spellInfo->Id == 16487 || m_spellInfo->Id == 16489)
+        heal = heal / 10;
+
+    // second wind
+    if(m_spellInfo->Id == 29841)
+        heal =  caster->GetMaxHealth() /5 * 0.02;
+    if(m_spellInfo->Id == 29842)
+        heal =  caster->GetMaxHealth() /5 * 0.05;
+
     caster->CalcHealAbsorb(target, GetSpellInfo(), heal, absorb);
     int32 gain = caster->DealHeal(target, heal);
 

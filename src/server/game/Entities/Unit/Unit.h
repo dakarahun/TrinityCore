@@ -1330,7 +1330,7 @@ class Unit : public WorldObject
             SpellsCastedInRow::iterator itr = m_spellsinrow.find(spellid);
             if(itr != m_spellsinrow.end())
                 return itr->second;
-           return NULL;
+           return 0;
        }
         inline int32 getLastSpellCasted() const { return m_lastSpellCasted ? m_lastSpellCasted : 0; }
 

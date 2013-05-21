@@ -1045,8 +1045,22 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage* damageInfo, int32 dama
 
     SpellSchoolMask damageSchoolMask = SpellSchoolMask(damageInfo->schoolMask);
 
+	//Colossus Smash HACK
     if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
-        damage = CalcArmorReducedDamage(victim, damage, spellInfo, attackType);
+    {
+        Unit *pCaster = damageInfo->attacker;
+        Aura *pSpell;
+        if (victim->HasAura(86346))
+        {
+            pSpell = victim->GetAura(86346);
+            if (pSpell->GetCaster() == pCaster)
+                damageInfo->damage = damage;
+            else
+                damage = CalcArmorReducedDamage(victim, damage, spellInfo, attackType);
+        }
+        else
+            damage = CalcArmorReducedDamage(victim, damage, spellInfo, attackType);
+    }
 
     bool blocked = false;
     // Per-school calc
@@ -5712,16 +5726,45 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
             break;
         }
         case SPELLFAMILY_WARRIOR:
-        {
-            switch (dummySpell->Id)
-            {
-                // Victorious
-                case 32216:
-                {
-                    RemoveAura(dummySpell->Id);
-                    return false;
-                }
-            }
+			{
+				switch (dummySpell->Id)
+				{
+					// Hold The Line
+				case 84604:
+					{
+						if (procSpell == 0 || !(procEx & (PROC_EX_PARRY)) || this == victim)
+							return false;
+
+						triggered_spell_id = 84619;
+						break;
+					}
+				case 84621:
+					{
+						if (procSpell == 0 || !(procEx & (PROC_EX_PARRY)) || this == victim)
+							return false;
+
+						triggered_spell_id = 84620;
+						break;
+					}
+					// Sweeping Strikes
+				case 12328:
+					{
+						target = SelectNearbyTarget(victim);
+						basepoints0 = damage;
+						if (!target)
+							return false;
+
+						triggered_spell_id = 26654;
+						break;
+					}
+					// Victorious
+				case 32216:
+					{
+						RemoveAura(dummySpell->Id);
+						return false;
+					}
+					break;
+				}
 
             // Retaliation
             if (dummySpell->SpellFamilyFlags[1] & 0x8)
@@ -7655,7 +7698,14 @@ bool Unit::HandleDummyAuraProc(Unit* victim, uint32 damage, AuraEffect* triggere
         default:
             break;
     }
-
+    // Warrior mastery ( arm )
+    if (dummySpell->Id == 76838)
+        if (roll_chance_i(GetAura(76838)->GetEffect(0)->GetAmount()))
+            if (!ToPlayer()->HasSpellCooldown(76858))
+            {
+                CastSpell(victim, 76858, true);
+                ToPlayer()->AddSpellCooldown(76858, 0, time(NULL) + 2);
+            }
     // if not handled by custom case, get triggered spell from dummySpell proto
     if (!triggered_spell_id)
         triggered_spell_id = dummySpell->Effects[triggeredByAura->GetEffIndex()].TriggerSpell;
@@ -8461,6 +8511,60 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // Custom triggered spells
 	switch (auraSpellInfo->Id)
 	{
+        // Impending Victory
+        case 80128:
+        case 80129:
+        {
+            if (!victim->HealthBelowPct(20))
+                return false;
+            break;
+        }
+        // Strength of Soul
+        case 89488:
+        case 89489:
+        {
+            if (procSpell->Id == 2050 || procSpell->Id == 2060 || procSpell->Id == 2061)
+                if (victim->HasAura(6788))
+                {
+                    uint32 newCooldownDelay = victim->GetAura(6788)->GetDuration();
+                    if (newCooldownDelay <= uint32((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000))
+                        newCooldownDelay = 0;
+                    
+                    else
+                        newCooldownDelay -= ((triggeredByAura->GetSpellInfo()->Effects[0].BasePoints) * 1000);
+                    victim->GetAura(6788)->SetDuration(newCooldownDelay, true);
+                }
+                break;
+        }
+        // Seals of Command
+        case 85126:
+        {
+            if (!HasAura(31801) &&
+                !HasAura(20154) &&
+                !HasAura(20164))
+                return false;
+            
+            if (procSpell &&
+                (procSpell->Id == 54158 || procSpell->Id == 31804 || procSpell->Id == 20187 || procSpell->Id == 24275))
+                return false;
+            break;
+        }
+        // Glyph of Dark Succor
+		case 96279:
+		{
+            if (!HasAura(48265) &&
+                !HasAura(48266))
+                return false;
+            break;
+        }
+        // Deathmatch
+        case 81913:
+        case 81914:
+        {
+            if (HealthAbovePct(20))
+                return false;
+            break;
+        }
 		//Lambs to the Slaughter
 		case 84583:
 		case 84587:
@@ -8530,13 +8634,6 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
                 return false;
             break;
         }
-	 case 81913:  // Die by the Sword
-	 case 81914:  // Die by the Sword Rank 2
-	 {
-	       if (!HealthBelowPct(20))
-	            return false;	
-	       break;
-	 }
 	 case 80128: //Impeding Victory Rush
 	 case 80129: 
 	 {
@@ -8659,6 +8756,128 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
     // dummy basepoints or other customs
     switch (trigger_spell_id)
     {
+        // Die by the Sword
+        // Die by the Sword
+        case 85386:
+        case 86624:
+        {
+            if (HealthBelowPct(19) || (!HealthBelowPctDamaged(20, damage)))
+                return false;
+            else
+            {
+                if (!ToPlayer()->HasSpellCooldown(trigger_spell_id))
+                {
+                    AddAura(trigger_spell_id, this);
+                    ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + 120);
+                }
+            }
+            break;
+        }
+        case 92184: // Lead Plating
+        case 92233: // Tectonic Shift
+        case 92355: // Turn of the Worm
+        case 92235: // Turn of the Worm
+        case 90996: // Crescendo of Suffering
+        case 91002: // Crescendo of Suffering
+        case 75477: // Scale Nimbleness
+        case 75480: // Scaly Nimbleness
+        case 71633: // Thick Skin
+        case 71639: // Thick Skin
+        {
+            if (HealthBelowPct(34) || (!HealthBelowPctDamaged(35, damage)))
+                return false;
+            else
+            {
+                if (!ToPlayer()->HasSpellCooldown(trigger_spell_id))
+                {
+                    AddAura(trigger_spell_id, this);
+                    ToPlayer()->AddSpellCooldown(trigger_spell_id, 0, time(NULL) + 30);
+                }
+            }
+            break;
+        }
+        // Shadow Infusion
+        case 91342:
+        {
+            if (!procSpell ||
+                procSpell->Id != 47632 &&
+                procSpell->Id != 47633)
+                return false;
+            break;
+        }
+		// Spell Block
+        case 97954:
+        {
+            if(procSpell->Id != 2565)
+                return false;
+            break;
+        }
+        // Grand Crusader
+        case 85416:
+        {
+            if (!procSpell ||
+                procSpell->Id != 53595 &&
+                procSpell->Id != 35395)
+                return false;
+
+            if (ToPlayer()->HasSpell(31935))
+                ToPlayer()->RemoveSpellCooldown(31935,true);
+            break;
+        }
+        // Find weakness
+        case 91021:
+        {
+            if (!procSpell || (
+                procSpell->Id != 8676 &&
+                procSpell->Id != 703 &&
+                procSpell->Id != 1833))
+                return false;
+            break;
+        }
+        case 81135: // Crimson Scourge Rank 1
+        case 81136: // Crimson Scourge Rank 2
+        {
+            if (!victim->HasAura(55078, GetGUID())) // Proc only if the target has Blood Plague
+                return false;
+            break;
+        }
+        // Efflorescence
+        case 34151:
+        case 81274:
+        case 81275:
+        {
+            basepoints0 = CalculatePct(int32(damage), triggerAmount);
+            break;
+        }
+		// Meat Cleaver
+        case 85738:
+        case 85739:
+        {
+            if(procSpell->Id != 845 || procSpell->Id != 1680)
+                return false;
+            break;
+        }
+		// Battle Trance
+        case 12964:
+        {
+            if(procSpell->Id != 12294 || procSpell->Id != 23881 || procSpell->Id != 23922)
+                return false;
+            break;
+        }
+		// Executioner
+        case 90806:      
+        {
+            if(procSpell->Id != 5308)
+                return false;
+            break;
+        }
+
+        case 87098: // Invocation
+        {
+            if(procSpell->Id != 2139) // Proc only from counterspell
+                return false;
+            break;
+        }
         // Auras which should proc on area aura source (caster in this case):
         // Cast positive spell on enemy target
         case 7099:  // Curse of Mending
