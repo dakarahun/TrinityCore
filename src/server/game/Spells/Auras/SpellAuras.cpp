@@ -1200,17 +1200,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
 						int32 bp0 = 0;
 						if(caster->HasAura(84608))
 						{
-							bp0 = 21;
+							bp0 = -20;
 							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
 						}
 						else if(caster->HasAura(84607))
 						{
-							bp0 = 14;
+							bp0 = -14;
 							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
 						}
 						else if(caster->HasAura(29598)) // shield mastery
 						{
-							bp0 = 7;
+							bp0 = -7;
 							caster->CastCustomSpell(caster, 97954, &bp0, NULL, NULL, true);
 						}
 					}
