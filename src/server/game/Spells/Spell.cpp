@@ -3040,6 +3040,10 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
             triggeredByAura->GetBase()->SetDuration(0);
         }
 
+
+       if (m_spellInfo->Id == 82928)
+           m_casttime = 0;
+
         SendCastResult(result);
 
         finish(false);
