@@ -113,7 +113,7 @@ class spell_rog_cheat_death : public SpellScriptLoader
 
             bool Load()
             {
-                absorbChance = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+                absorbChance = GetSpellInfo()->Effects[EFFECT_0].CalcValue(); 
                 return GetUnitOwner()->ToPlayer();
             }
 

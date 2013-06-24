@@ -663,6 +663,9 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
             return 0;
     }
 
+	if (damage && GetTypeId() == TYPEID_PLAYER && this != victim && HasAura(31231)) // Cheat Death Hackfix on Damage Reduction
+		damage = damage / 1.90;
+	
     // Signal the pet it was attacked so the AI can respond if needed
     if (victim->GetTypeId() == TYPEID_UNIT && this != victim && victim->IsPet() && victim->IsAlive())
         victim->ToPet()->AI()->AttackedBy(this);

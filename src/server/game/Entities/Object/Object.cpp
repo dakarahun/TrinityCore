@@ -1807,7 +1807,7 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
         if ((m_invisibility.GetFlags() & obj->m_invisibilityDetect.GetFlags()) != m_invisibility.GetFlags())
             return false;
 			
-	if (GetTypeId() == TYPEID_PLAYER && IsSpectator())
+	if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->IsSpectator())
 		return false;
 
     for (uint32 i = 0; i < TOTAL_INVISIBILITY_TYPES; ++i)

@@ -2423,7 +2423,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         {
 		    spellHitTarget = m_caster;
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-            m_caster->ProcDamageAndSpell(target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
+            m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
             if (m_caster->GetTypeId() == TYPEID_UNIT)
                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
         }
