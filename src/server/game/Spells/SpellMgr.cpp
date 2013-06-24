@@ -2789,6 +2789,11 @@ void SpellMgr::LoadSpellCustomAttr()
 			case 47825: // Soul Fire
 			    spellInfo->AttributesCu |= SPELL_ATTR0_CANT_INSTANT_SHOP;
 				break;
+		    default:
+			    break;
+	    }
+		switch (spellInfo->Id)
+		{
 			case 2094: // Blind
 			case 42950: // Dragon Breath
 			case 8643: // Kidney  shot
@@ -2801,7 +2806,7 @@ void SpellMgr::LoadSpellCustomAttr()
 				break;
 		    default:
 			    break;
-	    }
+		}
         if (!spellInfo->_IsPositiveEffect(EFFECT_0, false))
             spellInfo->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
 

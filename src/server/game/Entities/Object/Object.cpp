@@ -1785,7 +1785,10 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
 
     if (!ignoreStealth && !seer->CanDetectStealthOf(obj))
         return false;
-
+		
+	if (GetTypeId() == TYPEID_PLAYER && IsSpectator())
+		return false;
+		
     return true;
 }
 
@@ -1803,6 +1806,9 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
     if (obj->ToUnit())
         if ((m_invisibility.GetFlags() & obj->m_invisibilityDetect.GetFlags()) != m_invisibility.GetFlags())
             return false;
+			
+	if (GetTypeId() == TYPEID_PLAYER && IsSpectator())
+		return false;
 
     for (uint32 i = 0; i < TOTAL_INVISIBILITY_TYPES; ++i)
     {
@@ -1870,14 +1876,16 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
 
         detectionValue -= obj->m_stealth.GetValue(StealthType(i));
 		
-		if (detectionValue < 0)
-			return false;
+	if (detectionValue < 0 && (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasAura(41634)))
+		return false;
 
         // Calculate max distance
         float visibilityRange = float(detectionValue) * 0.3f + combatReach;
 
-        if (visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE)
+        if (visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE && (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasAura(41634)))
             visibilityRange = MAX_PLAYER_STEALTH_DETECT_RANGE;
+	 else if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasAura(41634))
+	     visibilityRange = 8.0f;
 
         if (distance > visibilityRange)
             return false;

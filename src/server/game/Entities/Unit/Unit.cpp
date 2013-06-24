@@ -353,21 +353,12 @@ void Unit::Update(uint32 p_time)
 			
 	if (GetTypeId() == TYPEID_PLAYER && HasAura(66) && HasUnitState(UNIT_STATE_FLEEING | UNIT_STATE_STUNNED | UNIT_STATE_DISTRACTED | UNIT_STATE_CONFUSED))
 		RemoveAurasDueToSpell(66);
+		
+		///@todo Hackfix on Delayed spells (For Example Fearing While Block)
+		if (GetTypeId() == TYPEID_PLAYER && IsAlive() && HasAura(45438))
+			if (HasUnitState(UNIT_STATE_FLEEING))
+				RemoveAurasByType(SPELL_AURA_MOD_FEAR);
 
-	///@todo Hackfix on Delayed spells (For Example Fearing While Block)
-	if (GetTypeId() == TYPEID_PLAYER && IsAlive() && /*(IsImmunedToDamage() || IsImmunedToSpell())*/ HasAura(45438) && HasUnitState(UNIT_STATE_FLEEING | UNIT_STATE_ROOT | UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED))
-	{
-		if (HasUnitState(UNIT_STATE_CONFUSED))
-			RemoveAurasByType(SPELL_AURA_MOD_CONFUSE);
-		if (HasUnitState(UNIT_STATE_FLEEING))
-			RemoveAurasByType(SPELL_AURA_MOD_FEAR);
-		if (HasUnitState(UNIT_STATE_STUNNED))
-			RemoveAurasByType(SPELL_AURA_MOD_STUN);
-		if (HasUnitState(UNIT_STATE_ROOT))
-			RemoveAurasByType(SPELL_AURA_MOD_ROOT);
-	}
-	
-	
 	if (GetTypeId() == TYPEID_PLAYER && ToPlayer() && (HasAura(47855) || HasAura(42846)) && IsAlive())
 	{
 		if (Player* player = ToPlayer())
@@ -2721,10 +2712,11 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
         for (Unit::AuraEffectList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
             if ((*i)->GetMiscValue() & spell->GetSchoolMask())
                 reflectchance += (*i)->GetAmount();
+				
         if (reflectchance > 0 && roll_chance_i(reflectchance))
         {
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-            //ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, spell);
+			ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, spell);
             return SPELL_MISS_REFLECT;
         }
     }

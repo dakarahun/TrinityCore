@@ -46,7 +46,13 @@ public:
     {
 
         Player* me = handler->GetSession()->GetPlayer();
-		me->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+		
+        PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_ADD_AT_LOGIN_FLAG);
+        stmt->setUInt16(0, uint16(AT_LOGIN_CHANGE_FACTION));
+		stmt->setUInt32(1, GUID_LOPART(me->GetGUID()));
+		
+        CharacterDatabase.Execute(stmt);
+		
 		handler->PSendSysMessage("Relog to change faction of your character.");
         return true;
     }

@@ -1745,7 +1745,7 @@ void Player::Update(uint32 p_time)
 		{
 			if (HasAuraType(SPELL_AURA_MOD_STEALTH))
 			{
-				SetVisibility(VISIBILITY_GROUP_STEALTH);
+				//SetVisibility(VISIBILITY_GROUP_STEALTH);
 
 				SetStandFlags(UNIT_STAND_FLAGS_CREEP);
 				if (GetTypeId() == TYPEID_PLAYER)
@@ -2869,7 +2869,7 @@ void Player::SetSpectate(bool on)
 
         setFaction(35);
 		SetGMVisible(false);
-		SetGameMaster(false);
+		SetGameMaster(true);
 
         if (Pet* pet = GetPet())
 			 RemovePet(pet, PET_SAVE_NOT_IN_SLOT, true);
@@ -2899,8 +2899,8 @@ void Player::SetSpectate(bool on)
         SetPhaseMask(newPhase, false);
 
         setFactionForRace(getRace());
-       // RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
-        //RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+        RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
 		SetGMVisible(true);
 		SetGameMaster(false);
 
