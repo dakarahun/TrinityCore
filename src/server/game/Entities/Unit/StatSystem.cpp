@@ -1254,6 +1254,8 @@ void Guardian::UpdateMaxHealth()
         case ENTRY_FELHUNTER:   multiplicator = 9.5f;   break;
         case ENTRY_FELGUARD:    multiplicator = 11.0f;  break;
         case ENTRY_BLOODWORM:   multiplicator = 1.0f;   break;
+		case 27829:             multiplicator = 5.0f;   break;
+		case 31216:             multiplicator = 7.0f;   break;
         default:                multiplicator = 10.0f;  break;
     }
 
