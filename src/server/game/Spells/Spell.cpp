@@ -5729,6 +5729,10 @@ uint32 Spell::GetCCDelay(SpellInfo const* _spell)
 
     switch(_spell->SpellFamilyName)
     {
+		case SPELLFAMILY_GENERIC:
+			if (_spell->Id == 56488)
+				return 200;
+			break;
         case SPELLFAMILY_HUNTER:
 			// Hunter Traps 
 			if (_spell->Id == 3355 || _spell->Id == 14308 || 
@@ -5846,6 +5850,9 @@ SpellCastResult Spell::CheckCasterAuras() const
     // there is no other way to handle it
     if (m_spellInfo->Id == 33206 && !m_caster->HasAura(63248))
         usableInStun = false;
+		
+	if (m_spellInfo->Id == 1044)
+		usableInStun = true;
 
     // Check whether the cast should be prevented by any state you might have.
     SpellCastResult prevented_reason = SPELL_CAST_OK;
