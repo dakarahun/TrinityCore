@@ -2868,7 +2868,7 @@ void Player::SetSpectate(bool on)
         spectatorFlag = true;
 
         setFaction(35);
-		SetGMVisible(false);
+	//	SetGMVisible(false);
 		SetGameMaster(true);
 
         if (Pet* pet = GetPet())
@@ -2901,7 +2901,7 @@ void Player::SetSpectate(bool on)
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS);
-		SetGMVisible(true);
+//		SetGMVisible(true);
 		SetGameMaster(false);
 
         if (spectateFrom)

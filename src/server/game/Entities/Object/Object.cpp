@@ -1692,7 +1692,7 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
 
     if (obj->IsNeverVisible() || CanNeverSee(obj))
         return false;
-
+		
     if (obj->IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
         return true;
 
@@ -1727,13 +1727,13 @@ bool WorldObject::CanSeeOrDetect(WorldObject const* obj, bool ignoreStealth, boo
     }
 
     // GM visibility off or hidden NPC
-    if (!obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM))
+   /* if (!obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM))
     {	   
         // Stop checking other things for GMs
         if (m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM))
             return true;
-    }
-    else
+    }*/
+    if (obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM))
         return m_serverSideVisibilityDetect.GetValue(SERVERSIDE_VISIBILITY_GM) >= obj->m_serverSideVisibility.GetValue(SERVERSIDE_VISIBILITY_GM);
 
     // Ghost players, Spirit Healers, and some other NPCs
@@ -1776,7 +1776,7 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
     if (Unit const* thisUnit = ToUnit())
         if (Unit* controller = thisUnit->GetCharmerOrOwner())
             seer = controller;
-
+		
     if (obj->IsAlwaysDetectableFor(seer))
         return true;
 		
@@ -1785,9 +1785,6 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth) const
 
     if (!ignoreStealth && !seer->CanDetectStealthOf(obj))
         return false;
-		
-	if (GetTypeId() == TYPEID_PLAYER && IsSpectator())
-		return false;
 		
     return true;
 }
@@ -1806,9 +1803,6 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
     if (obj->ToUnit())
         if ((m_invisibility.GetFlags() & obj->m_invisibilityDetect.GetFlags()) != m_invisibility.GetFlags())
             return false;
-			
-	if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->IsSpectator())
-		return false;
 
     for (uint32 i = 0; i < TOTAL_INVISIBILITY_TYPES; ++i)
     {
@@ -1841,7 +1835,7 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
     Unit const* unit = ToUnit();
     if (unit)
         combatReach = unit->GetCombatReach();
-
+		
 	if (GetTypeId() == TYPEID_PLAYER && ToPlayer() && ToPlayer()->IsSpectator())
 		return false;
 		
@@ -1884,8 +1878,8 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj) const
 
         if (visibilityRange > MAX_PLAYER_STEALTH_DETECT_RANGE && (GetTypeId() == TYPEID_PLAYER && !ToPlayer()->HasAura(41634)))
             visibilityRange = MAX_PLAYER_STEALTH_DETECT_RANGE;
-	 else if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasAura(41634))
-	     visibilityRange = 8.0f;
+		else if (GetTypeId() == TYPEID_PLAYER && ToPlayer()->HasAura(41634))
+			visibilityRange = 10.0f;
 
         if (distance > visibilityRange)
             return false;

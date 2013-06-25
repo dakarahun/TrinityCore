@@ -23,6 +23,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Player.h"
+#include "Pet.h"
 #include "Unit.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
@@ -1206,6 +1207,16 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 }
                 switch (GetId())
                 {
+					case 58984: // Shadowmeld
+						caster->AttackStop();
+						break;
+					case 19028: // SoulLink
+						if (Pet *pet = caster->ToPlayer()->GetPet())
+						{
+							caster->CastSpell(pet, 19028, true);
+							caster->AddAura(25228, pet);
+						}
+					break;
                     case 12536: // Clearcasting
                     case 12043: // Presence of Mind
                         // Arcane Potency

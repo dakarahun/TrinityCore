@@ -578,7 +578,7 @@ m_caster((info->AttributesEx6 & SPELL_ATTR6_CAST_BY_CHARMER && caster->GetCharme
 
     m_channelTargetEffectMask = 0;
 
-    // Determine if spell can be reflected back to the caster
+   // Determine if spell can be reflected back to the caster
     // Patch 1.2 notes: Spell Reflection no longer reflects abilities
     m_canReflect = m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !(m_spellInfo->Attributes & SPELL_ATTR0_ABILITY)
         && !(m_spellInfo->AttributesEx & SPELL_ATTR1_CANT_BE_REFLECTED) && !(m_spellInfo->Attributes & SPELL_ATTR0_UNAFFECTED_BY_INVULNERABILITY)
@@ -2421,9 +2421,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     {
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
         {
-		    spellHitTarget = m_caster;
             // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
             m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo);
+            spellHitTarget = m_caster;
             if (m_caster->GetTypeId() == TYPEID_UNIT)
                 m_caster->ToCreature()->LowerPlayerDamageReq(target->damage);
         }
@@ -2673,35 +2673,28 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 				
 			// Binary Resistance System by Saqirmdev
-			if (unit->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
+			if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToCreature()->IsPet()) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
 			{			
 				float resistChance = unit->GetResistance(SpellSchoolMask(m_spellInfo->SchoolMask));
-				bool canResist = false;
-				
 				if (resistChance &&  m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CAN_RESIST)
 				{
-					int16 SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+					if (m_caster->ToCreature()->IsPet())
+						int16 SpellPenetration = float(m_caster->GetOwner()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+					else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+						int16 SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
 					
 					if (SpellPenetration)
 						resistChance -= SpellPenetration;
 
-					if (SpellPenetration >= resistChance)
-						canResist = false;
-					else
-						canResist = true;
-						
-					if (canResist == true)
-					{
-						resistChance = float((resistChance / 74.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
+						resistChance = float((resistChance / 72.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
 				   
 						if (resistChance > 10000) // Resist can't be higher than 100% 
 							resistChance = 10000;
 						else if (resistChance < 0) // Resist can't be lower than 0
-							canResist = false;
+							resistChance = -1
 					
-						if (canResist && resistChance && resistChance > irand(0,10000))
+						if (resistChance && resistChance > irand(0,10000))
 							return SPELL_MISS_RESIST;
-					}
 				}
 			}			
 		}
@@ -2730,35 +2723,28 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 	else if (!m_spellInfo->IsPositive())
 	{
 		// Binary Resistance System by Saqirmdev
-		if (unit->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)))
+		if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToCreature()->IsPet()) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
 		{			
 			float resistChance = unit->GetResistance(SpellSchoolMask(m_spellInfo->SchoolMask));
-			bool canResist = false;
-			
 			if (resistChance &&  m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CAN_RESIST)
 			{
-				int16 SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
-				
+				if (m_caster->ToCreature()->IsPet())
+					int16 SpellPenetration = float(m_caster->GetOwner()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+				else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+					int16 SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+			
 				if (SpellPenetration)
 					resistChance -= SpellPenetration;
-
-				if (SpellPenetration >= resistChance)
-					canResist = false;
-				else
-				    canResist = true;
-					
-				if (canResist == true)
-				{
-					resistChance = float((resistChance / 74.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
-			   
-					if (resistChance > 10000) // Resist can't be higher than 100% 
-						resistChance = 10000;
-					else if (resistChance < 0) // Resist can't be lower than 0
-						canResist = false;
-				
-				    if (canResist && resistChance && resistChance > irand(0,10000))
-					    return SPELL_MISS_RESIST;
-				}
+						
+				resistChance = float((resistChance / 72.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
+			  
+				if (resistChance > 10000) // Resist can't be higher than 100% 
+					resistChance = 10000;
+				else if (resistChance < 0) // Resist can't be lower than 0
+					resistChance = -1
+			
+				if (resistChance && resistChance > irand(0,10000))
+					return SPELL_MISS_RESIST;
 			}
 		}
     }		
@@ -3183,16 +3169,6 @@ void Spell::prepare(SpellCastTargets const* targets, AuraEffect const* triggered
         return;
     }
 	
-	if  (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->Id == 47855 || m_spellInfo->Id == 42846))
-	{
-		if (!m_caster->GetVictim() || m_caster->GetVictim() && m_caster->HasAura(1784))
-		{
-			SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
-			finish(false);
-			return;
-		}	
-	}
-		
     // set timer base at cast time
     ReSetTimer();
 
@@ -7051,11 +7027,6 @@ void Spell::DoAllEffectOnLaunchTarget(TargetInfo& targetInfo, float* multiplier)
     if (targetInfo.missCondition == SPELL_MISS_NONE)
         unit = m_caster->GetGUID() == targetInfo.targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, targetInfo.targetGUID);
 		
-	if (targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE)
-	    if (m_caster && unit && unit != m_caster)
-		   if (unit->HasAura(23920))
-	           unit->RemoveAurasDueToSpell(23920);
-			   
     // In case spell reflect from target, do all effect on caster (if hit)
     else if (targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE)
         unit = m_caster;

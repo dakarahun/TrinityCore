@@ -662,9 +662,6 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
         if (victim->ToPlayer()->GetCommandStatus(CHEAT_GOD))
             return 0;
     }
-
-	if (damage && GetTypeId() == TYPEID_PLAYER && this != victim && HasAura(31231)) // Cheat Death Hackfix on Damage Reduction
-		damage = damage / 1.90;
 	
     // Signal the pet it was attacked so the AI can respond if needed
     if (victim->GetTypeId() == TYPEID_UNIT && this != victim && victim->IsPet() && victim->IsAlive())
@@ -755,7 +752,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
     uint32 health = victim->GetHealth();
     TC_LOG_DEBUG(LOG_FILTER_UNITS, "Unit " UI64FMTD " dealt %u damage to unit " UI64FMTD, GetGUID(), damage, victim->GetGUID());
-
+	
     // duel ends when player has 1 or less hp
     bool duel_hasEnded = false;
     bool duel_wasMounted = false;
@@ -902,7 +899,7 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
     }
 
     TC_LOG_DEBUG(LOG_FILTER_UNITS, "DealDamageEnd returned %d damage", damage);
-
+	
     return damage;
 }
 
@@ -2717,11 +2714,7 @@ SpellMissInfo Unit::SpellHitResult(Unit* victim, SpellInfo const* spell, bool Ca
                 reflectchance += (*i)->GetAmount();
 				
         if (reflectchance > 0 && roll_chance_i(reflectchance))
-        {
-            // Start triggers for remove charges if need (trigger only for victim, and mark as active spell)
-			ProcDamageAndSpell(victim, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, spell);
             return SPELL_MISS_REFLECT;
-        }
     }
 
     switch (spell->DmgClass)
@@ -9097,6 +9090,14 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     // player cannot attack in mount state
     if (GetTypeId() == TYPEID_PLAYER && IsMounted())
         return false;
+		
+	if (victim->GetTypeId() == TYPEID_PLAYER && victim->HasAura(58984))
+		return false;
+		//victim->RemoveAurasDueToSpell(58984);
+
+	if (GetTypeId() == TYPEID_PLAYER && HasAura(58984))
+		return false;
+		//RemoveAurasDueToSpell(58984);
 		
     // nobody can attack GM in GM-mode
     if (victim->GetTypeId() == TYPEID_PLAYER)
