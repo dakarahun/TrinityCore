@@ -2629,10 +2629,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
 	if (victim->GetTypeId() == TYPEID_PLAYER && (HitChance > 468 && HitChance < 5000)) // Prevent Bug on Spells (50-100% MissChance) && Fixed PVP HitChance
 	   tmp = 100;
 	
-	if (rand < tmp && victim->HasAura(31224) && !spell->AttributesEx3 & SPELL_ATTR3_IGNORE_HIT_RESULT)
+	if (rand < tmp && victim->HasAura(31224))
 		return SPELL_MISS_RESIST;
-
-	if (rand < tmp)
+	else if (rand < tmp)
 		return SPELL_MISS_MISS;
 
     // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore

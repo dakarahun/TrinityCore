@@ -2432,7 +2432,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (missInfo2 != SPELL_MISS_NONE)
         {
             if (missInfo2 != SPELL_MISS_MISS)
-                m_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo2);
+				if (m_spellInfo->AttributesCu & SPELL_ATTR0_CANT_FADED)
+					m_damage = 0;
+				else
+					m_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo2);
             m_damage = 0;
             spellHitTarget = NULL;
         }
