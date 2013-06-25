@@ -2630,7 +2630,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
 		return SPELL_MISS_RESIST;
 		
 	if (victim->GetTypeId() == TYPEID_PLAYER && HitChance > 468 && HitChance < 5000) // Prevent Bug on Spells (50-100% MissChance) && Fixed PVP HitChance
-	    rand = 0;
+	    rand = 10000;
 	if (rand < tmp)
 		return SPELL_MISS_MISS;
 
