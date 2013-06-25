@@ -101,7 +101,7 @@ class npc_change : public CreatureScript
 						{
 						    player->DestroyItemCount(29434, 10, true);								
 							player->AddItem(19322, 1);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 						}
@@ -118,7 +118,7 @@ class npc_change : public CreatureScript
 
 							player->DestroyItemCount(19322, 2, true);								
 							player->AddItem(47241, 1);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -135,7 +135,7 @@ class npc_change : public CreatureScript
 
 							player->ModifyHonorPoints(+5000);							
 							player->DestroyItemCount(19322, 2, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -152,7 +152,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(29434, 10);
 							player->DestroyItemCount(19322, 1, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -169,7 +169,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(4470, 10);
 							player->DestroyItemCount(19322, 1, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -186,7 +186,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(35691, 1);
 							player->DestroyItemCount(19322, 1, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -202,7 +202,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(49426, 1);
 							player->DestroyItemCount(19322, 8, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -218,7 +218,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(19322, 1);
 							player->DestroyItemCount(49426, 1, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -234,7 +234,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(49908, 1);
 							player->DestroyItemCount(19322, 25, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -256,7 +256,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(32768, 1);
 							player->DestroyItemCount(19322, 100, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -273,7 +273,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(37719, 1);
 							player->DestroyItemCount(19322, 50, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
@@ -289,7 +289,7 @@ class npc_change : public CreatureScript
 						{
 						    player->AddItem(19902, 1);
 							player->DestroyItemCount(19322, 75, true);
-							_creature->MonsterWhisper("Chance Succesful!", player->GetGUID());
+							_creature->MonsterWhisper("Change Succesful!", player->GetGUID());
 							player->CLOSE_GOSSIP_MENU();
 
 					    }
