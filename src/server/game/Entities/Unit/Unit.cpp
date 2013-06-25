@@ -2625,7 +2625,12 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
 		
 	int32 tmp = 10000 - HitChance;
 	int32 rand = irand(0, 10000);
-
+	
+	if (rand < tmp && HasAura(31224))
+		return SPELL_MISS_RESIST;
+		
+	if (victim->GetTypeId() == TYPEID_PLAYER && HitChance > 468 && HitChance < 5000) // Prevent Bug on Spells (50-100% MissChance) && Fixed PVP HitChance
+	    rand = 0;
 	if (rand < tmp)
 		return SPELL_MISS_MISS;
 
