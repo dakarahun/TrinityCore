@@ -2378,14 +2378,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         return;
 
     if (getState() == SPELL_STATE_DELAYED && !m_spellInfo->IsPositive() && (getMSTime() - target->timeDelay) <= unit->m_lastSanctuaryTime)
-    {
 		if (m_spellInfo->AttributesCu & SPELL_ATTR0_CANT_FADED)
-		{
-      	    // Do Nothing
-		}
+			unit->StopMoving();
 		else
-			return;                   
-    }                          // No missinfo in that case
+				return;                   
+                          // No missinfo in that case
 
     // Get original caster (if exist) and calculate damage/healing from him data
     Unit* caster = m_originalCaster ? m_originalCaster : m_caster;
@@ -2434,7 +2431,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         SpellMissInfo missInfo2 = DoSpellHitOnUnit(spellHitTarget, mask, target->scaleAura);
         if (missInfo2 != SPELL_MISS_NONE)
         {
-            if (missInfo2 != SPELL_MISS_MISS && !m_spellInfo->AttributesCu & SPELL_ATTR0_CANT_FADED)
+            if (missInfo2 != SPELL_MISS_MISS)
                 m_caster->SendSpellMiss(unit, m_spellInfo->Id, missInfo2);
             m_damage = 0;
             spellHitTarget = NULL;
@@ -2673,21 +2670,18 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 				
 			// Binary Resistance System by Saqirmdev
-			if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToCreature()->IsPet()) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
+			if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
 			{			
 				float resistChance = unit->GetResistance(SpellSchoolMask(m_spellInfo->SchoolMask));
 				int16 SpellPenetration;
 				if (resistChance &&  m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CAN_RESIST)
 				{
-					if (m_caster->ToCreature()->IsPet())
-						SpellPenetration = float(m_caster->GetOwner()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
-					else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-						SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+					SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
 					
 					if (SpellPenetration)
 						resistChance -= SpellPenetration;
 
-						resistChance = float((resistChance / 72.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
+						resistChance = float((resistChance / 82.34f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
 				   
 						if (resistChance > 10000) // Resist can't be higher than 100% 
 							resistChance = 10000;
@@ -2724,21 +2718,18 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
 	else if (!m_spellInfo->IsPositive())
 	{
 		// Binary Resistance System by Saqirmdev
-		if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER || m_caster->ToCreature()->IsPet()) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
+		if (unit->GetTypeId() == TYPEID_PLAYER && (m_caster->GetTypeId() == TYPEID_PLAYER) && !((m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_NORMAL) || (m_spellInfo->SchoolMask & SPELL_SCHOOL_MASK_HOLY)) && !m_spellInfo->IsPositive())
 		{			
 			float resistChance = unit->GetResistance(SpellSchoolMask(m_spellInfo->SchoolMask));
 			int16 SpellPenetration;
 			if (resistChance &&  m_spellInfo->AttributesCu & SPELL_ATTR0_CU_CAN_RESIST)
 			{
-				if (m_caster->ToCreature()->IsPet())
-					SpellPenetration = float(m_caster->GetOwner()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
-				else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-					SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
+				SpellPenetration = float(m_caster->ToPlayer()->GetSpellPenetration(SpellSchoolMask(m_spellInfo->SchoolMask)));
 			
 				if (SpellPenetration)
 					resistChance -= SpellPenetration;
 						
-				resistChance = float((resistChance / 72.0f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
+				resistChance = float((resistChance / 82.34f) * 1000.0f); // Resist Chance Formular 130 Resist -> 14,31% 
 			  
 				if (resistChance > 10000) // Resist can't be higher than 100% 
 					resistChance = 10000;

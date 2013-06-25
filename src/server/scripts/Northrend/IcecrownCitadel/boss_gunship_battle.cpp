@@ -824,7 +824,7 @@ class npc_muradin_gunship : public CreatureScript
             {
                 if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
                     return;
-                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetReactState(REACT_PASSIVE);
                 me->setFaction(1802);
                 events.Reset();
                 map = me->GetMap();
@@ -2072,7 +2072,7 @@ class npc_saurfang_gunship : public CreatureScript
             {
                 if (_instance->GetBossState(DATA_GUNSHIP_EVENT) == IN_PROGRESS)
                     return;
-                me->SetReactState(REACT_AGGRESSIVE);
+                me->SetReactState(REACT_PASSIVE);
                 me->setFaction(1801);
                 events.Reset();
                 map = me->GetMap();
@@ -2227,7 +2227,6 @@ class npc_saurfang_gunship : public CreatureScript
 				if (me && me->GetVictim() && (me->GetDistance(me->GetVictim()) > 15.0f || me->GetPositionY() > 2124.1f || me->GetVictim()->GetPositionY() > 2124.1f))
 				{
 					me->AttackStop();
-					me->GetCharmInfo()->SetIsCommandAttack(false);
 					me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE);
 				}
 				else
